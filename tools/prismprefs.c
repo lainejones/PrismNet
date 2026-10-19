@@ -1,5 +1,5 @@
 /*
- * PrismNet Prefs - edits ENV:PrismNet / ENVARC:PrismNet (GadTools, OS 3.0+).
+ * PrismNet Prefs - edits ENV:PrismNet / ENVARC:PrismNet (GadTools, OS 3.1+).
  * GPL-3.0-only, see LICENSE.
  *
  *  +- PrismNet Prefs ------------------------------------------------+

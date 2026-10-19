@@ -1,7 +1,7 @@
 # PrismNet manual
 
 PrismNet is a free, open-source TCP/IP stack for classic Amigas running
-AmigaOS 3.0 or newer. It connects the Amiga to your network and the internet
+AmigaOS 3.1 or newer. It connects the Amiga to your network and the internet
 through any SANA-II network driver, and it gives programs the same
 `bsdsocket.library` that AmiTCP, Miami and Roadshow give them, so web
 browsers, FTP and IRC clients, mail programs and the rest run unchanged.

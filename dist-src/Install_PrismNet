@@ -15,8 +15,8 @@
 (if (not (exists "C/PrismNet"))
     (abort "Can't find the PrismNet files next to this script.\n\n"
            "Run the installer from the drawer it came in."))
-(if (< (/ (getversion "exec.library" (resident)) 65536) 39)
-    (abort "PrismNet needs AmigaOS 3.0 or newer."))
+(if (< (/ (getversion "exec.library" (resident)) 65536) 40)
+    (abort "PrismNet needs AmigaOS 3.1 or newer."))
 
 (set mode
     (askchoice (prompt "PrismNet 0.5 - open-source TCP/IP stack\n\n"

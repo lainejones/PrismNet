@@ -12,7 +12,7 @@ GUIs and the usual CLI tools.
   users) run unmodified. The API surface is the AmiTCP 4 `bsdsocket.library`
   LVO table; the compatibility list in `docs/COMPAT.md` (to be built from
   a314bsd's experience) is the acceptance spec.
-- **Runs everywhere.** OS 3.0+ (target 3.1 and 3.2), plain 68000 upward,
+- **Runs everywhere.** OS 3.1+ (3.1 and 3.2), plain 68000 upward,
   usable on a 2 MB machine. Faster code paths (asm checksum, 020+ builds)
   are optional extras, never requirements.
 - **Full suite, not just a library.** Prefs GUI, Monitor GUI, CLI tools,
@@ -84,7 +84,7 @@ Key decisions:
 | `LIBS:bsdsocket.library` | AmiTCP-compatible API front-end |
 | `LIBS:usergroup.library` | AmiTCP user/group API (`getuid`, `getpwnam`...); many ports (e.g. wget) refuse to run without it |
 | `C:PrismNet` | the core task: `PrismNet START\|STOP\|ONLINE\|OFFLINE\|STATUS` (also started by the library on first open if configured) |
-| `SYS:Prefs/PrismNet` | **Prefs GUI** (GadTools; OS 3.0+) |
+| `SYS:Prefs/PrismNet` | **Prefs GUI** (GadTools; OS 3.1+) |
 | `SYS:Tools/PrismMon` | **Monitor GUI**: online/offline, per-interface stats, connection list, log viewer (grows out of a314bsd's NetBridge) |
 | CLI tools | `pnconfig` (ifconfig-like), `ping`, `netstat`, `host`, `traceroute` |
 | `pntest` | developer self-test: lwIP alone (raw API) doing ping/DNS/HTTP over one SANA-II device |

@@ -13,7 +13,7 @@ The full manual is PrismNet.guide in this drawer: double-click it.
 
 Requirements
 ------------
-- AmigaOS 3.0 or newer, any 68000 or better
+- AmigaOS 3.1 or newer, any 68000 or better
 - a SANA-II driver for your network hardware in DEVS:Networks
 - about 290 KB of free memory while running (175 KB with the small core
   for 1-2 MB machines; the installer offers it)

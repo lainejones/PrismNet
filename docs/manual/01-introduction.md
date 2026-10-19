@@ -43,7 +43,7 @@ widely used TCP/IP implementation, running as an Amiga task.
 
 ## Requirements
 
-- AmigaOS 3.0 or newer, any 68000 or better.
+- AmigaOS 3.1 or newer, any 68000 or better.
 - A network interface with a SANA-II driver in `DEVS:Networks`: a PCMCIA
   card (`cnet.device` and similar), a Zorro card (X-Surf, ZZ9000), a SCSI
   network adapter (DaynaPORT), an A314, or a serial link (SLIP or PPP; see

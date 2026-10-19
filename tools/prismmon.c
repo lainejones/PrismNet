@@ -1,5 +1,5 @@
 /*
- * PrismMon - PrismNet network monitor (GadTools, OS 2.04+).
+ * PrismMon - PrismNet network monitor (GadTools, OS 3.1+).
  * GPL-3.0-only, see LICENSE.
  *
  *  +- PrismMon -------------------------------------------------+

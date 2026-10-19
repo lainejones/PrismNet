@@ -106,7 +106,7 @@ converter turns those into buttons.
 `./dist.sh` (after `make` and `make small`) assembles `dist/PrismNet/`,
 laid out like SYS: (`C`, `Libs`, `Prefs`, `Tools`, `Storage`, `Docs`, each
 with a drawer icon), with `Install_PrismNet`, the README, `PrismNet.guide`
-and their icons, plus `dist/PrismNet-<ver>.zip`. It refuses to package a
+and their icons. It refuses to package a
 binary older than its sources. Icons are committed `.info` files
 (`tools/icons/regen_dist_icons.sh` makes them).
 

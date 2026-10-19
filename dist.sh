@@ -1,7 +1,7 @@
 #!/bin/sh
 # Assemble the PrismNet release drawer in dist/PrismNet (run after "make").
 # Layout mirrors SYS: (C, Libs, Prefs, Tools, Storage, Docs). The .lha is built
-# on an Amiga from this drawer (real protection bits); dist.sh makes the .zip.
+# on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
 VER=0.6
@@ -60,6 +60,5 @@ for dr in C L Libs Prefs Tools Storage Docs Storage/PrismNet Storage/DOSDrivers 
     cp $I/drawer.info $D/$dr.info
 done
 
-(cd dist && rm -f PrismNet-$VER.zip && powershell -NoProfile -Command \
-  "Compress-Archive -Path PrismNet,PrismNet.info -DestinationPath PrismNet-$VER.zip" )
+rm -f dist/PrismNet-*.zip                 # (no zip: it cannot keep the protection bits)
 find dist -type f | sort

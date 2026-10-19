@@ -42,7 +42,7 @@ struct group;
 #include <../ndk-include/inline/usergroup.h>
 struct ug_passwd { char *pw_name, *pw_passwd; LONG pw_uid, pw_gid; char *pw_gecos, *pw_dir, *pw_shell; };
 
-static const char version[] __attribute__((used)) = "$VER: telnetd 1.0 (18.10.2026) PrismNet";
+static const char version[] __attribute__((used)) = "$VER: telnetd 1.1 (19.10.2026) PrismNet";
 
 struct Library *SocketBase, *UserGroupBase;
 

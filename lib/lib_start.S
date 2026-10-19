@@ -37,7 +37,7 @@ _pn_libname:
 _pn_idstring:
     .ascii  "PrismNet bsdsocket.library 4.3 (18.10.2026)"
     .byte   13,10,0
-    .ascii  "$VER: bsdsocket.library 4.3 (18.10.2026) PrismNet"
+    .ascii  "$VER: bsdsocket.library 4.4 (19.10.2026) PrismNet"
     .byte   0
     .even
 

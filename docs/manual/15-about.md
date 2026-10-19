@@ -19,6 +19,9 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **0.6.1** (2026-10-19): an audit: 18 fixes, among them an anonymous FTP
+  user reaching other volumes, the SMB client on a crafted reply, and long
+  paths in the NFS client; a bigger TCP send buffer (faster uploads).
 - **0.6** (2026-10-18): FTP and telnet servers with the inetd dispatcher,
   the Services tab, account passwords in Prefs, the small core in the
   package, this manual.

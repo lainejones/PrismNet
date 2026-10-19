@@ -3,4 +3,4 @@ Handler    = DH0:PrismNet/prismnfs-handler.new
 StackSize  = 8192
 Priority   = 5
 GlobVec    = -1
-Startup    = "192.168.50.2:/volume1/amigatest VOLUME=pnnew TZ=-5"
+Startup    = "192.168.1.10:/volume1/amigatest VOLUME=pnnew TZ=-5"

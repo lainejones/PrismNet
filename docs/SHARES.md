@@ -55,7 +55,7 @@ Handler   = L:smb2-handler
 StackSize = 65536
 Priority  = 5
 GlobVec   = -1
-Startup   = "smb://192.168.50.3/public VOLUME=Drobo DOMAIN=WORKGROUP NOPASSWORDREQ"
+Startup   = "smb://192.168.1.11/public VOLUME=Drobo DOMAIN=WORKGROUP NOPASSWORDREQ"
 ```
 
 A Linux NFS server needs one export line (Synology needs nothing):
@@ -79,9 +79,9 @@ AmiNFSv3 0.2b2 (Aminet `AmiNFSv3.lha`, 30908 bytes) on "PrismNet test"
 `amigatest` exported read-only, squash to guest, non-privileged ports allowed:
 
 ```
-Startup = "192.168.50.2:/volume1/amigatest VOLUME=amigatest RSIZE=16384 WSIZE=16384"
+Startup = "192.168.1.10:/volume1/amigatest VOLUME=amigatest RSIZE=16384 WSIZE=16384"
 Mount DH0:PrismNet/nfs/NFS0      -> List NFS0: shows the share
-PrismNet NETSTAT                 -> tcp 10.0.2.15:50888 192.168.50.2:2049 ESTABLISHED NFS0
+PrismNet NETSTAT                 -> tcp 10.0.2.15:50888 192.168.1.10:2049 ESTABLISHED NFS0
 NFSDismount NFS0:                -> "NFS0: dismounted"
 ```
 
@@ -230,7 +230,7 @@ gets its own scope document: [NFSCLIENT.md](NFSCLIENT.md) for NFS, [SMBCLIENT.md
    test of Add / Type / Options / Save, as for the other tabs.
 3. **NFS live**: AmiNFSv3 in WinUAE ("PrismNet test", slirp to the LAN)
    against the Synology, on a read-only or scratch export and **only with
-   Laine's OK before anything is written to the NAS**: mount, `List`, copy
+   an explicit go-ahead before anything is written to the NAS**: mount, `List`, copy
    a file to RAM:, compare, dismount. Then the A500 config with the
    low-memory sizes.
 4. **SMB live**: extend `t-smb` (Drobo): mount from a Prefs-written file,

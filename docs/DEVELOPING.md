@@ -73,6 +73,12 @@ Slirp provides DHCP (10.0.2.15), gateway/ping target 10.0.2.2, DNS
 `bsdsocket_emu=false`, or WinUAE's own built-in bsdsocket.library answers
 `OpenLibrary` and PrismNet is never used.
 
+**Shares.** The NFS and SMB tests (`test/amiga/t-nfs`, `t-smb*`, the mount
+files in `test/amiga/nfs` and `smb`, and the `nh-shares-*` scripts) use example
+servers: `192.168.1.10` (a NAS with an export and share `amigatest`, user
+`smbuser`) and `192.168.1.11` (a guest share `public`). Put your own servers'
+addresses in before running them.
+
 **Servers.** `python test/host/ftptest.py <amiga> [password]` and
 `python test/host/telnettest.py <amiga> [user] [password]` run against a
 machine with the servers on; see [SERVERS.md](SERVERS.md) for the accounts

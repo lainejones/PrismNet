@@ -5,9 +5,9 @@ C:PrismNet START
 Wait 6
 Echo "start" >DH0:PrismNet/shares.log
 Version DH0:PrismNet/SMBShares >>DH0:PrismNet/shares.log
-DH0:PrismNet/SMBShares 192.168.50.3 >>DH0:PrismNet/shares.log
+DH0:PrismNet/SMBShares 192.168.1.11 >>DH0:PrismNet/shares.log
 Echo "== ALL" >>DH0:PrismNet/shares.log
-DH0:PrismNet/SMBShares 192.168.50.3 ALL >>DH0:PrismNet/shares.log
+DH0:PrismNet/SMBShares 192.168.1.11 ALL >>DH0:PrismNet/shares.log
 Echo "== no server" >>DH0:PrismNet/shares.log
 DH0:PrismNet/SMBShares NOSUCHBOX >>DH0:PrismNet/shares.log
 Echo "DONE" >>DH0:PrismNet/shares.log

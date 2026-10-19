@@ -11,4 +11,4 @@ UICLICKID 200
 CLICK 49 69
 EXEC Wait 9
 EXEC Type T:prefs-stale.log
-SCREENSHOT C:\Users\Laine\AppData\Local\Temp\claude\s3\prefs2.png
+SCREENSHOT prefs2.png

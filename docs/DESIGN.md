@@ -108,9 +108,9 @@ Key decisions:
 
 ```
 interfaces/eth0      DEVICE=cnet.device  UNIT=0  CONFIG=DHCP  [MTU=1500]
-                     # static: CONFIG=STATIC ADDRESS=192.168.50.40 NETMASK=255.255.255.0
-routes               DEFAULT 192.168.50.1
-dns                  NAMESERVER 192.168.50.1
+                     # static: CONFIG=STATIC ADDRESS=192.168.1.40 NETMASK=255.255.255.0
+routes               DEFAULT 192.168.1.1
+dns                  NAMESERVER 192.168.1.1
                      DOMAIN lan
 hostname             amiga
 hosts                (standard hosts format)

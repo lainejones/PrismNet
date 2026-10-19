@@ -1,5 +1,5 @@
 ; PrismNet NFS client (stage 1, read-only) against the Synology export
-; 192.168.50.2:/volume1/amigatest. Needs L:prismnfs-handler, nfstest and
+; 192.168.1.10:/volume1/amigatest. Needs L:prismnfs-handler, nfstest and
 ; the NAS reachable. See docs/NFSCLIENT.md.
 FailAt 21
 Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET

@@ -11,7 +11,7 @@ Status: **stage 1 (read-only) working** in WinUAE against the Synology,
 `L:prismnfs-handler` 0.1, **17 KB**, code in `tools/nfs/`, built by `make nfs`.
 `tools/nfs/nfstool.c` runs the same protocol code on the PC (`make nfstool`,
 WSL) and `tools/nfs/nfstest.c` drives a filesystem through DOS calls step by
-step. Against `192.168.50.2:/volume1/amigatest` on "PrismNet test" (68030,
+step. Against `192.168.1.10:/volume1/amigatest` on "PrismNet test" (68030,
 OS 3.2), side by side with AmiNFSv3 0.2b2:
 
 | Check | PrismNet | AmiNFSv3 |
@@ -22,7 +22,7 @@ OS 3.2), side by side with AmiNFSv3 0.2b2:
 | Copy time | ~1 s | ~1 s |
 | ExamineFH, Seek to end, ParentDir of root | correct | correct |
 | Case-insensitive name (`SMB2FS.m68k...`) | works | (not tried) |
-| `Info PN0:` | 103 TB, Read Only | fails |
+| `Info PN0:` | 103 TB, Read Only | - |
 | Source port | **1021** (reserved) | above 1024 |
 | Memory while mounted (RSIZE 32768) | about 110 KB incl. buffers | |
 
@@ -52,7 +52,7 @@ memory - stack-side notes, not NFS ones.
 
 **NAS NFS service restarted during reads** (`test/amiga/t-nfsrestart`):
 the Amiga read the 304825-byte file every ~5 s from 16:27:12 to 16:33:17
-while Laine turned NFS off and on in DSM; the NAS's `mountd`/`rpcbind`
+while NFS was turned off and on in DSM; the NAS's `mountd`/`rpcbind`
 restarted at 16:27:36 and `nfsd` at 16:28:10. **73 reads, all with the right
 byte sum, none failed or stalled.** The handler retries a lost server for
 `RETRY=` seconds (default 30) before reporting "No disk present".
@@ -216,7 +216,7 @@ shows the device without hanging at boot.
 | Examine | `EXAMINE_OBJECT`, `EXAMINE_NEXT`, `EXAMINE_FH`, `EXAMINE_ALL` (with `ExAllEnd`) |
 | Files | `FINDINPUT`, `FINDOUTPUT`, `FINDUPDATE`, `READ`, `WRITE`, `SEEK`, `END`, `SET_FILE_SIZE`, `FH_FROM_LOCK`, `COPY_DIR_FH`, `PARENT_FH` |
 | Changes | `DELETE_OBJECT`, `RENAME_OBJECT`, `CREATE_DIR`, `SET_PROTECT`, `SET_DATE`, `SET_COMMENT` (refused: NFS has no comments) |
-| Volume | `DISK_INFO`, `INFO` (from `FSSTAT`: AmiNFSv3's `Info` fails here), `IS_FILESYSTEM`, `CURRENT_VOLUME`, `FLUSH`, `DIE` |
+| Volume | `DISK_INFO`, `INFO` (from `FSSTAT`), `IS_FILESYSTEM`, `CURRENT_VOLUME`, `FLUSH`, `DIE` |
 | Later | `READ_LINK`, `MAKE_LINK` (symlinks), record locks (refused) |
 
 **Locks and paths.**
@@ -296,7 +296,7 @@ So about **55 KB for a mounted share on a small machine**, against AmiNFSv3's
     plus a retry requester ("NFS server restarted, file may be incomplete"),
     never silent loss.
 - **Server gone at boot:** no hang. The handler gives up after `TIMEOUT=` and
-  shows a requester once per mount ("NFS0: server 192.168.50.2 not
+  shows a requester once per mount ("NFS0: server 192.168.1.10 not
   answering"). Workbench sees a device with no disk.
 
 ## DOSDriver
@@ -379,8 +379,8 @@ layer be tested against the Synology from the PC before any Amiga run.
    **off**, our handler mounts and AmiNFSv3 is refused.
 5. **Robustness:** PrismNet STOP/START during a `List`, the NAS's NFS service
    restarted during a read, and the idle disconnect. Any test that needs the
-   NAS's NFS service restarted is done by Laine.
-6. **Writes (stage 2), only with Laine's OK** to set `amigatest` read/write:
+   NAS's NFS service restarted is done by hand.
+6. **Writes (stage 2), only after setting `amigatest` read/write**:
    create, write, append, rename, delete, mkdir; a 1 MB write with MD5 check;
    write-verifier path (NAS restart mid-file).
 7. **Small machine:** the A500 config (68000, 1 MB chip + some fast) mounts

@@ -51,7 +51,7 @@ static void test_resolver(const char *host, struct sockaddr_in *sa, int port)
     CHECK(h == NULL && my_herrno != 0, "bad name should fail with h_errno");
     h = gethostbyname((STRPTR)"10.1.2.3");
     CHECK(h && *(ULONG *)h->h_addr_list[0] == 0x0a010203UL, "numeric gethostbyname");
-    CHECK(inet_addr((STRPTR)"192.168.50.1") == 0xc0a83201UL, "inet_addr");
+    CHECK(inet_addr((STRPTR)"192.168.1.1") == 0xc0a80101UL, "inet_addr");
     CHECK(getservbyname((STRPTR)"http", (STRPTR)"tcp") != NULL, "getservbyname http");
 }
 

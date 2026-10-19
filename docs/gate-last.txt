@@ -1,13 +1,13 @@
 PrismNet pre-deploy gate: PASSED
-date 2026-10-18 18:56, commit ef78a1d (+ uncommitted changes), fresh build, machine "PrismNet test"
+date 2026-10-18 23:52, commit 5134b53 (+ uncommitted changes), fresh build, machine "PrismNet test"
 
 test        result  notes
 ----------  ------  -----
 t-pingstop  PASS    1 pass/0 fail
-t-stack     PASS    2 pass/0 fail, stack peak 5412/16384
-t-rsq       PASS    2 pass/0 fail, stack peak 5412/16384
-t-rscfg     PASS    1 pass/0 fail, stack peak 5412/16384
-t-config    PASS    3 pass/0 fail, stack peak 5412/16384
-t-stress    PASS    2 pass/0 fail, stack peak 5412/16384
+t-stack     PASS    2 pass/0 fail, stack peak 5540/16384
+t-rsq       PASS    2 pass/0 fail, stack peak 5540/16384
+t-rscfg     PASS    1 pass/0 fail, stack peak 5540/16384
+t-config    PASS    3 pass/0 fail, stack peak 5540/16384
+t-stress    PASS    2 pass/0 fail, stack peak 5540/16384
 
 OK to deploy; then on one real machine: start, ping, STOP, restart, a download, STATUS.

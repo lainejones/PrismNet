@@ -3,4 +3,4 @@ Handler    = L:prismsmb-handler
 StackSize  = 16384
 Priority   = 5
 GlobVec    = -1
-Startup    = "192.168.50.3/public VOLUME=drobo GUEST TZ=-5"
+Startup    = "192.168.1.11/public VOLUME=drobo GUEST TZ=-5"

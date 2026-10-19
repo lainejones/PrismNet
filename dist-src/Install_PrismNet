@@ -19,7 +19,7 @@
     (abort "PrismNet needs AmigaOS 3.1 or newer."))
 
 (set mode
-    (askchoice (prompt "PrismNet 0.5 - open-source TCP/IP stack\n\n"
+    (askchoice (prompt "PrismNet 0.6 - open-source TCP/IP stack\n\n"
                        "Networking through your SANA-II network driver. Programs made "
                        "for AmiTCP, Miami or Roadshow work unchanged.\n\n"
                        "What do you want to do?")

@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits); dist.sh makes the .zip.
 set -e
 cd "$(dirname "$0")"
-VER=0.5
+VER=0.6
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -41,7 +41,7 @@ cp out/prismsmb-handler                  $D/L/            # optional SMB client
 cp out/ShareUnmount out/SMBShares        $D/C/
 cp out/inetd out/ftpd out/telnetd        $D/C/            # optional servers
 cp dist-src/PNFS0 dist-src/PSMB0         $D/Storage/DOSDrivers/
-python tools/mkguide.py docs/manual $D/PrismNet.guide >/dev/null   # the manual
+PN_GUIDEVER="$VER ($(date +%d.%m.%Y))" python tools/mkguide.py docs/manual $D/PrismNet.guide >/dev/null   # the manual
 cp out/PrismNetPrefs                     $D/Prefs/PrismNet
 cp icons/PrismNetPrefs.info              $D/Prefs/PrismNet.info
 cp out/PrismMon icons/PrismMon.info      $D/Tools/

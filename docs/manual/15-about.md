@@ -19,7 +19,7 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
-- **0.6** (in progress): FTP and telnet servers with the inetd dispatcher,
+- **0.6** (2026-10-18): FTP and telnet servers with the inetd dispatcher,
   the Services tab, account passwords in Prefs, the small core in the
   package, this manual.
 - **0.5** (2026-10-18): first release. bsdsocket.library and

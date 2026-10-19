@@ -5,7 +5,7 @@
 # pn-smb on the share: write 1 MB, read it back, rename, truncate, set the
 # date and the read-only bit, delete everything. Prints MD5s to compare.
 cd "$(dirname "$0")/../.." || exit 1
-target=${1:-192.168.50.2/amigatest}
+target=${1:-192.168.1.10/amigatest}
 user=${2:-smbuser}
 make smbtool >/dev/null || exit 1
 printf 'Password for %s on %s: ' "$user" "$target"

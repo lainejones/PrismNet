@@ -4,8 +4,8 @@
 # Asks for the password once (not echoed, memory only); lists the share and
 # reads one file, printing its MD5 to compare with the PC's own.
 cd "$(dirname "$0")/../.." || exit 1
-target=${1:-192.168.50.101/amiga}
-user=${2:-laine}
+target=${1:-192.168.1.20/amiga}
+user=${2:-amiga}
 file=${3:-PrismNet-test\\PrismNet\\nfstest}
 make smbtool >/dev/null || exit 1
 printf 'Password for %s on %s: ' "$user" "$target"

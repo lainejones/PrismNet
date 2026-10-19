@@ -151,7 +151,7 @@ build/smbtool: tools/smb/smb2.c tools/smb/crypto.c tools/smb/smbtool.c tools/net
 	gcc $(SMB_HOST) -o $@ tools/smb/smb2.c tools/smb/crypto.c tools/smb/smbtool.c tools/netfs/net_posix.c tools/netfs/nbname.c
 
 # Host test of the NFS protocol layer (native gcc, run in WSL):
-#   make nfstool && build/nfstool 192.168.50.2:/volume1/amigatest ls
+#   make nfstool && build/nfstool 192.168.1.10:/volume1/amigatest ls
 NFS_HOST_SRC = tools/nfs/xdr.c tools/nfs/rpc.c tools/nfs/nfs3.c tools/netfs/names.c \
                tools/netfs/net_posix.c tools/netfs/nbname.c tools/nfs/nfstool.c
 nfstool: build/nfstool

@@ -23,7 +23,7 @@ vectors and the MS-NLMP NTLMv2 example pass, `make cryptotest`).
 | Amiga ("PrismNet test"): Lock/Examine/ExNext, ParentDir, Open/Read/Seek | correct; byte sum 42713520 |
 | Amiga: `Copy` the 512 KB file | ~1 s, MD5 identical |
 | `ShareUnmount PS0:` | unmounted |
-| smb2fs 53.9 as baseline | its `DROBO` mount now fails (TREE_CONNECT access denied with its stored settings), so no side-by-side yet |
+| smb2fs 53.9 as baseline | not compared side by side |
 
 **Large files** (2026-10-17, Amiga `Copy` to the host drive, MD5 on the PC):
 
@@ -55,13 +55,13 @@ After the fix the 849 MB `af-dvd.iso` copied in 25 min 26 s (~556 KB/s) with
 Windows' SMB client (before: ~5,000 dropped sends and a 15 s stall).
 
 **Authenticated and signed** (2026-10-17, Synology, account `smbuser`, the
-password typed by Laine each time; `tools/smb/logintest.sh` on the PC,
+password typed in each time; `tools/smb/logintest.sh` on the PC,
 `test/amiga/t-smbauth` + `test/amiga/smb/PS1` on the Amiga):
 
 | Check | Result |
 |---|---|
 | NTLMv2 against MS-NLMP 4.2.4: NT hash, NTOWFv2, NTProofStr, SessionBaseKey | all match (`make cryptotest`) |
-| smbtool, user session, no domain and domain `nuzzie.ca` | both accepted |
+| smbtool, user session, no domain and with a domain | both accepted |
 | smbtool with signing forced: listing, 304825-byte read | server accepted every signed request, every signed reply verified, MD5 `131156c5...` |
 | Amiga, `USER=smbuser SIGN=YES`: password window on first access | opened, masked input, login worked |
 | Amiga: List, Examine/ExNext, Open/Read/Seek, `Copy` | correct; copy MD5 `131156c5...` |
@@ -89,7 +89,7 @@ with ~85 KB free; the handler now sizes its buffers to the machine (send
 buffer 2 KB while read-only, receive buffer RSIZE + 1 KB, listing buffers on
 first use instead of two 8 KB ones up front).
 
-**Windows share** (this PC, `amiga` as `laine`, signing required): listing
+**Windows share** (a Windows 11 PC, share `amiga`, a user account, signing required): listing
 and a signed read, MD5 identical to the PC's own. That closes stage 1.
 
 **Installer (2026-10-18).** The release drawer carries `L/prismsmb-handler`,
@@ -135,11 +135,11 @@ full Remove from the same machine took every file off again.
 | Server | 2.1 signed | 3.0 | 3.0.2 | 3.1.1 | 3.0.2 CCM | 3.1.1 GCM |
 |---|---|---|---|---|---|---|
 | Synology (smbuser) | MD5 ok | ok | ok | ok | ok, 1 MB write ok | ok, 1 MB write ok |
-| Windows 11 (laine, signing required) | ok | ok | ok | ok | ok | ok |
+| Windows 11 (user account, signing required) | ok | ok | ok | ok | ok | ok |
 | Drobo (guest) | ok | ok | ok | ok | - | - |
 
 Share list (3.1.1): Synology as smbuser 8 shares (disks, the printer, homes),
-Windows as laine `Amiga` plus ADMIN$/C$/IPC$ (hidden), Drobo as guest
+Windows as a user: `Amiga` plus ADMIN$/C$/IPC$ (hidden), Drobo as guest
 Public and DroboApps.
 
 Amiga ("PrismNet test", 68030): 3.1.1 guest mount of the Drobo, 512 KB ROM
@@ -212,8 +212,8 @@ from the PC on 2026-10-17:
 
 | Server | Picks | Signing | Notes |
 |---|---|---|---|
-| Synology DS1821+, DSM 7.4.1 (192.168.50.2) | 3.0.2 | enabled, not required | `min protocol=SMB2`, `max protocol=SMB3`; large MTU, leasing, encryption offered |
-| Drobo (192.168.50.3) | 3.0.2 | enabled, not required | Samba-style capabilities; smb2fs already mounts its `public` share over PrismNet (`test/amiga/t-smb`) |
+| Synology DS1821+, DSM 7.4.1 (192.168.1.10) | 3.0.2 | enabled, not required | `min protocol=SMB2`, `max protocol=SMB3`; large MTU, leasing, encryption offered |
+| Drobo (192.168.1.11) | 3.0.2 | enabled, not required | Samba-style capabilities; smb2fs already mounts its `public` share over PrismNet (`test/amiga/t-smb`) |
 | This PC, Windows 11 Pro build 26300 | 3.0.2 | **required** | Windows 11 24H2 and later require signing by default |
 
 All three allow 8 MB reads and writes. Consequences: **SMB1 is not needed**
@@ -344,8 +344,8 @@ assembly SHA-256 for 68000 is a stage-3 option if it matters.
   hide a file from its owner.
 - `PASSWORD=secret` in the DOSDriver works too (as in smbfs/smb2fs), for
   scripts and people who edit mountlists anyway.
-- Tests use guest shares, or an account Laine sets up, with the password typed
-  in on the Amiga by Laine. The assistant never writes a password into a file.
+- Tests use guest shares, or a test account whose password is typed in on
+  the Amiga. No password is ever written into a file.
 
 ## Names and finding servers
 
@@ -403,10 +403,10 @@ Unmount: `ShareUnmount PSMB0:` (the same tool as NFS).
      against the Drobo `public` share.
    - Side by side with **smb2fs 53.9** (installed on the test machine) as the
      baseline: the same listings and checksums.
-3. **Windows with signing required**: a share on this PC that Laine creates.
+3. **Windows with signing required**: a share on a Windows PC.
    Reads must work signed; the signing cost is measured at 68030 and on the
    2 MB "PrismNet a500" machine.
-4. **Writes** (stage 2), only in test folders Laine names: create, append,
+4. **Writes** (stage 2), only in dedicated test folders: create, append,
    rename, delete, mkdir, times; a 1 MB round trip with MD5 check.
 5. **Robustness**: server restart during a read, PrismNet STOP/START, IDLE,
    a wrong password (requester, then a clean failure).
@@ -437,7 +437,7 @@ server.
 ## Open questions
 
 1. A test account on the Synology (and maybe a share on this PC) for signed,
-   authenticated tests. Laine creates it and types the password on the Amiga.
+   authenticated tests. Its password is typed in on the Amiga.
 2. Handler name: `prismsmb-handler` (proposed); smb2fs is `smb2-handler`, so
    no clash.
 3. In stage 1, sign only when required, or always when the server enables

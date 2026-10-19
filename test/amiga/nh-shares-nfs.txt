@@ -2,7 +2,7 @@ EXEC Run >NIL: DH0:PrismNet/PrefsNew
 EXEC Wait 4
 UICLICKID 45
 EXEC Wait 4
-SCREENSHOT C:\Users\Laine\AppData\Local\Temp\claude\s3\shares10a.png
+SCREENSHOT shares10a.png
 UICLICK OK
 EXEC Wait 1
 UICLICKID 31
@@ -10,7 +10,7 @@ EXEC Wait 1
 UICLICKID 34
 EXEC Wait 1
 UICLICKID 35
-TYPE 192.168.50.2
+TYPE 192.168.1.10
 PRESSKEY 0x44
 UICLICKID 37
 TYPE /volume1/amigatest
@@ -20,7 +20,7 @@ TYPE pnnfs
 PRESSKEY 0x44
 UICLICKID 44
 EXEC Wait 8
-SCREENSHOT C:\Users\Laine\AppData\Local\Temp\claude\s3\shares10b.png
+SCREENSHOT shares10b.png
 UICLICK OK
 EXEC Wait 1
 EXEC List NET1: QUICK

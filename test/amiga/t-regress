@@ -1,0 +1,4 @@
+Execute DH0:PrismNet/t-config >DH0:PrismNet/g1.log
+Execute DH0:PrismNet/t-stress >DH0:PrismNet/g2.log
+Execute DH0:PrismNet/t-usergroup >DH0:PrismNet/g3.log
+Execute DH0:PrismNet/t-wget >DH0:PrismNet/g4.log

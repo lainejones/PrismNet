@@ -1,0 +1,4 @@
+# AUTOSTART=YES: bsdsocket.library starts the PrismNet core when a program
+# opens it and the core is not running. COMMAND= is the core's path.
+AUTOSTART=YES
+COMMAND=C:PrismNet

@@ -1,0 +1,14 @@
+; Signed, authenticated SMB on the Amiga: the password window opens on the
+; first access - type it there
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PS1
+Echo "start" >DH0:PrismNet/smbauth.log
+Date >>DH0:PrismNet/smbauth.log
+List PS1: >>DH0:PrismNet/smbauth.log
+Copy PS1:smb2fs.m68k-amigaos.lha DH0:PrismNet/authcopy >>DH0:PrismNet/smbauth.log
+DH0:PrismNet/nfstest PS1: FILE=smb2fs.m68k-amigaos.lha >>DH0:PrismNet/smbauth.log
+Date >>DH0:PrismNet/smbauth.log
+Echo "DONE" >>DH0:PrismNet/smbauth.log

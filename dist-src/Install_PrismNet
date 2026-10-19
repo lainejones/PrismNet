@@ -1,0 +1,472 @@
+; -------------------------------------------------------------------------
+; PrismNet - Installer script
+; Installs the PrismNet TCP/IP stack: bsdsocket.library + usergroup.library
+; in LIBS:, the PrismNet command in C:, PrismNet Prefs in SYS:Prefs and the
+; PrismMon monitor where you choose, then writes a first configuration to
+; ENVARC:PrismNet. Run it again to update or to remove PrismNet.
+;
+; Another stack's files that PrismNet replaces (libraries, ping, traceroute)
+; are saved in C:Backup - the first backup is never overwritten, and
+; "Remove PrismNet" puts them back.
+; -------------------------------------------------------------------------
+(set @app-name "PrismNet")
+(complete 0)
+
+(if (not (exists "C/PrismNet"))
+    (abort "Can't find the PrismNet files next to this script.\n\n"
+           "Run the installer from the drawer it came in."))
+(if (< (/ (getversion "exec.library" (resident)) 65536) 39)
+    (abort "PrismNet needs AmigaOS 3.0 or newer."))
+
+(set mode
+    (askchoice (prompt "PrismNet 0.5 - open-source TCP/IP stack\n\n"
+                       "Networking through your SANA-II network driver. Programs made "
+                       "for AmiTCP, Miami or Roadshow work unchanged.\n\n"
+                       "What do you want to do?")
+               (help "Install also updates an existing PrismNet; your settings are kept.\n"
+                     "Remove takes PrismNet off this Amiga and puts back another stack's "
+                     "files that were saved in C:Backup.")
+               (choices "Install or update PrismNet" "Remove PrismNet")
+               (default 0)))
+
+; which libraries in LIBS: are PrismNet's own (1/0)
+(set oursock 0)
+(set ourug 0)
+(if (exists "LIBS:bsdsocket.library" (noreq))
+    (if (= 0 (run "Search >NIL: LIBS:bsdsocket.library \"PrismNet bsdsocket.library\"" (safe)))
+        (set oursock 1)))
+(if (exists "LIBS:usergroup.library" (noreq))
+    (if (= 0 (run "Search >NIL: LIBS:usergroup.library \"PrismNet usergroup.library\"" (safe)))
+        (set ourug 1)))
+
+; backups of another stack's files live in one drawer
+(set bakdir "C:Backup")
+(procedure P_SAVE_BAK   ; save bak_src as C:Backup/bak_name unless already saved
+    (if (not (exists (tackon bakdir bak_name) (noreq)))
+      (
+        (if (not (exists bakdir (noreq))) (makedir bakdir))
+        (copyfiles (source bak_src) (dest bakdir) (newname bak_name) (nogauge))
+      )))
+; older installers left LIBS:<name>.bak / C:<name>.bak: move them into C:Backup
+(foreach "LIBS:" "#?.library.bak"
+    (set bak_src (tackon "LIBS:" @each-name))
+    (set bak_name (substr @each-name 0 (- (strlen @each-name) 4)))
+    (P_SAVE_BAK)
+    (delete bak_src))
+(foreach "C:" "(ping|traceroute|nslookup).bak"
+    (set bak_src (tackon "C:" @each-name))
+    (set bak_name (substr @each-name 0 (- (strlen @each-name) 4)))
+    (P_SAVE_BAK)
+    (delete bak_src))
+
+; a running PrismNet must stop before its files are replaced or removed,
+; but only once the user has confirmed: Cancel must not drop the network
+(procedure P_STOP
+    (if (exists "C:PrismNet" (noreq))
+        (run "C:PrismNet STOP >NIL:")))
+
+; =========================================================================
+; REMOVE
+; =========================================================================
+(if (= mode 1)
+  (
+    (if (= 0 (askbool (prompt "Remove PrismNet from this Amiga?\n\n"
+                              "Programs that need the network will stop working "
+                              "until you install a TCP/IP stack again.")
+                      (help "Your other stack's files come back from C:Backup "
+                            "if the installer saved them there.")
+                      (choices "Remove" "Cancel") (default 0)))
+        ((message "Nothing was changed.") (exit (quiet))))
+    (P_STOP)
+    (complete 10)
+
+    ; boot entry (uses the copy of the Prefs program in this archive)
+    (run "\"Prefs/PrismNet\" BOOT=NO >NIL:")
+
+    ; libraries: delete ours, put a saved one back
+    (if oursock (delete "LIBS:bsdsocket.library"))
+    (if ourug (delete "LIBS:usergroup.library"))
+    (if (exists bakdir (noreq))        ; foreach on a missing drawer aborts the script
+        (foreach bakdir "#?.library"
+            (if (not (exists (tackon "LIBS:" @each-name) (noreq)))
+              (
+                (copyfiles (source (tackon bakdir @each-name)) (dest "LIBS:") (nogauge))
+                (delete (tackon bakdir @each-name))
+              ))))
+    (complete 40)
+
+    ; programs (the installer recorded where PrismMon and Prefs went)
+    (if (exists "C:PrismNet" (noreq)) (delete "C:PrismNet"))
+    ; network tools: delete only PrismNet's, then put back another stack's
+    ; copy the installer saved in C:Backup
+    (foreach "C" "(ping|traceroute|nslookup)"
+        (set nm @each-name)
+        (set tool (tackon "C:" nm))
+        (if (exists tool (noreq))
+            (if (= 0 (run (cat "Search >NIL: " tool " \"PrismNet\"") (safe)))
+                (delete tool)))
+        (if (and (exists (tackon bakdir nm) (noreq)) (not (exists tool (noreq))))
+          (
+            (copyfiles (source (tackon bakdir nm)) (dest "C:") (nogauge))
+            (delete (tackon bakdir nm))
+          )))
+    ; the drawer goes only if nothing else is left in it
+    (run (cat "Delete >NIL: " bakdir " QUIET"))
+    ; the share clients, if they were installed: the handlers, the tools, and
+    ; the mount files only while they are still PrismNet's (a user's own copy stays)
+    (if (exists "L:prismnfs-handler" (noreq)) (delete "L:prismnfs-handler"))
+    (if (exists "L:prismsmb-handler" (noreq)) (delete "L:prismsmb-handler"))
+    (if (exists "C:ShareUnmount" (noreq))
+        (if (= 0 (run "Search >NIL: C:ShareUnmount \"PrismNet\"" (safe))) (delete "C:ShareUnmount")))
+    (if (exists "C:inetd" (noreq))
+        (if (= 0 (run "Search >NIL: C:inetd \"PrismNet\"" (safe))) (delete "C:inetd")))
+    (if (exists "C:ftpd" (noreq))
+        (if (= 0 (run "Search >NIL: C:ftpd \"PrismNet\"" (safe))) (delete "C:ftpd")))
+    (if (exists "C:telnetd" (noreq))
+        (if (= 0 (run "Search >NIL: C:telnetd \"PrismNet\"" (safe))) (delete "C:telnetd")))
+    (if (exists "C:SMBShares" (noreq))
+        (if (= 0 (run "Search >NIL: C:SMBShares \"PrismNet\"" (safe))) (delete "C:SMBShares")))
+    (foreach "Storage/DOSDrivers" "P(NFS|SMB)0"
+        (set nm @each-name)
+        (if (exists (tackon "SYS:Storage/DOSDrivers" nm) (noreq))
+            (if (= 0 (run (cat "Search >NIL: SYS:Storage/DOSDrivers/" nm " \"PrismNet "
+                               (if (= nm "PSMB0") "SMB" "NFS") " client\"") (safe)))
+              (
+                (delete (tackon "SYS:Storage/DOSDrivers" nm))
+                (if (exists (tackon "SYS:Storage/DOSDrivers" (cat nm ".info")) (noreq))
+                    (delete (tackon "SYS:Storage/DOSDrivers" (cat nm ".info"))))
+              ))))
+    (set prefsdir (getenv "PrismNet/prefsdir"))
+    (if (= prefsdir "") (set prefsdir "SYS:Prefs"))
+    (if (exists (tackon prefsdir "PrismNet") (noreq)) (delete (tackon prefsdir "PrismNet")))
+    (if (exists (tackon prefsdir "PrismNet.info") (noreq)) (delete (tackon prefsdir "PrismNet.info")))
+    (set mondir (getenv "PrismNet/monitordir"))
+    (if (<> mondir "")
+      (
+        (if (exists (tackon mondir "PrismMon") (noreq)) (delete (tackon mondir "PrismMon")))
+        (if (exists (tackon mondir "PrismMon.info") (noreq)) (delete (tackon mondir "PrismMon.info")))
+        (if (exists (tackon mondir "PrismNet.guide") (noreq)) (delete (tackon mondir "PrismNet.guide")))
+        (if (exists (tackon mondir "PrismNet.guide.info") (noreq)) (delete (tackon mondir "PrismNet.guide.info")))
+      ))
+    (complete 70)
+
+    (if (= 0 (askbool (prompt "Also delete your PrismNet settings (ENVARC:PrismNet)?")
+                      (help "Keep them if you might install PrismNet again later.")
+                      (choices "Keep settings" "Delete settings") (default 1)))
+      (
+        ; FILES only, in ENV: and then ENVARC:. Deleting any drawer of ENV:PrismNet
+        ; while ENVARC:PrismNet exists crashes OS 3.2's lazy ENV: (alert 8100 0005),
+        ; and lazy ENV: keeps the ENVARC: drawers in use until a reboot, so the
+        ; empty drawers stay behind (harmless; Delete ENVARC:PrismNet ALL after
+        ; the reboot removes them).
+        (run "Delete >NIL: ENV:PrismNet/interfaces/#? ENV:PrismNet/examples/interfaces/#? QUIET FORCE")
+        (run "Delete >NIL: ENV:PrismNet/examples/~(interfaces) ENV:PrismNet/~(interfaces|examples) QUIET FORCE")
+        (run "Delete >NIL: ENVARC:PrismNet ALL QUIET FORCE")
+      ))
+    (complete 100)
+    (message "PrismNet has been removed.\n\n"
+             "Reboot so no program keeps using the old library in memory.")
+    (exit (quiet))
+  ))
+
+; =========================================================================
+; INSTALL
+; =========================================================================
+
+; ---- libraries --------------------------------------------------------------
+(set foreign 0)
+(if (and (exists "LIBS:bsdsocket.library" (noreq)) (= oursock 0))
+    (set foreign 1))
+(if foreign
+    (if (= 0 (askbool (prompt "LIBS: already has a bsdsocket.library from another TCP/IP stack "
+                              "(Roadshow, AmiTCP, Miami, a314bsd...).\n\n"
+                              "PrismNet replaces it. Yours is kept as "
+                              "C:Backup/bsdsocket.library, and \"Remove PrismNet\" puts it back.")
+                      (help "Stop the other stack and reboot after installing, so programs "
+                            "load PrismNet's library.")
+                      (choices "Replace" "Cancel") (default 1)))
+        ((message "Nothing was changed - your bsdsocket.library stays.") (exit (quiet)))))
+(P_STOP)
+
+; first backup only: a re-run must not save PrismNet's own library
+(if foreign
+  (
+    (set bak_src "LIBS:bsdsocket.library") (set bak_name "bsdsocket.library") (P_SAVE_BAK)
+  ))
+(if (and (exists "LIBS:usergroup.library" (noreq)) (= ourug 0))
+  (
+    (set bak_src "LIBS:usergroup.library") (set bak_name "usergroup.library") (P_SAVE_BAK)
+  ))
+(copyfiles (prompt "Installing bsdsocket.library and usergroup.library in LIBS:")
+           (help @copyfiles-help)
+           (source "Libs") (dest "LIBS:") (choices "bsdsocket.library" "usergroup.library") (nogauge))
+(complete 25)
+
+; ---- programs -----------------------------------------------------------------
+;; on a machine with little memory, offer the small core (same command, smaller
+;; buffers and window: about 175 KB idle instead of 290 KB)
+(set memkb (/ (database "total-mem") 1024))
+(set smallcore 0)
+(if (< memkb 3072)
+    (set smallcore
+        (askbool (prompt (cat "This Amiga has " memkb " KB of free memory.\n\n"
+                              "Install the small PrismNet core? It uses about 175 KB "
+                              "instead of 290 KB, with smaller buffers (a little slower "
+                              "for big downloads)."))
+                 (help "The small core is built for 68000 machines with 1 to 2 MB. "
+                       "Everything else is the same. You can switch later by copying "
+                       "Tools/Small/PrismNet or C/PrismNet from the archive to C:.")
+                 (choices "Small core" "Standard core") (default 1))))
+(copyfiles (prompt "Installing the PrismNet command in C:") (help @copyfiles-help)
+           (source (if smallcore "Tools/Small/PrismNet" "C/PrismNet")) (dest "C:") (nogauge))
+(run "Protect >NIL: C:PrismNet +e")
+
+; network tools (ping, traceroute, nslookup). Another stack may have its own
+; in C: (Roadshow ships ping and traceroute): ask before replacing each one,
+; and save the old one in C:Backup so "Remove PrismNet" can put it back.
+(set kept "")
+(foreach "C" "(ping|traceroute|nslookup)"
+    (set nm @each-name)
+    (set tool (tackon "C:" nm))
+    (set doit 1)
+    (if (exists tool (noreq))
+        (if (<> 0 (run (cat "Search >NIL: " tool " \"PrismNet\"") (safe)))
+            (if (askbool (prompt (cat tool " is already there, from another TCP/IP stack.\n\n"
+                                      "Replace it with PrismNet's " nm "?"))
+                         (help (cat "PrismNet's " nm " works with any AmiTCP-compatible stack. "
+                                    "Yours is saved in C:Backup, and \"Remove PrismNet\" "
+                                    "puts it back."))
+                         (choices "Replace" "Keep mine") (default 1))
+                ((set bak_src tool) (set bak_name nm) (P_SAVE_BAK))
+                (set doit 0))))
+    (if doit
+        (
+            (copyfiles (source (tackon "C" nm)) (dest "C:") (nogauge))
+            (run (cat "Protect >NIL: " tool " +e"))
+        )
+        (set kept (cat kept " " nm))))
+(if (<> kept "")
+    (message (cat "Kept your own" kept " in C:.\n\n"
+                  "PrismNet's versions are in the Tools/Net drawer of the archive.")))
+
+(set prefsdir (if (exists "SYS:Prefs" (noreq)) "SYS:Prefs" "SYS:"))
+(copyfiles (prompt "Installing PrismNet Prefs") (help @copyfiles-help)
+           (source "Prefs") (dest prefsdir) (choices "PrismNet" "PrismNet.info") (nogauge))
+(run (cat "Protect >NIL: \"" (tackon prefsdir "PrismNet") "\" +e"))
+
+(set mondir
+    (askdir (prompt "Where should PrismMon, the network monitor, go?")
+            (help "Any drawer you open from Workbench, for example SYS:Tools or SYS:Utilities.")
+            (default (if (exists "SYS:Tools" (noreq)) "SYS:Tools" "SYS:"))))
+(copyfiles (prompt "Installing PrismMon") (help @copyfiles-help)
+           (source "Tools") (dest mondir) (choices "PrismMon" "PrismMon.info") (nogauge))
+(run (cat "Protect >NIL: \"" (tackon mondir "PrismMon") "\" +e"))
+; the manual, next to the monitor
+(copyfiles (prompt "Installing the PrismNet manual") (help @copyfiles-help)
+           (source "") (dest mondir) (choices "PrismNet.guide" "PrismNet.guide.info") (nogauge))
+
+; ---- optional: network-share clients -------------------------------------------
+(set shares
+    (askoptions (prompt "Install network-share clients?\n\n"
+                        "They open folders shared by a NAS or another computer "
+                        "as an ordinary Amiga volume. You can skip this now and "
+                        "run the installer again later.")
+                (help "NFS client: L:prismnfs-handler, C:ShareUnmount and a mount file "
+                      "SYS:Storage/DOSDrivers/PNFS0 to edit (server and folder), then "
+                      "double-click to mount. Works with a Synology/QNAP NAS or Linux.\n\n"
+                      "SMB client: L:prismsmb-handler, C:SMBShares (lists a server's shares), "
+                      "C:ShareUnmount and a mount file SYS:Storage/DOSDrivers/PSMB0. Works with "
+                      "Windows, macOS, a NAS or Samba (SMB 2 and 3).\n\n"
+                      "PrismNet Prefs, Shares tab, writes the mount files for you.")
+                (choices "NFS client (NAS / Linux shares)" "SMB client (Windows / macOS / NAS shares)")
+                (default 0)))
+(if (BITAND shares 1)
+  (
+    (copyfiles (prompt "Installing the NFS client") (help @copyfiles-help)
+               (source "L") (dest "L:") (choices "prismnfs-handler") (nogauge))
+    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers"))
+    (if (exists "SYS:Storage/DOSDrivers/PNFS0" (noreq))
+        (message "SYS:Storage/DOSDrivers/PNFS0 is already there and was kept.")
+        (copyfiles (source "Storage/DOSDrivers") (dest "SYS:Storage/DOSDrivers")
+                   (choices "PNFS0" "PNFS0.info") (nogauge)))
+  ))
+(if (BITAND shares 2)
+  (
+    (copyfiles (prompt "Installing the SMB client") (help @copyfiles-help)
+               (source "L") (dest "L:") (choices "prismsmb-handler") (nogauge))
+    (copyfiles (prompt "Installing SMBShares") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "SMBShares") (nogauge))
+    (run "Protect >NIL: C:SMBShares +e")
+    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers"))
+    (if (exists "SYS:Storage/DOSDrivers/PSMB0" (noreq))
+        (message "SYS:Storage/DOSDrivers/PSMB0 is already there and was kept.")
+        (copyfiles (source "Storage/DOSDrivers") (dest "SYS:Storage/DOSDrivers")
+                   (choices "PSMB0" "PSMB0.info") (nogauge)))
+  ))
+(if shares
+  (
+    (copyfiles (prompt "Installing ShareUnmount") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "ShareUnmount") (nogauge))
+    (run "Protect >NIL: C:ShareUnmount +e")
+  ))
+
+; ---- optional: servers ------------------------------------------------------------
+(set servers
+    (askoptions (prompt "Install servers?\n\n"
+                        "They let other computers reach this Amiga. Nothing listens "
+                        "unless you choose one here.")
+                (help "FTP server: C:inetd and C:ftpd, and ENVARC:PrismNet/services with "
+                      "an ftp line. PrismNet starts inetd when it starts. FTP logins are "
+                      "PrismNet's users: add one in PrismNet Prefs, Users tab. The FTP "
+                      "client sees the Amiga's volumes as folders. Anonymous access is "
+                      "off; ENVARC:PrismNet/services explains how to turn it on.\n\n"
+                      "Telnet server: C:inetd and C:telnetd. A user logs in and gets an "
+                      "AmigaDOS Shell in their home directory. Telnet sends the password "
+                      "as plain text, so only use it on your own network.")
+                (choices "FTP server (copy files to and from this Amiga)"
+                         "Telnet server (a Shell from another computer)")
+                (default 0)))
+(if (BITAND servers 1)
+  (
+    (copyfiles (prompt "Installing the FTP server") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "inetd" "ftpd") (nogauge))
+    (run "Protect >NIL: C:inetd +e")
+    (run "Protect >NIL: C:ftpd +e")
+  ))
+(if (BITAND servers 2)
+  (
+    (copyfiles (prompt "Installing the telnet server") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "inetd" "telnetd") (nogauge))
+    (run "Protect >NIL: C:inetd +e")
+    (run "Protect >NIL: C:telnetd +e")
+  ))
+(complete 45)
+
+; ---- settings -----------------------------------------------------------------
+(set arc "ENVARC:PrismNet")
+(if (not (exists arc (noreq))) (makedir arc))
+; a services file with the chosen servers switched on (the full commented
+; sample goes to ENVARC:PrismNet/examples with the others)
+(if (and servers (not (exists (tackon arc "services") (noreq))))
+    (textfile (dest (tackon arc "services"))
+              (append "# PrismNet services - see examples/services.sample for every option.\n"
+                      "# Change them with PrismNet Prefs > Services.\n"
+                      (if (BITAND servers 1) "" "#") "ftp  21  tcp  C:ftpd\n"
+                      (if (BITAND servers 2) "" "#") "telnet  23  tcp  C:telnetd\n")))
+(if (not (exists (tackon arc "interfaces") (noreq))) (makedir (tackon arc "interfaces")))
+
+; remember where things went (read back by "Remove PrismNet")
+(textfile (dest (tackon arc "prefsdir")) (append prefsdir))
+(textfile (dest (tackon arc "monitordir")) (append mondir))
+
+(set configure 1)
+(set have 0)
+(if (exists (tackon arc "interfaces") (noreq))
+    (foreach (tackon arc "interfaces") "~(#?.info|#?.bak|#?.new)" (set have 1)))
+(if have
+    (if (askbool (prompt "You already have PrismNet settings.\n\nKeep them?")
+                 (help "Choose New settings to answer the network questions again "
+                       "(it rewrites interfaces/eth0, dns, routes, hostname and startup).")
+                 (choices "Keep my settings" "New settings") (default 1))
+        (set configure 0)))
+
+(if configure
+  (
+    ; default: the first driver in DEVS:Networks (also what Novice mode takes)
+    (set firstdev "")
+    (if (exists "DEVS:Networks" (noreq))
+        (foreach "DEVS:Networks" "#?.device"
+            (if (= firstdev "") (set firstdev @each-name))))
+    (set dev (askfile (prompt "Choose the SANA-II driver of your network card\n"
+                              "(normally in DEVS:Networks).")
+                      (help "For example cnet.device for many PCMCIA cards, x-surf.device for "
+                            "the X-Surf, scsidayna.device for the DaynaPORT.")
+                      (default (if (= firstdev "") "DEVS:Networks/" (tackon "DEVS:Networks" firstdev)))))
+    (if (patmatch "DEVS:Networks/#?" dev) (set dev (fileonly dev)))
+    (if (or (= dev "") (not (patmatch "#?.device" dev)))
+        (abort "No network driver was chosen.\n\n"
+               "Copy your card's SANA-II driver to DEVS:Networks and run the installer again."))
+    (set unit (asknumber (prompt (cat "Which unit of " dev "?"))
+                         (help "0 unless you have several cards on one driver.")
+                         (range 0 15) (default 0)))
+    (set static (askchoice (prompt "How does this Amiga get its network address?")
+                           (help "DHCP: from your router - the usual choice.\n"
+                                 "Fixed address: you type the address, netmask, gateway and DNS server.")
+                           (choices "Automatically (DHCP)" "Fixed address") (default 0)))
+    (set conf (cat "# PrismNet interface eth0 (written by the installer)\n"
+                   "DEVICE=\"" dev "\" UNIT=" unit "\n"))
+    (if static
+      (
+        (set addr (askstring (prompt "IP address of this Amiga") (help "For example 192.168.1.40")
+                             (default "192.168.1.40")))
+        (set mask (askstring (prompt "Netmask") (help "Usually 255.255.255.0") (default "255.255.255.0")))
+        (set gw   (askstring (prompt "Gateway (your router)") (help "For example 192.168.1.1")
+                             (default "192.168.1.1")))
+        (set dns  (askstring (prompt "DNS server") (help "Often the same as the gateway") (default gw)))
+        (set conf (cat conf "CONFIG=STATIC ADDRESS=" addr " NETMASK=" mask " GATEWAY=" gw "\n"))
+        (textfile (dest (tackon arc "routes")) (append (cat "DEFAULT " gw "\n")))
+        (textfile (dest (tackon arc "dns")) (append (cat "NAMESERVER " dns "\n")))
+      )
+      (
+        (set conf (cat conf "CONFIG=DHCP\n"))
+        (if (exists (tackon arc "routes") (noreq)) (delete (tackon arc "routes")))
+        (if (exists (tackon arc "dns") (noreq)) (delete (tackon arc "dns")))
+      ))
+    (textfile (dest (tackon arc "interfaces/eth0")) (append conf))
+    (set host (askstring (prompt "A name for this Amiga on the network")
+                         (help "Letters, digits and '-' only.") (default "amiga")))
+    (textfile (dest (tackon arc "hostname")) (append (cat host "\n")))
+    (if (askbool (prompt "Start PrismNet automatically whenever a program needs the network?")
+                 (help "Recommended. Otherwise start it yourself with \"PrismNet START\" "
+                       "or from PrismMon.")
+                 (choices "Yes" "No") (default 1))
+        (textfile (dest (tackon arc "startup")) (append "AUTOSTART=YES\nCOMMAND=C:PrismNet\n"))
+        (textfile (dest (tackon arc "startup")) (append "AUTOSTART=NO\nCOMMAND=C:PrismNet\n")))
+    (if (askbool (prompt "Set the Amiga's clock from the network (SNTP)?")
+                 (help "Asks the time server your DHCP server names, or pool.ntp.org, "
+                       "whenever PrismNet starts, and sets the clock in the time zone of "
+                       "the Locale prefs. \"PrismNet SETCLOCK\" asks at any time. "
+                       "The file ENVARC:PrismNet/time holds the setting.")
+                 (choices "Yes" "No") (default 1))
+        (textfile (dest (tackon arc "time")) (append "SERVER=DHCP\n"))
+        (if (exists (tackon arc "time") (noreq)) (delete (tackon arc "time"))))
+  ))
+
+; commented sample configuration for reference
+(if (not (exists (tackon arc "examples") (noreq))) (makedir (tackon arc "examples")))
+(copyfiles (source "Storage/PrismNet") (dest (tackon arc "examples")) (all) (nogauge))
+
+; ENV: is what PrismNet reads now; ENVARC: is copied there at boot
+(run "Copy >NIL: ENVARC:PrismNet ENV:PrismNet ALL QUIET CLONE")
+(complete 80)
+
+; ---- boot -----------------------------------------------------------------------
+; (startup) only asks in Expert mode, so ask ourselves; default to what is
+; there now (Prefs can change it later)
+(set atboot (= 0 (run "Search >NIL: S:User-Startup \";BEGIN PrismNet\"" (safe))))
+(if (askbool (prompt "Start PrismNet every time the Amiga boots?\n\n"
+                     "Not needed if it starts automatically when a program needs the network.")
+             (help "This adds \"C:PrismNet START\" to S:User-Startup. PrismNet Prefs can switch it "
+                   "on and off later.")
+             (choices "Yes" "No") (default atboot))
+    (startup "PrismNet"
+        (prompt "Adding \"C:PrismNet START\" to S:User-Startup.")
+        (help "PrismNet Prefs can switch this off later.")
+        (command "C:PrismNet START >NIL:"))
+    (if atboot (run (cat "\"" (tackon prefsdir "PrismNet") "\" BOOT=NO >NIL:"))))
+(complete 90)
+
+(if (askbool (prompt "Start PrismNet now?")
+             (help "If another TCP/IP stack is running, choose Later and reboot first.")
+             (choices "Start now" "Later") (default (if foreign 0 1)))
+    (run "C:PrismNet START >NIL:"))
+
+(complete 100)
+(message "PrismNet is installed.\n\n"
+         "PrismNet Prefs: " (tackon prefsdir "PrismNet") "\n"
+         "PrismMon and the manual: " mondir "\n"
+         (if shares "Network shares: set them up in Prefs > Shares\n" "")
+         (if servers "Servers: give users a password in Prefs > Users\n" "")
+         "\nIn a Shell: PrismNet STATUS, START, STOP, LOG.\n"
+         (if foreign "\nReboot now so programs use PrismNet instead of your old stack." ""))
+(exit (quiet))

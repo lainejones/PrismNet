@@ -1,0 +1,6 @@
+/* PrismNet NFS client test: Synology amigatest */
+Handler    = L:prismnfs-handler
+StackSize  = 8192
+Priority   = 5
+GlobVec    = -1
+Startup    = "192.168.50.2:/volume1/amigatest VOLUME=pntest TZ=-5"

@@ -1,0 +1,22 @@
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PS1
+Echo "start" >DH0:PrismNet/smbsave.log
+Echo "== first access: the window should open, Remember on" >>DH0:PrismNet/smbsave.log
+Date >>DH0:PrismNet/smbsave.log
+List PS1: QUICK >>DH0:PrismNet/smbsave.log
+Date >>DH0:PrismNet/smbsave.log
+Echo "== saved file" >>DH0:PrismNet/smbsave.log
+List ENVARC:PrismNet/smb >>DH0:PrismNet/smbsave.log
+List ENV:PrismNet/smb >>DH0:PrismNet/smbsave.log
+Echo "== unmount, then access again: no window expected" >>DH0:PrismNet/smbsave.log
+C:ShareUnmount PS1: >>DH0:PrismNet/smbsave.log
+Wait 3
+Date >>DH0:PrismNet/smbsave.log
+List PS1: QUICK >>DH0:PrismNet/smbsave.log
+Date >>DH0:PrismNet/smbsave.log
+Type PS1:smb2fs.m68k-amigaos.lha TO NIL:
+Echo "second access done, rc $RC" >>DH0:PrismNet/smbsave.log
+Echo "DONE" >>DH0:PrismNet/smbsave.log

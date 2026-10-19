@@ -1,0 +1,22 @@
+; NFS client stage 2 (writes) against the Synology export (read/write).
+; Needs DH0:PrismNet/big1m.bin (any test file); compare its MD5 with the
+; NAS copy afterwards. Cleans up after itself.
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/nfs/PN0
+MakeDir PN0:pn-test
+Copy DH0:PrismNet/big1m.bin PN0:pn-test/big.bin
+Echo "hello from the Amiga" >PN0:pn-test/hello.txt
+Echo "second line" >>PN0:pn-test/hello.txt
+Type PN0:pn-test/hello.txt
+Rename PN0:pn-test/hello.txt PN0:pn-test/Hello2.txt
+Protect PN0:pn-test/Hello2.txt r
+SetDate PN0:pn-test/Hello2.txt 01-Jan-25 12:00:00
+List PN0:pn-test
+Rename PN0:pn-test/Hello2.txt PN0:pn-test/big.bin
+Copy PN0:pn-test/big.bin DH0:PrismNet/bigback
+Delete PN0:pn-test
+Delete PN0:pn-test ALL FORCE
+NFSDismount PN0:

@@ -1,0 +1,7 @@
+.KEY PAGE/A
+; PrismMon opened on one tab (0 Status, 1 Interfaces, 2 Connections, 3 Memory, 4 Log)
+SetEnv PrismNet/monpage <PAGE>
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >NIL:
+DH0:PrismNet/PrismMon
+UnSetEnv PrismNet/monpage

@@ -1,0 +1,19 @@
+Version LIBS:usergroup.library
+Echo "--- 1: default user"
+DH0:PrismNet/ugtest USER=amiga
+Echo "--- 2: ENV:USER"
+SetEnv USER tester
+DH0:PrismNet/ugtest USER=tester
+Echo "--- 3: passwd database"
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/test-passwd ENV:PrismNet/passwd QUIET
+DH0:PrismNet/ugtest USER=tester DBUSER=bob DBUID=1001
+Delete ENV:PrismNet/passwd QUIET
+UnSetEnv USER
+Echo "--- 4: wget with PrismNet's usergroup.library"
+Run <NIL: >NIL: DH0:PrismNet/PrismNet DEVICE=cnet.device QUIET
+Wait 10
+DH0:PrismNet/wget -O RAM:aminet.html http://aminet.net/
+List RAM:aminet.html
+DH0:PrismNet/PrismNet STOP
+Wait 2

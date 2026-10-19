@@ -1,0 +1,6 @@
+.KEY PAGE/A
+; PrismNetPrefs opened on one tab (0 Interfaces, 1 Network, 2 Users, 3 Startup)
+SetEnv PrismNet/prefspage <PAGE>
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+DH0:PrismNet/PrismNetPrefs
+UnSetEnv PrismNet/prefspage

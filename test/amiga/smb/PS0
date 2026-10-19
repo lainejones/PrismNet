@@ -1,0 +1,6 @@
+/* PrismNet SMB client test: Drobo public share, guest */
+Handler    = L:prismsmb-handler
+StackSize  = 16384
+Priority   = 5
+GlobVec    = -1
+Startup    = "192.168.50.3/public VOLUME=drobo GUEST TZ=-5"

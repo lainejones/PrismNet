@@ -1,0 +1,13 @@
+; Large-file SMB read: Copy a big file through prismsmb-handler to the host
+; drive (DH0:PrismNet/iso.bin); compare its MD5 on the PC afterwards.
+; Edit the path below to the file to test.
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PS0
+Echo "start" >DH0:PrismNet/big-smb.log
+Date >>DH0:PrismNet/big-smb.log
+Copy "PS0:ISO/SW_DVD5_Publisher_2016_64Bit_English_MLF_X20-42723.ISO" DH0:PrismNet/iso.bin >>DH0:PrismNet/big-smb.log
+Date >>DH0:PrismNet/big-smb.log
+Echo "DONE" >>DH0:PrismNet/big-smb.log

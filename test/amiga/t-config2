@@ -1,0 +1,16 @@
+Echo "=== D: AUTOSTART=NO -> OpenLibrary must fail"
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Echo "AUTOSTART=NO" >ENV:PrismNet/startup
+DH0:PrismNet/bsdtest
+C:PrismNet STATUS
+Echo "=== E: no config at all -> OpenLibrary must fail, no core"
+Delete ENV:PrismNet ALL QUIET
+DH0:PrismNet/bsdtest
+C:PrismNet STATUS
+Echo "=== F: AUTOSTART back on -> auto-start works again"
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+DH0:PrismNet/bsdtest LOOKUP=slirpgw EXPECT=10.0.2.2 REVERSE
+C:PrismNet STOP
+Delete ENV:PrismNet ALL QUIET

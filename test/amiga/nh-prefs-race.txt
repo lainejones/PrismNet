@@ -1,0 +1,14 @@
+# NetHarness batch (nhctl.py --batch): the Prefs tab-switch race, with Prefs held off the CPU by hog.
+# Needs DH0:PrismNet/t-prefslow (ChangeTaskPri -1 + PrefsDbg), PrefsDbg built with -DPREFS_DEBUG_STALE.
+UICLICKID 32
+EXEC Wait 2
+EXEC Run >NIL: Execute DH0:PrismNet/t-prefslow
+EXEC Wait 5
+UICLICKID 203
+EXEC Wait 2
+EXEC Run >NIL: DH0:PrismNet/hog 6 0
+UICLICKID 200
+CLICK 49 69
+EXEC Wait 9
+EXEC Type T:prefs-stale.log
+SCREENSHOT C:\Users\Laine\AppData\Local\Temp\claude\s3\prefs2.png

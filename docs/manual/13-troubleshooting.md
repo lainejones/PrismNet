@@ -1,0 +1,80 @@
+# Troubleshooting
+
+Start with `PrismNet STATUS` and `PrismNet LOG`: most problems show up
+there.
+
+## PrismNet won't start
+
+`PrismNet START` says why. The usual reasons:
+
+- **The driver can't be opened**: wrong name or unit, the driver isn't in
+  `DEVS:Networks`, or the card isn't there. Check the Device field in
+  Prefs; `...` lists what is installed.
+- **Another stack has the card**: Roadshow, AmiTCP or Miami still running.
+  Take it out of the startup files and reboot.
+- **Not enough memory**: it shows the free memory and the largest block.
+  See [Small machines](12-memory.md).
+- **No settings**: run PrismNet Prefs or the installer.
+
+## No address from DHCP
+
+- Is the link up? `PrismNet STATUS` shows `link up` or `down` for each
+  interface. Check the cable or the Wi-Fi bridge.
+- `PrismNet LOG` shows the DHCP exchange. No answer at all usually means the
+  packets don't reach the network: the wrong unit, or a driver that needs
+  configuring first.
+- Try a fixed address to rule DHCP out.
+
+## Pings work, names don't
+
+- `PrismNet STATUS` shows the DNS servers. With none, set one in Prefs
+  (Network tab), e.g. your router or `1.1.1.1`.
+- `nslookup aminet.net` asks the DNS server directly and shows what comes
+  back.
+- A name without a dot gets the domain added (Network tab, *Domain*).
+
+## A program says there is no TCP/IP stack
+
+- `bsdsocket.library` in `LIBS:` must be PrismNet's: `Version LIBS:bsdsocket.library FULL`
+  shows *PrismNet*. Another stack's installer may have put its own back.
+- With *Start when needed* off, PrismNet has to be running before the
+  program starts.
+- **In WinUAE**: switch off *bsdsocket.library emulation* (`bsdsocket_emu=false`
+  in the configuration), or WinUAE's own library answers instead of
+  PrismNet's.
+
+## A program misbehaves
+
+Start PrismNet with a trace:
+
+```
+PrismNet STOP
+PrismNet START TRACE=RAM:trace.txt
+```
+
+Run the program, then stop PrismNet again. `RAM:trace.txt` has every
+request the program sent to the stack (the operation, socket, arguments,
+result and error code) between the log messages. It is meant for the
+developers: send it with a problem report.
+
+## The FTP or telnet server doesn't answer
+
+- Is the server switched on? Prefs, Services tab; `ENV:PrismNet/services`
+  must exist and have the line without `#`.
+- `PrismNet NETSTAT` should show a socket listening on port 21 or 23.
+- **Login incorrect**: the account needs a password (Prefs, Users,
+  *Accounts... > Password...*).
+
+## Known problems
+
+- **CD32 with `slip.device` 37.4 (1993)**: after `PrismNet STOP`, a
+  `PrismNet START` can hang while opening the driver; the machine gets
+  sluggish and the network stays down until a reboot. A reboot starts
+  cleanly. Other drivers restart fine.
+- **IPv6** isn't supported yet.
+
+## Reporting a problem
+
+Include the output of `PrismNet STATUS` and `PrismNet LOG`, the Amiga
+model, CPU, OS version and network card, and what you did. `Tools/bsdtest`
+output helps too.

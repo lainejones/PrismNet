@@ -1,0 +1,16 @@
+; SLIP STOP + START: must answer the first ping after the restart (needs
+; tools/bench/slippeer.py, the "PrismNet slip" config and s2stat from make diag).
+; Before the fix, slip.device kept the old core's reads and ~34 packets vanished.
+Delete ENV:PrismNet/interfaces/#? ENV:PrismNet/~(interfaces) QUIET
+Copy DH0:PrismNet/cfg/slip ENV:PrismNet ALL QUIET
+MakeDir ENV:SANA2 >NIL:
+Copy DH0:PrismNet/cfg/slip0.config ENV:SANA2/slip0.config
+Echo "start" >DH0:PrismNet/rs.log
+C:PrismNet START >NIL:
+Execute DH0:PrismNet/t-pingloop 3 first
+C:PrismNet STOP >NIL:
+Wait 2
+C:PrismNet START >NIL:
+Execute DH0:PrismNet/t-pingloop 42 restart
+C:PrismNet STOP >NIL:
+Echo "=== done" >>DH0:PrismNet/rs.log

@@ -1,0 +1,6 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >NIL:
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=2 QUIET >NIL:
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 COUNT=0 CALLS=2000 >DH0:PrismNet/c1.log
+C:PrismNet STOP

@@ -1,0 +1,56 @@
+PrismNet - an open-source TCP/IP stack for AmigaOS 3.x
+======================================================
+
+PrismNet gives your Amiga networking through any SANA-II network driver
+(PCMCIA cards like cnet.device, X-Surf, ZZ9000, DaynaPORT, A314, serial
+SLIP/PPP). Programs written for AmiTCP, Miami or Roadshow - web browsers,
+wget, FTP, IRC, mail - work unchanged: PrismNet provides the same
+bsdsocket.library they expect.
+
+It is free and open source (GNU GPL version 3). The networking core is lwIP.
+
+The full manual is PrismNet.guide in this drawer: double-click it.
+
+Requirements
+------------
+- AmigaOS 3.0 or newer, any 68000 or better
+- a SANA-II driver for your network hardware in DEVS:Networks
+- about 290 KB of free memory while running (175 KB with the small core
+  for 1-2 MB machines; the installer offers it)
+
+Installing
+----------
+Double-click "Install_PrismNet". It installs the libraries, the PrismNet
+command, PrismNet Prefs, the PrismMon monitor and this manual, and asks
+for your network driver and DHCP or a fixed address. Another stack's
+libraries are saved in C:Backup. Optional: network-share clients (NFS,
+SMB) and servers (FTP, telnet).
+
+Run it again to update (your settings are kept) or to remove PrismNet.
+
+Using it
+--------
+Usually there is nothing to do: the first program that wants the network
+starts PrismNet. In a Shell:
+
+  PrismNet START      start in the background and show the status
+  PrismNet STATUS     interfaces, addresses, DNS, memory
+  PrismNet STOP
+  PrismNet NETSTAT    open connections
+  PrismNet ROUTE      the routes
+  PrismNet ARP        hardware addresses on the LAN
+  PrismNet LOG        recent messages
+
+PrismNet Prefs (SYS:Prefs/PrismNet) changes every setting; PrismMon shows
+what the stack is doing. Settings live in plain text files in
+ENVARC:PrismNet (commented examples in ENVARC:PrismNet/examples).
+
+Problems
+--------
+See "Troubleshooting" in the manual. Please report problems with the
+output of "PrismNet STATUS" and "PrismNet LOG".
+
+Licence
+-------
+PrismNet is licensed under the GNU GPL version 3 (see Docs/LICENSE). lwIP
+is BSD licensed (see Docs/lwIP-COPYING).

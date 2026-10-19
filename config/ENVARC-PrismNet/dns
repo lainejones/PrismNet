@@ -1,0 +1,4 @@
+# Nameservers override the ones DHCP provides (up to 3).
+# NAMESERVER 192.168.1.1
+# Search domain: bare names (no dot) are looked up as name.domain
+# DOMAIN home.lan

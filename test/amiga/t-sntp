@@ -1,0 +1,23 @@
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Echo "SERVER=pool.ntp.org" >ENV:PrismNet/time
+Echo "start" >DH0:PrismNet/sntp3.log
+Echo "==== 1: no Locale prefs (fallback keeps the zone)" >>DH0:PrismNet/sntp3.log
+Date >>DH0:PrismNet/sntp3.log
+C:PrismNet START
+Wait 8
+Date >>DH0:PrismNet/sntp3.log
+C:PrismNet LOG >>DH0:PrismNet/sntp3.log
+C:PrismNet STOP
+Echo "==== 2: Locale prefs UTC-6 installed" >>DH0:PrismNet/sntp3.log
+Copy DH0:PrismNet/locale360.prefs ENV:Sys/locale.prefs
+Wait 3
+C:PrismNet START
+Wait 8
+Date >>DH0:PrismNet/sntp3.log
+C:PrismNet STATUS >>DH0:PrismNet/sntp3.log
+C:PrismNet SETCLOCK >>DH0:PrismNet/sntp3.log
+C:PrismNet LOG >>DH0:PrismNet/sntp3.log
+C:PrismNet STOP
+Delete ENV:Sys/locale.prefs QUIET
+Echo "DONE" >>DH0:PrismNet/sntp3.log

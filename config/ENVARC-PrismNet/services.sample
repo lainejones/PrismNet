@@ -1,0 +1,26 @@
+# PrismNet services: the servers inetd starts when a connection comes in.
+# As ENVARC:PrismNet/services (the installer's server options put one
+# there; copy it to ENV:PrismNet too, or reboot), PrismNet starts inetd as
+# soon as it is up and stops it with PrismNet STOP. Delete the file and no
+# server runs. One service a line:
+#
+#   name  port  tcp  program  [arguments...]
+#
+# ftp: PrismNet's FTP server. Logins are PrismNet's users (PrismNet Prefs >
+# Users); "/" shows the Amiga's volumes. Options:
+#   ANONYMOUS=dir     also let "anonymous" in, read-only, inside dir only
+#   READONLY          nobody may change anything
+#   PASVPORTS=a-b     ports for passive transfers (for a firewall rule)
+#   PASVADDRESS=ip    address to announce for passive transfers (behind NAT)
+#   IDLE=seconds      drop an idle connection (default 600)
+#
+ftp  21  tcp  C:ftpd
+#ftp  21  tcp  C:ftpd ANONYMOUS=Work:Public
+#
+# telnet: an AmigaDOS Shell over the network, in the user's home directory
+# (PrismNet Prefs > Users). Telnet sends passwords as plain text: use it on
+# your own network only. Options:
+#   IDLE=seconds      drop an idle session (default 1800)
+#   NOLOGIN=user      no login prompt, everyone is that user (trusted LAN only)
+#
+#telnet  23  tcp  C:telnetd

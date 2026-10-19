@@ -1,0 +1,28 @@
+/* PrismNet NFS client: mount a NAS or Linux NFS export as an Amiga volume.
+ *
+ * 1. Change the Startup line below: the server (name or address), a colon,
+ *    then the export path, e.g. "nas.lan:/volume1/amiga VOLUME=NAS".
+ * 2. Double-click this icon, or type:  Mount SYS:Storage/DOSDrivers/PNFS0
+ *    Drag it into DEVS:DOSDrivers to mount it at every boot (it connects
+ *    only when the volume is first used).
+ * 3. Unmount with:  ShareUnmount PNFS0:
+ *
+ * Options after the export path:
+ *   VOLUME=name      volume name on Workbench (default: last part of the path)
+ *   UID=n GID=n      identity sent to the server (default 1000/1000)
+ *   TZ=+H[:MM]       time zone, hours east of UTC (default: from Locale)
+ *   READONLY         never write
+ *   RSIZE=n WSIZE=n  transfer sizes in bytes (default: fits free memory)
+ *   CHARSET=RAW      names as bytes (default UTF8: Latin-1 <-> UTF-8)
+ *   IDLE=s           disconnect after s quiet seconds, 0 = never (default 60)
+ *   RETRY=s          keep retrying a lost server for s seconds (default 30)
+ *   TIMEOUT=s        seconds per call (default 15)
+ *   DEPTH=1..4       requests in flight for big transfers (default 1)
+ *   RESVPORT=NO      do not use a source port below 1024
+ * On the server, export the folder to your network (on a Synology: Control
+ * Panel > Shared Folder > Edit > NFS Permissions). */
+Handler   = L:prismnfs-handler
+StackSize = 8192
+Priority  = 5
+GlobVec   = -1
+Startup   = "192.168.1.10:/volume1/share VOLUME=NAS"

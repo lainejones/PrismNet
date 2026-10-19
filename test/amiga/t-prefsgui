@@ -1,0 +1,4 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/static ENV:PrismNet ALL QUIET
+Echo "DOMAIN example.lan" >>ENV:PrismNet/dns
+Run <NIL: >NIL: DH0:PrismNet/PrismNetPrefs

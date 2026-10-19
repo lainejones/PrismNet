@@ -1,0 +1,7 @@
+build/
+out/
+*.lha
+*.zip
+dist/
+__pycache__/
+*.pyc

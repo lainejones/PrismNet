@@ -1,0 +1,15 @@
+; sanaif audit: a driver that keeps aborted writes (fault injection: reset every
+; ~5 s, nothing collected). CORE is passed in: PrismNet.lost (old) or .lost2 (fixed)
+.key CORE/A
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+DH0:PrismNet/<CORE> START
+Wait 6
+Echo "start <CORE>" >>DH0:PrismNet/txlost.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=3 QUIET >>DH0:PrismNet/txlost.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=1 UPLOAD=16384 >>DH0:PrismNet/txlost.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=3 QUIET >>DH0:PrismNet/txlost.log
+DH0:PrismNet/<CORE> STATUS >>DH0:PrismNet/txlost.log
+DH0:PrismNet/<CORE> LOG >>DH0:PrismNet/txlost.log
+DH0:PrismNet/<CORE> STOP
+Echo "END <CORE>" >>DH0:PrismNet/txlost.log

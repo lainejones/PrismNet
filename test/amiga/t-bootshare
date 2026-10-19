@@ -1,0 +1,10 @@
+FailAt 21
+Echo "start" >DH0:PrismNet/bootshare.log
+Echo "== after boot: is the stack running? (it must not be yet)" >>DH0:PrismNet/bootshare.log
+C:PrismNet STATUS >>DH0:PrismNet/bootshare.log
+Echo "== first access to the boot-mounted share" >>DH0:PrismNet/bootshare.log
+Date >>DH0:PrismNet/bootshare.log
+List NET0: QUICK >>DH0:PrismNet/bootshare.log
+Date >>DH0:PrismNet/bootshare.log
+C:PrismNet STATUS >>DH0:PrismNet/bootshare.log
+Echo "DONE" >>DH0:PrismNet/bootshare.log

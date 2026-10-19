@@ -1,0 +1,14 @@
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Echo "start" >DH0:PrismNet/small.log
+Avail FLUSH >>DH0:PrismNet/small.log
+DH0:PrismNet/PrismNet.small START
+Wait 6
+DH0:PrismNet/PrismNet.small STATUS >>DH0:PrismNet/small.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=5 QUIET >>DH0:PrismNet/small.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 >>DH0:PrismNet/small.log
+DH0:PrismNet/net/nslookup aminet.net >>DH0:PrismNet/small.log
+DH0:PrismNet/PrismNet.small STATUS >>DH0:PrismNet/small.log
+DH0:PrismNet/PrismNet.small STOP
+Avail FLUSH >>DH0:PrismNet/small.log
+Echo "DONE" >>DH0:PrismNet/small.log

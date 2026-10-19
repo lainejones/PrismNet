@@ -1,0 +1,27 @@
+; netfs audit: the same checks on the old handler (PN0:) and the fixed one (PN9:)
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/nfs/PN0
+Mount DH0:PrismNet/nfs/PN9
+Echo "start" >DH0:PrismNet/nfsaudit.log
+Echo "==== OLD handler" >>DH0:PrismNet/nfsaudit.log
+Echo "== parent of a file" >>DH0:PrismNet/nfsaudit.log
+DH0:PrismNet/parenttest PN0:pn-audit/real.txt >>DH0:PrismNet/nfsaudit.log
+Echo "== overlong UTF-8 name" >>DH0:PrismNet/nfsaudit.log
+List PN0:pn-audit >>DH0:PrismNet/nfsaudit.log
+Echo "== write through a soft link" >>DH0:PrismNet/nfsaudit.log
+Echo "fromamiga-old" >>PN0:pn-audit/link
+Type PN0:pn-audit/real.txt >>DH0:PrismNet/nfsaudit.log
+Echo "==== NEW handler" >>DH0:PrismNet/nfsaudit.log
+Echo "== parent of a file" >>DH0:PrismNet/nfsaudit.log
+DH0:PrismNet/parenttest PN9:pn-audit/real2.txt >>DH0:PrismNet/nfsaudit.log
+Echo "== overlong UTF-8 name" >>DH0:PrismNet/nfsaudit.log
+List PN9:pn-audit >>DH0:PrismNet/nfsaudit.log
+Echo "== write through a soft link" >>DH0:PrismNet/nfsaudit.log
+Echo "fromamiga-new" >>PN9:pn-audit/link2
+Type PN9:pn-audit/real2.txt >>DH0:PrismNet/nfsaudit.log
+Echo "== parent of a directory (regression)" >>DH0:PrismNet/nfsaudit.log
+DH0:PrismNet/parenttest PN9:pn-audit/docs >>DH0:PrismNet/nfsaudit.log
+Echo "DONE" >>DH0:PrismNet/nfsaudit.log

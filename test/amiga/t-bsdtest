@@ -1,0 +1,7 @@
+Run <NIL: >NIL: DH0:PrismNet/PrismNet DEVICE=cnet.device QUIET
+Wait 8
+DH0:PrismNet/PrismNet STATUS
+DH0:PrismNet/bsdtest
+DH0:PrismNet/PrismNet STATUS
+DH0:PrismNet/PrismNet STOP
+Wait 2

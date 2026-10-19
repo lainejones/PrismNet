@@ -1,0 +1,2 @@
+List PS1:pn-audit/A ALL >DH0:PrismNet/smblist-old.log
+Echo "old: list returned" >>DH0:PrismNet/smblist.log

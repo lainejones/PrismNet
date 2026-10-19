@@ -1,0 +1,9 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Avail FLUSH >DH0:PrismNet/b0.log
+C:PrismNet START >NIL:
+Avail FLUSH >>DH0:PrismNet/b0.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=10 QUIET >DH0:PrismNet/b1.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=3 CONNECTS=100 UPLOAD=2048 >DH0:PrismNet/b2.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 BUFSIZE=4096 >DH0:PrismNet/b3.log
+C:PrismNet STOP

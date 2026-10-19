@@ -1,0 +1,6 @@
+/* audit: the fixed handler, same share */
+Handler    = DH0:PrismNet/prismsmb-handler.new
+StackSize  = 16384
+Priority   = 5
+GlobVec    = -1
+Startup    = "192.168.50.2/amigatest VOLUME=amigasmbnew USER=smbuser SIGN=YES TZ=-5"

@@ -1,0 +1,14 @@
+.KEY n/A,tag/A
+Echo "=== <tag>" >>DH0:PrismNet/rs.log
+Set n 0
+Lab loop
+Date >>DH0:PrismNet/rs.log
+DH0:PrismNet/net/ping 192.168.240.1 COUNT=1 >T:p
+Search T:p "bytes from" NONUM >>DH0:PrismNet/rs.log
+C:PrismNet STATUS >T:st
+Search T:st "rx " NONUM >>DH0:PrismNet/rs.log
+DH0:PrismNet/s2stat DEVICE=slip.device >>DH0:PrismNet/rs.log
+Set n `Eval $n + 1`
+If NOT $n GE <n> VAL
+  Skip loop BACK
+EndIf

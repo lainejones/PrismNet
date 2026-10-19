@@ -1,0 +1,19 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >NIL:
+Echo >DH0:PrismNet/w.log ""
+Echo >DH0:PrismNet/m.log ""
+Run >NIL: Execute DH0:PrismNet/t-watch
+Echo >>DH0:PrismNet/m.log "=== round 0"
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=10 QUIET >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=3 CONNECTS=100 UPLOAD=2048 >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 BUFSIZE=4096 >>DH0:PrismNet/m.log
+Echo >>DH0:PrismNet/m.log "=== round 1"
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=10 QUIET >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=3 CONNECTS=100 UPLOAD=2048 >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 BUFSIZE=4096 >>DH0:PrismNet/m.log
+Echo >>DH0:PrismNet/m.log "=== round 2"
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=10 QUIET >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=3 CONNECTS=100 UPLOAD=2048 >>DH0:PrismNet/m.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 BUFSIZE=4096 >>DH0:PrismNet/m.log
+C:PrismNet STOP

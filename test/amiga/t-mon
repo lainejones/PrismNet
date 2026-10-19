@@ -1,0 +1,6 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Run <NIL: >NIL: DH0:PrismNet/bsdstress TASKS=3 ROUNDS=30
+Wait 3
+Run <NIL: >NIL: DH0:PrismNet/PrismMon

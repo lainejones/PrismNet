@@ -1,0 +1,37 @@
+/* PrismNet SMB client: mount a Windows, macOS, NAS or Samba share as an
+ * Amiga volume (SMB 2.0.2 to 3.1.1).
+ *
+ * 1. Change the Startup line below: the server (name or address), a slash,
+ *    then the share, e.g. "nas.lan/public VOLUME=NAS USER=amiga".
+ *    PrismNet Prefs (Shares tab) can write this file for you, with
+ *    Browse... to pick the share from the server's list.
+ * 2. Double-click this icon, or type:  Mount SYS:Storage/DOSDrivers/PSMB0
+ *    Drag it into DEVS:DOSDrivers to mount it at every boot (it connects
+ *    only when the volume is first used).
+ * 3. Unmount with:  ShareUnmount PSMB0:
+ *
+ * The first time a share with USER= is used, a small window asks for the
+ * password once and remembers it (ENVARC:PrismNet/smb/). List a server's
+ * shares with:  SMBShares nas.lan USER=amiga
+ *
+ * Options after the share:
+ *   VOLUME=name      volume name on Workbench (default: the share name)
+ *   USER=name        account on the server (asks for the password once)
+ *   DOMAIN=name      domain or workgroup (default WORKGROUP)
+ *   GUEST            connect without an account
+ *   PASSWORD=secret  give the password here instead of the window
+ *   TZ=+H[:MM]       time zone, hours east of UTC (default: from Locale)
+ *   READONLY         never write
+ *   SIGN=AUTO|YES    sign only when the server asks (default), or always
+ *   ENCRYPT=AUTO|YES|NO  encrypt when the share demands it (default AUTO)
+ *   MAXPROTO=2.1|3.0|3.0.2|3.1.1  highest dialect to use (default 3.1.1)
+ *   IDLE=s           disconnect after s quiet seconds, 0 = never (default 60)
+ *   RETRY=s          keep retrying a lost server for s seconds (default 30)
+ *   TIMEOUT=s        seconds per call (default 15)
+ *   PORT=n           server port (default 445)
+ */
+Handler   = L:prismsmb-handler
+StackSize = 8192
+Priority  = 5
+GlobVec   = -1
+Startup   = "192.168.1.10/public VOLUME=NAS GUEST"

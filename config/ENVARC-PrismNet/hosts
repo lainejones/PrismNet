@@ -1,0 +1,2 @@
+# address     name [aliases...]   - checked before DNS, also for reverse lookups
+# 192.168.1.10  nas  nas.home.lan

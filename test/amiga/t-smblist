@@ -1,0 +1,18 @@
+; SMB audit (needs the smbuser password, once per handler): a tree walk with
+; more directories open than the handler has listing slots - old handler on
+; PS1:, fixed one on PS9:. pn-audit/A has 40 entries, A/B 40, A/B/C.
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PS1
+Mount DH0:PrismNet/smb/PS9
+Echo "start" >DH0:PrismNet/smblist.log
+Echo "==== OLD handler: List A ALL (should end after 80 files + 2 dirs)" >>DH0:PrismNet/smblist.log
+Run >NIL: Execute DH0:PrismNet/t-smblist-old
+Wait 90
+Echo "---- after 90 s" >>DH0:PrismNet/smblist.log
+Echo "==== NEW handler" >>DH0:PrismNet/smblist.log
+List PS9:pn-audit/A ALL >DH0:PrismNet/smblist-new.log
+Echo "new: list returned" >>DH0:PrismNet/smblist.log
+Echo "DONE" >>DH0:PrismNet/smblist.log

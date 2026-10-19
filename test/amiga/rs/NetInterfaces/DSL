@@ -1,0 +1,5 @@
+# Roadshow interface
+device=DEVS:Networks/cnet.device
+unit = 0
+address=192.168.1.40
+netmask=255.255.255.0

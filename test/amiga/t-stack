@@ -1,0 +1,9 @@
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >NIL:
+C:PrismNet STATUS >DH0:PrismNet/hw.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=3 QUIET >NIL:
+C:PrismNet STATUS >>DH0:PrismNet/hw.log
+DH0:PrismNet/bsdtest >>DH0:PrismNet/hw.log
+DH0:PrismNet/bsdstress TASKS=8 ROUNDS=1 >>DH0:PrismNet/hw.log
+C:PrismNet STATUS >>DH0:PrismNet/hw.log
+C:PrismNet STOP >>DH0:PrismNet/hw.log

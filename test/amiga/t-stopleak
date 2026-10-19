@@ -1,0 +1,19 @@
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Echo "start" >DH0:PrismNet/leak.log
+Echo "== before START" >>DH0:PrismNet/leak.log
+Avail FLUSH >>DH0:PrismNet/leak.log
+C:PrismNet START
+Wait 6
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=1 >>DH0:PrismNet/leak.log
+C:PrismNet STOP
+Wait 3
+Echo "== after STOP" >>DH0:PrismNet/leak.log
+Avail FLUSH >>DH0:PrismNet/leak.log
+C:PrismNet START
+Wait 6
+C:PrismNet STOP
+Wait 3
+Echo "== after second START/STOP" >>DH0:PrismNet/leak.log
+Avail FLUSH >>DH0:PrismNet/leak.log
+Echo "DONE" >>DH0:PrismNet/leak.log

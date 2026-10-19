@@ -1,0 +1,6 @@
+/* PrismNet SMB client test: Synology amigatest as smbuser, signed */
+Handler    = L:prismsmb-handler
+StackSize  = 16384
+Priority   = 5
+GlobVec    = -1
+Startup    = "192.168.50.2/amigatest VOLUME=amigasmb USER=smbuser SIGN=YES TZ=-5"

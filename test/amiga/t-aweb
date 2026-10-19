@@ -1,0 +1,4 @@
+Run <NIL: >NIL: DH0:PrismNet/PrismNet DEVICE=cnet.device QUIET
+Wait 10
+CD DH0:AWeb
+Run <NIL: >NIL: DH0:AWeb/AWeb http://aminet.net/

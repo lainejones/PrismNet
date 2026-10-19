@@ -1,0 +1,12 @@
+Assign LIBS: DH0:PrismNet/rs/Libs SYS:Libs
+Assign DEVS: SYS:Devs DH0:PrismNet/rs ADD
+Avail FLUSH >DH0:PrismNet/r0.log
+DH0:PrismNet/rs/C/AddNetInterface DEVS:NetInterfaces/eth0 TIMEOUT=20 >DH0:PrismNet/r5.log
+Wait 3
+DH0:PrismNet/rs/C/ShowNetStatus >>DH0:PrismNet/r5.log
+Avail FLUSH >>DH0:PrismNet/r0.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=10 QUIET >DH0:PrismNet/r1.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=3 CONNECTS=100 UPLOAD=2048 >DH0:PrismNet/r2.log
+DH0:PrismNet/net/httpbench 10.0.2.2 PORT=8080 PATH=/4m COUNT=2 BUFSIZE=4096 >DH0:PrismNet/r3.log
+DH0:PrismNet/net/nslookup aminet.net >DH0:PrismNet/r4.log
+DH0:PrismNet/net/traceroute 10.0.2.2 MAXHOPS=2 WAIT=1 >>DH0:PrismNet/r4.log

@@ -1,0 +1,13 @@
+Echo "--- round trip"
+DH0:PrismNet/PrismNetPrefs FROM=DH0:PrismNet/cfg/dhcp TO=RAM:t1
+DH0:PrismNet/PrismNetPrefs FROM=RAM:t1 TO=RAM:t2
+Type RAM:t2/interfaces/eth0 RAM:t2/hostname RAM:t2/dns RAM:t2/startup
+Echo "--- static"
+DH0:PrismNet/PrismNetPrefs FROM=DH0:PrismNet/cfg/static TO=RAM:t4
+Type RAM:t4/interfaces/eth0 RAM:t4/routes
+Echo "--- roadshow import"
+DH0:PrismNet/PrismNetPrefs FROM=DH0:PrismNet/cfg/dhcp IMPORT=DH0:PrismNet/rs/ TO=RAM:t3
+List RAM:t3 ALL FILES LFORMAT "%p%n"
+Type RAM:t3/interfaces/DSL RAM:t3/dns RAM:t3/routes RAM:t3/hosts
+Echo "--- validation"
+DH0:PrismNet/PrismNetPrefs FROM=DH0:PrismNet/cfg/bad TO=RAM:t5

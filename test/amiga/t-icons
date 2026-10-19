@@ -1,0 +1,3 @@
+Run >NIL: SYS:System/RexxMast
+Wait 2
+SYS:Rexxc/rx "ADDRESS WORKBENCH; WINDOW 'DH0:PrismNet' OPEN"

@@ -1,0 +1,7 @@
+# PrismNet interface "eth0" - one file per interface (up to 4), name = file name.
+# DEVICE is looked up in DEVS:Networks/ when no path is given.
+DEVICE=cnet.device UNIT=0
+CONFIG=DHCP
+# Static instead of DHCP:
+#   CONFIG=STATIC ADDRESS=192.168.1.40 NETMASK=255.255.255.0 GATEWAY=192.168.1.1
+# Optional: MTU=1400

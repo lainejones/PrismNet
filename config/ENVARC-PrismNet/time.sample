@@ -1,0 +1,4 @@
+; PrismNet: time from the network (SNTP). Delete this file to switch it off.
+; SERVER=DHCP takes the server DHCP offers, else pool.ntp.org; or SERVER=host
+; SETCLOCK=NO only measures (PrismNet STATUS shows the difference)
+SERVER=DHCP

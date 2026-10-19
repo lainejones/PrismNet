@@ -1,0 +1,2 @@
+# PrismNet interface: DHCP
+DEVICE=cnet.device UNIT=0 CONFIG=DHCP

@@ -1,0 +1,28 @@
+; SMB writes on the Amiga (signed, smbuser): the password window opens once
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PS1
+Echo "start" >DH0:PrismNet/smbw.log
+List PS1: QUICK >>DH0:PrismNet/smbw.log
+MakeDir PS1:pn-smb
+Date >>DH0:PrismNet/smbw.log
+Copy DH0:PrismNet/big1m.bin PS1:pn-smb/big.bin >>DH0:PrismNet/smbw.log
+Date >>DH0:PrismNet/smbw.log
+Echo "hello from the Amiga" >PS1:pn-smb/h.txt
+Echo "second line" >>PS1:pn-smb/h.txt
+Type PS1:pn-smb/h.txt >>DH0:PrismNet/smbw.log
+Rename PS1:pn-smb/h.txt PS1:pn-smb/H2.txt >>DH0:PrismNet/smbw.log
+Protect PS1:pn-smb/H2.txt r >>DH0:PrismNet/smbw.log
+SetDate PS1:pn-smb/H2.txt 01-Jan-25 12:00:00 >>DH0:PrismNet/smbw.log
+List PS1:pn-smb >>DH0:PrismNet/smbw.log
+Rename PS1:pn-smb/H2.txt PS1:pn-smb/big.bin >>DH0:PrismNet/smbw.log
+Copy PS1:pn-smb/big.bin DH0:PrismNet/bigback >>DH0:PrismNet/smbw.log
+Echo "== delete non-empty" >>DH0:PrismNet/smbw.log
+Delete PS1:pn-smb >>DH0:PrismNet/smbw.log
+Echo "== delete all" >>DH0:PrismNet/smbw.log
+Protect PS1:pn-smb/H2.txt +w >>DH0:PrismNet/smbw.log
+Delete PS1:pn-smb ALL FORCE >>DH0:PrismNet/smbw.log
+List PS1: QUICK >>DH0:PrismNet/smbw.log
+Echo "DONE" >>DH0:PrismNet/smbw.log

@@ -1,0 +1,11 @@
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Run <NIL: >NIL: DH0:PrismNet/bsdstress TASKS=3 ROUNDS=10
+Wait 4
+Echo "--- NETSTAT"
+C:PrismNet NETSTAT
+Echo "--- LOG"
+C:PrismNet LOG
+DH0:PrismNet/bsdtest LOOKUP=slirpgw EXPECT=10.0.2.2 REVERSE
+C:PrismNet STOP

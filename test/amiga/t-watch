@@ -1,0 +1,266 @@
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 0"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 1"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 2"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 3"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 4"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 5"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 6"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 7"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 8"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 9"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 10"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 11"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 12"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 13"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 14"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 15"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 16"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 17"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 18"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 19"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 20"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 21"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 22"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 23"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 24"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 25"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 26"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 27"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 28"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 29"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 30"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 31"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 32"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 33"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 34"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 35"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 36"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 37"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 38"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 39"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 40"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 41"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 42"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 43"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 44"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 45"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 46"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 47"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 48"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 49"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 50"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 51"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 52"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 53"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 54"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 55"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 56"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 57"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 58"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 59"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 60"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 61"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 62"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 63"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 64"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 65"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 66"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 67"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 68"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 69"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 70"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 71"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 72"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 73"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 74"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 75"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 76"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 77"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+C:PrismNet STATUS >>DH0:PrismNet/w.log
+C:PrismNet LOG >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 78"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log
+Wait 5
+Echo >>DH0:PrismNet/w.log "--- 79"
+DH0:PrismNet/pndiag >>DH0:PrismNet/w.log

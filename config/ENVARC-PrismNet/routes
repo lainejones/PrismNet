@@ -1,0 +1,8 @@
+# Default route for static setups (DHCP interfaces get theirs from the server).
+# DEFAULT 192.168.1.1
+#
+# Static routes: ROUTE destination[/bits] gateway (up to 16). Without /bits
+# it is a route to one host. The gateway must be on one of your interfaces'
+# networks. PrismNet Prefs edits these under Network settings > Routes...
+# ROUTE 192.168.2.0/24 192.168.1.254
+# ROUTE 10.8.0.1 192.168.1.254

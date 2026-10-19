@@ -1,0 +1,9 @@
+Run <NIL: >NIL: DH0:PrismNet/PrismNet DEVICE=cnet.device QUIET
+Wait 8
+DH0:PrismNet/wget -O RAM:aminet.html http://aminet.net/
+List RAM:aminet.html
+DH0:PrismNet/wget -O RAM:readme http://aminet.net/util/libs/AmiSSL-v5-OS3.readme
+List RAM:readme
+DH0:PrismNet/PrismNet STATUS
+DH0:PrismNet/PrismNet STOP
+Wait 2

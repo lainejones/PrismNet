@@ -19,6 +19,9 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **0.6.2** (2026-10-19): with two network cards, a NetBIOS name query is
+  answered with the address of the card it came in on; a driver that refuses
+  the multicast write command gets plain writes instead.
 - **0.6.1** (2026-10-19): an audit: 18 fixes, among them an anonymous FTP
   user reaching other volumes, the SMB client on a crafted reply, and long
   paths in the NFS client; a bigger TCP send buffer (faster uploads).

@@ -40,7 +40,7 @@
 #include "prismnet/pnclient.h"
 #include "tabs.h"
 
-static const char verstag[] __attribute__((used)) = "$VER: PrismMon 0.6.1 (19.10.2026) PrismNet";
+static const char verstag[] __attribute__((used)) = "$VER: PrismMon 0.6.2 (19.10.2026) PrismNet";
 
 struct IntuitionBase *IntuitionBase;
 struct GfxBase       *GfxBase;
@@ -661,7 +661,7 @@ static struct NewMenu newmenu[] = {
 static void about(struct Mon *m)
 {
     struct EasyStruct es = { sizeof(struct EasyStruct), 0, (STRPTR)"About PrismMon",
-        (STRPTR)"PrismMon 0.6.1\nPrismNet network monitor\n\nOpen source (GPL-3) - lwIP inside", (STRPTR)"OK" };
+        (STRPTR)"PrismMon 0.6.2\nPrismNet network monitor\n\nOpen source (GPL-3) - lwIP inside", (STRPTR)"OK" };
     EasyRequestArgs(m->win, &es, NULL, NULL);
 }
 

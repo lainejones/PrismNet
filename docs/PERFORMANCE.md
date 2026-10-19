@@ -150,7 +150,7 @@ took the per-call figure from 129 to about 102 µs.
 ## A4000 and A2000 on 0.6 (2026-10-19)
 
 Against `benchserver.py` on a PC over 1 Gbit LAN, and AmiSpeedTest 0.8 (Speedtest.net,
-Calgary servers 15-31 ms away; the PC itself gets 900 Mbit/s there, so the Amiga
+the nearest servers, 15-31 ms away; the PC itself gets 900 Mbit/s there, so the Amiga
 is the limit).
 
 | Machine, card | Download | Upload | Conn/s | Call | AmiSpeedTest down / up |

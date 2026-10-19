@@ -117,6 +117,19 @@ and their icons. It refuses to package a
 binary older than its sources. Icons are committed `.info` files
 (`tools/icons/regen_dist_icons.sh` makes them).
 
+**Installer test matrix** (all passed on 0.6.1, 2026-10-19, WinUAE *PrismNet
+install*, driven over NetHarness): (1) everything yes: both share clients, both
+servers, DHCP, start when needed, network time, boot entry, start now; (2) another
+stack's `bsdsocket.library` in `LIBS:`, Cancel: nothing changed; (3) the same,
+Replace, then everything no: keep your own `ping`, no shares or servers, a fixed
+address, no autostart, no clock, no boot entry, start later; (4) update keeping
+the settings: the network questions are skipped; (5) Remove keeping the settings:
+the other stack's library comes back from `C:Backup`, your `ping` stays; Remove
+deleting them after (1): only empty drawers stay (lazy `ENV:`); (6) a 2.5 MB
+machine: the small-core question, answered Standard; New settings rewrites the
+files. A stand-in for "another stack" is any `LIBS:bsdsocket.library` (and
+`C:ping`) without the word PrismNet in it.
+
 The `.lha` is built on an Amiga from that drawer
 (`lha -r a PrismNet-<ver>.lha PrismNet PrismNet.info`) so protection bits are
 real. Installer tests run on the WinUAE config *PrismNet install* (a fresh

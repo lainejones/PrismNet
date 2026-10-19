@@ -107,11 +107,17 @@
 #define PN_ACK_EVERY 8      /* ACK every 8 full segments, or at once on PSH (tcp_in.c) */
 #endif
 #define TCP_WND                     (PN_WND_MSS * TCP_MSS)   /* per socket */
+/* Send buffer: 24 segments took the A4000's upload from 952 to 1254 KB/s
+ * (8 -> 16 gave most of it, 32 no more); the receive window stays at 24
+ * (44 cost 20 % of download). See docs/PERFORMANCE.md. */
+#ifndef PN_SND_MSS
 #ifdef PN_SMALL
-#define TCP_SND_BUF                 (4 * TCP_MSS)
+#define PN_SND_MSS 4
 #else
-#define TCP_SND_BUF                 (8 * TCP_MSS)
+#define PN_SND_MSS 24
 #endif
+#endif
+#define TCP_SND_BUF                 (PN_SND_MSS * TCP_MSS)
 #define TCP_SND_QUEUELEN            (4 * TCP_SND_BUF / TCP_MSS)
 /* lwIP's oversize optimisation corrupts memory after retransmissions (its
  * spare-room count is only resynced when TCP_OVERSIZE_DBGCHECK is on, which

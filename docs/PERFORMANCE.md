@@ -147,6 +147,40 @@ A call that only reads state, or finds nothing to do (a recv that would
 block), skips the rest of a loop pass (pending requests, socket events); that
 took the per-call figure from 129 to about 102 µs.
 
+## A4000 and A2000 on 0.6 (2026-10-19)
+
+Against `benchserver.py` on a PC over 1 Gbit LAN, and AmiSpeedTest 0.8 (Speedtest.net,
+Calgary servers 15-31 ms away; the PC itself gets 900 Mbit/s there, so the Amiga
+is the limit).
+
+| Machine, card | Download | Upload | Conn/s | Call | AmiSpeedTest down / up |
+|---|---:|---:|---:|---:|---:|
+| A4000, 68060, ZZ9000Net (100 Mbit) | 1750 KB/s | 950 KB/s | 60 | 14 us | 12.6 / 7.8 Mbit/s |
+| A2000, 68030, X-Surf (10 Mbit) | 832 KB/s | 686 KB/s | 126 | 102 us | 6.8 / 5.6 Mbit/s |
+
+The A2000 is where it was on 0.5 (845 KB/s); a 10 Mbit card can't go much further.
+
+**Send buffer.** `TCP_SND_BUF` was 8 segments. On the A4000, with the receive
+window left at 24 segments:
+
+| `PN_SND_MSS` | Download | Upload | AmiSpeedTest up |
+|---:|---:|---:|---:|
+| 8 (before) | 1710 KB/s | 952 KB/s | 7.7 Mbit/s |
+| 16 | 1756 KB/s | 1199 KB/s | 9.7 Mbit/s |
+| 24 (**now**) | 1743 KB/s | 1254 KB/s | 10.7 Mbit/s |
+| 32 | 1701 KB/s | 1255 KB/s | - |
+
+A bigger receive window (44 segments) **lost** 20 % of download (1378 KB/s) with
+either send buffer, so the window stays at 24. The small core keeps 4/6.
+
+**Where the A4000's download time goes** (profiling core, 6 x 4 MB at 1.49 MB/s =
+17 s): lwIP input 2.0 s (~240 us a frame), checksums 0.6 s (12.7 MB at 20 MB/s),
+each transmit into `ZZ9000Net.device` ~1.45 ms (1851 of them, 2.7 s), the rest of
+the main loop under 0.5 s. The core is busy for about 3.3 s of the 17: the stack
+waits on the driver for the rest, so the ZZ9000Net path (frames copied over
+Zorro III from the card's ARM side) looks like the ceiling, not the stack.
+Roadshow on the same machine would settle it; not measured yet.
+
 ## Tools
 
 - `httpbench ... CALLS=n`: n× `getsockopt(SO_TYPE)` and n× `recv(MSG_DONTWAIT)` on

@@ -1232,6 +1232,12 @@ BOOL sock_select(struct PnClient *c, struct PnReq *r, BOOL final)
 
     if (nfds < 0)
         REPLY(-1, PN_EINVAL);
+    for (fd = c->nfds; fd < nfds; fd++) {      /* no descriptor can be up there */
+        ULONG bit = 1UL << (fd & 31);
+        LONG w = fd >> 5;
+        if ((rd && (rd[w] & bit)) || (wr && (wr[w] & bit)) || (ex && (ex[w] & bit)))
+            REPLY(-1, PN_EBADF);
+    }
     if (nfds > c->nfds)
         nfds = c->nfds;
     words = (nfds + 31) / 32;

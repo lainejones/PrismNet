@@ -726,7 +726,8 @@ static BOOL core_direct(struct PnReq *r)
         r->error = PN_ENETDOWN;
         return TRUE;
     }
-    pn_clock_hold(TRUE);                /* the clock's timer I/O is the core's */
+    pn_clock_update();                  /* deadlines set here need the time now */
+    pn_clock_hold(TRUE);                /* no more reads in the caller's task */
     r->flags |= PNREQ_DIRECT;
     replied = run_request(c, r);
     r->flags &= ~(PNREQ_DIRECT | PNREQ_REPLIED);
@@ -1715,6 +1716,9 @@ static LONG nc_if_set(const char *name, ULONG what, ULONG v)
     return PN_EINVAL;
 }
 
+/* interface slots whose driver kept requests at removal: never reused or freed */
+static ULONG lost_slots;
+
 static LONG nc_if_add(const char *name, const char *device, ULONG unit)
 {
     struct PnIface *pi;
@@ -1726,7 +1730,7 @@ static LONG nc_if_add(const char *name, const char *device, ULONG unit)
         return PN_EINVAL;
     if (iface_index(name) >= 0)
         return PN_EEXIST;
-    if (nifs >= PN_MAX_IFACES)
+    if (nifs >= PN_MAX_IFACES || (lost_slots & (1UL << nifs)))
         return PN_ENOBUFS;
     pi = &ifs[nifs];
     memset(pi, 0, sizeof(*pi));
@@ -1765,7 +1769,14 @@ static LONG nc_if_remove(const char *name)
     pi = &ifs[i];
     if (pi->cfg.dhcp)
         dhcp_release_and_stop(&pi->s.netif);
+    dhcp_cleanup(&pi->s.netif);         /* free its struct dhcp */
+#if LWIP_MDNS_RESPONDER
+    if (!pi->s.p2p)
+        mdns_resp_remove_netif(&pi->s.netif);   /* ERR_VAL if it never had one */
+#endif
     sanaif_close(&pi->s);               /* also takes it out of lwIP's list */
+    if (sanaif_requests_lost(&pi->s))
+        lost_slots |= 1UL << i;         /* the driver still holds this slot's I/O */
     nifs--;
     if (!netif_default)
         netif_set_default(&ifs[0].s.netif);
@@ -2191,6 +2202,8 @@ shutdown:
         BOOL held = FALSE;
         for (i = 0; i < nifs; i++)
             held |= sanaif_requests_lost(&ifs[i].s);
+        if (lost_slots)
+            held = TRUE;                /* a removed interface's driver still has I/O */
         if (!held && ifs) {
             pn_free(ifs);
             ifs = NULL;

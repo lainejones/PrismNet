@@ -61,7 +61,7 @@ static char  rbuf[1024];
 static LONG  rlen, rpos;
 static UBYTE *xbuf;                 /* transfer buffer */
 
-static BOOL  logged_in, anon, readonly, binary = TRUE;
+static BOOL  logged_in, anon, readonly, readonly_all, binary = TRUE;
 static char  user[64];
 static char  vcwd[PATHMAX] = "/";   /* the client's view: "/", "/Work/dir" */
 static char  anonroot[PATHMAX];     /* anonymous: what "/" is */
@@ -166,9 +166,17 @@ static void amiga_path(const char *v, char *out)
     int n;
 
     if (anon) {
+        size_t n;
+        const char *s;
         strcpy(out, anonroot);
-        if (strcmp(v, "/"))
-            AddPart((STRPTR)out, (STRPTR)(v + 1), PATHMAX);
+        if (!strcmp(v, "/"))
+            return;
+        n = strlen(out);
+        if (n && out[n - 1] != ':' && out[n - 1] != '/' && n + 1 < PATHMAX)
+            out[n++] = '/';
+        for (s = v + 1; *s && n + 1 < PATHMAX; s++)
+            out[n++] = *s == ':' ? '_' : *s;    /* a volume name can't lead out */
+        out[n] = 0;
         return;
     }
     if (!strcmp(v, "/")) { out[0] = 0; return; }
@@ -297,6 +305,19 @@ static void do_pasv(BOOL extended)
           (long)(port >> 8), (long)(port & 255));
 }
 
+/* PORT/EPRT may only name the client itself (else: an "FTP bounce") */
+static BOOL port_to_client(void)
+{
+    struct sockaddr_in peer;
+    socklen_t len = sizeof(peer);
+    if (getpeername(ctrl, (struct sockaddr *)&peer, &len) == 0 &&
+        peer.sin_addr.s_addr != port_sa.sin_addr.s_addr) {
+        reply(504, "PORT must name your own address.");
+        return FALSE;
+    }
+    return TRUE;
+}
+
 static void do_port(const char *arg)
 {
     unsigned long h[6];
@@ -309,6 +330,7 @@ static void do_port(const char *arg)
     port_sa.sin_len = sizeof(port_sa); port_sa.sin_family = AF_INET;
     port_sa.sin_addr.s_addr = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | h[3];
     port_sa.sin_port = (UWORD)((h[4] << 8) | h[5]);
+    if (!port_to_client()) return;
     have_port = TRUE;
     reply(200, "PORT command successful.");
 }
@@ -330,6 +352,7 @@ static void do_eprt(const char *arg)
     port_sa.sin_len = sizeof(port_sa); port_sa.sin_family = AF_INET;
     port_sa.sin_addr.s_addr = inet_addr((STRPTR)ip);
     port_sa.sin_port = (UWORD)port;
+    if (!port_to_client()) return;
     have_port = TRUE;
     reply(200, "EPRT command successful.");
 }
@@ -475,16 +498,19 @@ static void do_stor(const char *arg, BOOL append)
     vjoin(arg, v);
     amiga_path(v, a);
     if (!a[0] || is_dir(a)) { reply(553, "%s: not a file name.", v); return; }
+    fh = 0;
     if (append || rest) {
         if (!(fh = Open((CONST_STRPTR)a, MODE_READWRITE))) { reply(553, "%s: can't open it.", v); return; }
         Seek(fh, rest ? (LONG)rest : 0, rest ? OFFSET_BEGINNING : OFFSET_END);
-    } else if (!(fh = Open((CONST_STRPTR)a, MODE_NEWFILE))) {
-        reply(553, "%s: can't create it.", v);
-        return;
     }
     rest = 0;
     reply(150, "Ok to send data.");
-    if ((fd = open_data()) < 0) { Close(fh); return; }
+    if ((fd = open_data()) < 0) { if (fh) Close(fh); return; }
+    if (!fh && !(fh = Open((CONST_STRPTR)a, MODE_NEWFILE))) {   /* only now: it empties the file */
+        CloseSocket(fd);
+        reply(553, "%s: can't create it.", v);
+        return;
+    }
     while ((n = recv(fd, xbuf, BUFSIZE, 0)) > 0) {
         LONG len = n;
         if (!binary) {                      /* CR LF -> LF */
@@ -543,6 +569,7 @@ static void do_pass(const char *pass)
         return;
     }
     logged_in = TRUE;
+    readonly = readonly_all;                /* not what an earlier anonymous login left */
     set_home(pw->pw_dir);
     reply(230, "User %s logged in.", user);
 }
@@ -589,7 +616,7 @@ int main(void)
         }
     }
     if (args[3]) pasv_addr = inet_addr((STRPTR)args[3]);
-    readonly = args[4] != 0;
+    readonly = readonly_all = args[4] != 0;
     if (args[5] && *(LONG *)args[5] > 0) idle_secs = *(LONG *)args[5];
     getsockname(ctrl, (struct sockaddr *)&sa, &len);
     local_ip = sa.sin_addr.s_addr;

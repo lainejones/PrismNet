@@ -89,6 +89,7 @@ static UBYTE *put_name(UBYTE *q, const char *name)
     while (*name) {
         const char *dot = strchr(name, '.');
         int len = dot ? dot - name : (int)strlen(name);
+        if (len == 0) { name++; continue; }     /* "." or "a..b": no empty labels */
         if (len > 63) len = 63;
         *q++ = (UBYTE)len;
         memcpy(q, name, len);

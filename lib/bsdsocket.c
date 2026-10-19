@@ -1082,15 +1082,22 @@ static STRPTR pn_inet_ntop(LONG af REG(d0), APTR src REG(a0), STRPTR dst REG(a1)
 
 static LONG pn_inet_pton(LONG af REG(d0), STRPTR src REG(a0), APTR dst REG(a1), struct PnBase *b REG(a6))
 {
-    ULONG a, parts = 0;
-    const char *p;
+    ULONG a = 0, v;
+    const char *p = (const char *)src;
+    int part, digits;
     if (af != 2) { set_errno(b, PN_EAFNOSUPPORT); return -1; }
-    for (p = (const char *)src; p && *p; p++) {
-        if (*p == '.') parts++;
-        else if (*p < '0' || *p > '9') return 0;
+    if (!p) return 0;
+    for (part = 0; part < 4; part++) {          /* d.d.d.d, each 0-255, no leading 0 */
+        for (v = 0, digits = 0; *p >= '0' && *p <= '9'; p++, digits++) {
+            if (digits && v == 0) return 0;
+            v = v * 10 + (ULONG)(*p - '0');
+            if (v > 255) return 0;
+        }
+        if (!digits) return 0;
+        a = (a << 8) | v;
+        if (part < 3 && *p++ != '.') return 0;
     }
-    if (!src || parts != 3 || !aton((const char *)src, &a))
-        return 0;
+    if (*p) return 0;
     CopyMem(&a, (APTR)dst, 4);              /* dst may be odd: 68000 */
     return 1;
 }
@@ -2106,6 +2113,15 @@ static VOID pn_setdefaultdomainname(STRPTR name REG(a0), struct PnBase *b REG(a6
 
 static ULONG pn_stub_zero(void) { return 0; }
 
+/* CreateAddrAllocMessageA (Roadshow's DHCP-for-programs): not supported. The
+ * result pointer must not be left as it was, and 0 would mean AAMR_Success. */
+static LONG pn_createaddrallocmessage(APTR *result REG(a1), struct PnBase *b REG(a6))
+{
+    (void)b;
+    if (result) *result = NULL;
+    return 5;                               /* AAMR_VersionUnknown */
+}
+
 #define F(x) ((APTR)(x))
 static const APTR functable[] = {
     F(pn_open), F(pn_close), F(pn_expunge), F(pn_null),
@@ -2130,7 +2146,7 @@ static const APTR functable[] = {
     F(pn_changeroutetaglist), F(pn_freerouteinfo), F(pn_getrouteinfo),                  /* -426..-438 */
     F(pn_addinterfacetaglist), F(pn_configureinterfacetaglist),                          /* -444..-450 */
     F(pn_releaseinterfacelist), F(pn_obtaininterfacelist), F(pn_queryinterfacetaglist), /* -456..-468 */
-    F(pn_stub_zero), F(pn_stub_zero),                                                    /* -474..-480 */
+    F(pn_createaddrallocmessage), F(pn_stub_zero),                                       /* -474..-480 */
     F(pn_stub_zero), F(pn_stub_zero), F(pn_stub_zero), F(pn_stub_zero),                  /* -486..-504 */
     F(pn_getnetworkstatistics),                                                          /* -510 */
     F(pn_adddomainnameserver), F(pn_removedomainnameserver),                             /* -516..-522 */

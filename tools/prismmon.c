@@ -73,7 +73,7 @@ struct Mon {
     struct List    lists[PG_COUNT];
     int            nlog;
     ULONG          logseq;
-    char           status[120];
+    char           status[200];
     BOOL           running;
     WORD           lx, ly, lw, lh;  /* the list gadget's box, for right clicks */
     struct PnStatus   *st;
@@ -344,7 +344,7 @@ static void refresh(struct Mon *m)
         strcpy(m->status, "PrismNet is not running");
         m->running = FALSE;
     } else {
-        sprintf(m->status, "Running - host %s%s%s, %lu client%s, %lu socket%s",
+        snprintf(m->status, sizeof(m->status), "Running - host %s%s%s, %lu client%s, %lu socket%s",
                 m->st->hostname, m->st->domain[0] ? "." : "", m->st->domain,
                 (unsigned long)m->st->clients, m->st->clients == 1 ? "" : "s",
                 (unsigned long)m->st->sockets, m->st->sockets == 1 ? "" : "s");
@@ -352,8 +352,9 @@ static void refresh(struct Mon *m)
     }
     if (!m->st) return;
 
-    /* rebuild every tab but the log (which only grows) */
-    detach(m, m->page);
+    /* rebuild every tab but the log (which only grows; fill_log detaches it) */
+    if (m->page != PG_LOG)
+        detach(m, m->page);
     for (pg = 0; pg < PG_COUNT; pg++)
         if (pg != PG_LOG)
             list_free(&m->lists[pg]);

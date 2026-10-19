@@ -133,7 +133,8 @@ struct Prefs {
     char   ftp_port[8], ftp_prog[96], ftp_anondir[128], ftp_pasv[16], ftp_extra[96];
     BOOL   tel_on;                      /* the telnet line */
     char   tel_port[8], tel_prog[96], tel_extra[96];
-    char   svc_other[1536];             /* every other line of the file, kept as it was */
+    char   svc_other[4096];             /* every other line of the file, kept as it was */
+    BOOL   svc_full;                    /* ... and there were more than fit */
 };
 
 static struct Prefs P;
@@ -2169,7 +2170,7 @@ static int run_gui(void)
                         pi->dhcp = TRUE;
                         gui.sel = P.nifs++;
                         show_all(&gui);
-                        ActivateGadget(gui.g[G_DEVICE], gui.win, NULL);
+                        if (gui.g[G_DEVICE]) ActivateGadget(gui.g[G_DEVICE], gui.win, NULL);
                     }
                     break;
                 case G_REMOVE:
@@ -2190,7 +2191,7 @@ static int run_gui(void)
                         store_if(&gui);
                         P.ifs[gui.sel].dhcp = (code == 0);
                         show_if(&gui);
-                        if (code == 1) ActivateGadget(gui.g[G_ADDR], gui.win, NULL);
+                        if (code == 1 && gui.g[G_ADDR]) ActivateGadget(gui.g[G_ADDR], gui.win, NULL);
                     }
                     break;
                 case G_PICK:   pick_device(&gui); break;

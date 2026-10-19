@@ -269,11 +269,20 @@ static struct DosPacket *waitpkt;
 static ULONG wait_deadline;
 static UBYTE line[256], ready[512];
 static int linelen, readylen;
-static BOOL eof_pending;
+static BOOL eof_pending, eol_pending;
 
 static void cooked_input(void)
 {
     LONG c;
+    if (eol_pending) {                              /* a line end that didn't fit before */
+        if (readylen + linelen + 1 > (int)sizeof(ready)) return;
+        memcpy(ready + readylen, line, linelen);
+        readylen += linelen;
+        ready[readylen++] = '\n';
+        linelen = 0;
+        eol_pending = FALSE;
+        tn_puts("\n");
+    }
     while (readylen < (int)sizeof(ready) - 2 && (c = in_get()) >= 0) {
         if (c == 27) {                              /* ESC [ ... : a cursor key, not for a line */
             while (in_avail() && (c = in_get()) >= 0 && !(c >= '@' && c <= '~' && c != '['))
@@ -281,7 +290,7 @@ static void cooked_input(void)
             continue;
         }
         if (c == '\r' || c == '\n') {
-            if (readylen + linelen + 1 > (int)sizeof(ready)) break;
+            if (readylen + linelen + 1 > (int)sizeof(ready)) { eol_pending = TRUE; break; }
             memcpy(ready + readylen, line, linelen);
             readylen += linelen;
             ready[readylen++] = '\n';

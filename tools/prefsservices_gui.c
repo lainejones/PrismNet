@@ -23,8 +23,6 @@ static void show_services(struct Gui *gui)
 
 static void store_services(struct Gui *gui)
 {
-    if (!gui->g[G_FTPPORT])
-        return;                             /* the page is not shown */
     gcopy(gui, G_FTPPORT, P.ftp_port, sizeof(P.ftp_port));
     gcopy(gui, G_FTPDIR, P.ftp_anondir, sizeof(P.ftp_anondir));
     gcopy(gui, G_FTPPASV, P.ftp_pasv, sizeof(P.ftp_pasv));

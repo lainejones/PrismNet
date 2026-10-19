@@ -39,6 +39,7 @@ static void load_services(struct Prefs *p, const char *dir)
     strcpy(p->ftp_port, "21");
     strcpy(p->ftp_prog, "C:ftpd");
     p->ftp_anondir[0] = p->ftp_pasv[0] = p->ftp_extra[0] = p->svc_other[0] = 0;
+    p->svc_full = FALSE;
     p->tel_on = FALSE;
     strcpy(p->tel_port, "23");
     strcpy(p->tel_prog, "C:telnetd");
@@ -99,7 +100,8 @@ static void load_services(struct Prefs *p, const char *dir)
         if (strlen(p->svc_other) + strlen(line) + 2 < sizeof(p->svc_other)) {
             strcat(p->svc_other, line);
             strcat(p->svc_other, "\n");
-        }
+        } else
+            p->svc_full = TRUE;             /* saving would lose lines: check_services refuses */
     }
     FreeVec(t);
 }
@@ -111,7 +113,7 @@ static BOOL save_services(const struct Prefs *p, const char *dir)
 
     if (!p->have_services && !p->ftp_on && !p->tel_on)
         return TRUE;                        /* never set up: don't create the file */
-    if (!(text = AllocVec(sizeof(p->svc_other) + 400, MEMF_CLEAR)))
+    if (!(text = AllocVec(sizeof(p->svc_other) + 1024, MEMF_CLEAR)))   /* + both lines at their longest */
         return FALSE;
     strcpy(text, p->svc_other);
     sprintf(text + strlen(text), "%sftp %s tcp %s", p->ftp_on ? "" : "#", p->ftp_port, p->ftp_prog);
@@ -133,6 +135,8 @@ static const char *check_services(const struct Prefs *p)
 {
     const char *s;
     long port = atol(p->ftp_port), tport = atol(p->tel_port);
+    if (p->svc_full)
+        return "Services: ENV:PrismNet/services is too long to edit here;\nedit it with a text editor.";
     if (p->tel_on && (tport < 1 || tport > 65535))
         return "Services: the telnet port must be 1 to 65535.";
     if (p->tel_on && p->ftp_on && tport == port)

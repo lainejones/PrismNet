@@ -98,6 +98,7 @@ static void hosts_parse(char *buf)
             tok[nt++] = eol;
             while (*eol && *eol != ' ' && *eol != '\t' && *eol != '\r') eol++;
         }
+        *eol = 0;                       /* a full line: the last name ends here too */
         if (nt < 2 || !pn_parse_ip(tok[0], &h->addr))
             continue;
         for (i = 1; i < nt; i++)

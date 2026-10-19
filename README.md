@@ -12,6 +12,26 @@ you already have run unchanged. The networking core is
 
 ![PrismNet Prefs, Services tab](docs/images/prefs-services.png)
 
+## At a glance
+
+| | |
+|---|---|
+| **Stack** | TCP, UDP, ICMP and raw sockets (lwIP 2.2.1); AmiTCP 4 `bsdsocket.library`; Roadshow API extensions; `usergroup.library` |
+| **Hardware** | any SANA-II driver: Ethernet, PCMCIA, SCSI (DaynaPORT), A314, serial SLIP/CSLIP/PPP/PLIP; built-in SLIP over `serial.device` |
+| **Addresses** | DHCP or fixed, up to 4 interfaces, default gateway, static routes |
+| **Names** | DNS (3 servers, search domain), `hosts` file; the Amiga answers to its name by NetBIOS and mDNS (`amiga.local`) and gives it to DHCP |
+| **Clock** | sets the Amiga's time from the network (SNTP) at start-up, or on demand with `PrismNet SETCLOCK` |
+| **Starting** | on demand (the first program that needs it), at boot, or by hand; `PrismNet STOP` and `START` |
+| **Commands** | `PrismNet STATUS`, `NETSTAT`, `ROUTE`, `ARP`, `LOG`, `SETCLOCK`, `START`/`STOP`, `TRACE=` request log |
+| **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `httpbench`, `SMBShares`, `ShareUnmount` |
+| **GUIs** | PrismNet Prefs (6 tabs, Roadshow import), PrismMon (live status, traffic, connections, memory, log) |
+| **Shares** | own NFS v3 and SMB 2/3 clients: a NAS, Windows, macOS or Samba folder as an Amiga volume |
+| **Servers** | FTP server, telnet server (AmigaDOS Shell), inetd to start them on demand; user accounts with passwords |
+| **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
+| **Install** | Amiga Installer: install, update (keeps settings), remove (puts the old stack's files back) |
+| **Docs** | AmigaGuide manual on the Amiga, the same manual here |
+| **Needs** | AmigaOS 3.1 or newer, any 68000 or better |
+
 ## Features
 
 ### A drop-in stack

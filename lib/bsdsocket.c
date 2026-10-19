@@ -60,8 +60,6 @@ struct PnBase {
     UBYTE           *dstack;            /* private stack for direct calls */
 };
 
-#define BASE(b) ((struct PnBase *)(b))
-
 /* ---------------------------------------------------------------------- */
 /* errno handling                                                           */
 /* ---------------------------------------------------------------------- */

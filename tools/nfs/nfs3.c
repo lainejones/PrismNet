@@ -112,14 +112,6 @@ long mnt3_mnt(struct Rpc *r, const char *path, struct Fh *root)
     return done(r, RPC_OK);
 }
 
-long mnt3_umnt(struct Rpc *r, const char *path)
-{
-    struct Xdr *x = rpc_begin(r, MOUNT_PROG, 3, MOUNTPROC3_UMNT, 1);
-
-    xdr_put_string(x, path);
-    return rpc_call(r);
-}
-
 long nfs3_getattr(struct Rpc *r, const struct Fh *fh, struct Fattr *a)
 {
     struct Xdr *x = rpc_begin(r, NFS_PROG, 3, NFSPROC3_GETATTR, 1);

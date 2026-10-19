@@ -16,7 +16,6 @@ struct Fsinfo {
 
 long  pmap_getport(struct Rpc *r, u32 prog, u32 vers, unsigned *port);
 long  mnt3_mnt(struct Rpc *r, const char *path, struct Fh *root);
-long  mnt3_umnt(struct Rpc *r, const char *path);
 
 long  nfs3_getattr(struct Rpc *r, const struct Fh *fh, struct Fattr *a);
 long  nfs3_lookup(struct Rpc *r, const struct Fh *dir, const char *name,

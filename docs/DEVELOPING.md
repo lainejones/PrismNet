@@ -79,6 +79,13 @@ servers: `192.168.1.10` (a NAS with an export and share `amigatest`, user
 `smbuser`) and `192.168.1.11` (a guest share `public`). Put your own servers'
 addresses in before running them.
 
+**TCP sequence wrap.** `SetEnv PrismNet/testisn 7FF00000` before the core starts
+makes every connection begin at that sequence number, so a transfer crosses 2^31
+after 1 MB (the point where some stacks on the ZZ9000 stalled: BlitterStudio
+zz9000-firmware issue 29). PrismNet 0.6.1 on the A4000 passed a 100 MB upload and
+a 16 MB download across it at full speed, and a 1 GB single-connection upload.
+Remove the variable afterwards: it is a test aid, not a setting.
+
 **Servers.** `python test/host/ftptest.py <amiga> [password]` and
 `python test/host/telnettest.py <amiga> [user] [password]` run against a
 machine with the servers on; see [SERVERS.md](SERVERS.md) for the accounts

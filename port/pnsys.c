@@ -19,6 +19,8 @@
 #include <exec/io.h>
 #include <devices/timer.h>
 #include <proto/exec.h>
+#include <proto/dos.h>
+#include <dos/var.h>
 #include <proto/timer.h>
 
 #include "lwip/sys.h"
@@ -49,8 +51,29 @@ static ULONG eclock_lo(void)
     return ev.ev_lo;
 }
 
+/* Test aid: ENV:PrismNet/testisn (hex) makes every connection start at that
+ * sequence number, e.g. 7FF00000 to cross 2^31 after 1 MB (a stall seen in
+ * other stacks on that crossing: BlitterStudio zz9000-firmware issue 29). */
+static u32_t forced_isn;
+
+static void read_forced_isn(void)
+{
+    char buf[16];
+    if (GetVar((CONST_STRPTR)"PrismNet/testisn", (STRPTR)buf, sizeof(buf), GVF_GLOBAL_ONLY) > 0) {
+        const char *p = buf;
+        u32_t v = 0;
+        for (; *p; p++) {
+            int d = *p >= '0' && *p <= '9' ? *p - '0' : (*p | 32) >= 'a' && (*p | 32) <= 'f' ? (*p | 32) - 'a' + 10 : -1;
+            if (d < 0) break;
+            v = (v << 4) | (u32_t)d;
+        }
+        forced_isn = v;
+    }
+}
+
 BOOL pn_sys_init(void)
 {
+    read_forced_isn();
     timer_port = CreateMsgPort();
     if (!timer_port)
         return FALSE;
@@ -158,6 +181,8 @@ u32_t prismnet_tcp_isn(const ip_addr_t *local_ip, u16_t local_port,
 {
     u32_t h = ip4_addr_get_u32(ip_2_ip4(remote_ip)) ^ (ip4_addr_get_u32(ip_2_ip4(local_ip)) << 7);
     h ^= ((u32_t)local_port << 16) | remote_port;
+    if (forced_isn)
+        return forced_isn;                  /* test aid, see pn_sys_init */
     return (u32_t)prismnet_rand() ^ h ^ (sys_now() * 64u);
 }
 

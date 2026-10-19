@@ -71,6 +71,11 @@ developers: send it with a problem report.
   `PrismNet START` can hang while opening the driver; the machine gets
   sluggish and the network stays down until a reboot. A reboot starts
   cleanly. Other drivers restart fine.
+- **`amiga.local` does not resolve** on some cards: the network driver
+  refuses the mDNS group address. `PrismNet LOG` then says "refused
+  multicast". The X-Surf driver 1.16 does; the DaynaPORT driver from 1.6 on
+  (scsidayna.device) and the ZZ9000 accept it. Windows still finds the Amiga
+  by its NetBIOS name (`ping A2000`).
 - **IPv6** isn't supported yet.
 
 ## Reporting a problem

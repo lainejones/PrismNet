@@ -232,8 +232,12 @@ static void tx_done(struct sanaif *s, struct sanaif_req *r)
 {
     s->tx_progress = sys_now();         /* the driver is moving, even if this one failed */
     if (r->io.ios2_Req.io_Error != 0) {
-        if (r->io.ios2_Req.io_Command == S2_MULTICAST && r->io.ios2_Req.io_Error == IOERR_NOCMD)
-            s->no_s2mcast = TRUE;       /* older driver: send multicast as a plain write */
+        /* A driver without S2_MULTICAST answers IOERR_NOCMD, or (scsidayna 1.5)
+         * S2ERR_NOT_SUPPORTED: from then on multicast goes out as a plain write,
+         * which every Ethernet driver sends to whatever address it is given. */
+        if (r->io.ios2_Req.io_Command == S2_MULTICAST &&
+            (r->io.ios2_Req.io_Error == IOERR_NOCMD || r->io.ios2_Req.io_Error == S2ERR_NOT_SUPPORTED))
+            s->no_s2mcast = TRUE;
         s->stats.tx_errors++;
     } else {
         s->stall_ms = SANAIF_TX_STALL_MS;

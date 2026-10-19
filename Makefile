@@ -244,6 +244,7 @@ diag:
 	$(MAKE) OBJ=build/objdiag OUT=out/diag CFLAGS="$(CFLAGS) -DPN_DIAGPORT" out/diag/PrismNet
 	$(CC) $(CPU) -Os -noixemul -Wall -s -o out/diag/pndiag tools/pndiag.c
 	$(CC) $(CPU) -Os -noixemul -Wall -Wno-pointer-sign -Iport/include -s -o out/diag/s2stat tools/s2stat.c
+	$(CC) $(CPU) -Os -noixemul -Wall -Wno-pointer-sign -Iport/include -s -o out/diag/s2mcast tools/s2mcast.c
 
 clean:
 	rm -rf build $(OUT)

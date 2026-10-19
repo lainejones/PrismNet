@@ -661,7 +661,7 @@ static LONG examine_all(struct NLock *l, u8 *buf, LONG size, LONG type,
         buf += rec;
         eac->eac_Entries++;
     }
-    *err = r < 0 ? -r : ioerr(r);
+    *err = ioerr(r);
     return 0;
 }
 
@@ -1052,6 +1052,12 @@ static LONG err_of(long e)
     return e <= -100 ? -e : ioerr(e);
 }
 
+/* does dirpath + "/" + leaf fit a PATHMAX buffer? */
+static int path_fits(const char *dirpath, const char *leaf)
+{
+    return strlen(dirpath) + 1 + strlen(leaf) + 1 <= PATHMAX;
+}
+
 static void join_path(char *out, const char *dirpath, const char *leaf)
 {
     strcpy(out, dirpath);
@@ -1281,7 +1287,7 @@ void handler_main(void)
                     char real[PATHMAX];
                     if (!path[0]) { fh = M.root; a = M.rootattr; }
                     else if ((e = resolve(NULL, path, &fh, &a, real)) < 0 || e) {
-                        r2 = e < 0 ? -e : ioerr(e); break;
+                        r2 = ioerr(e); break;
                     }
                 }
                 if (!(l = new_lock(&fh, NF3DIR, a.fileid_lo, path, SHARED_LOCK))) { r2 = ERROR_NO_FREE_STORE; break; }
@@ -1320,7 +1326,6 @@ void handler_main(void)
                 struct NLock *l = LOCK(dp->dp_Arg1);
                 if (!l) { r2 = ERROR_OBJECT_WRONG_TYPE; break; }   /* root: Lock it first */
                 e = examine_next(l, BADDR(dp->dp_Arg2));
-                if (e < 0) { r2 = -e; break; }
                 if (e) { r2 = ioerr(e); break; }
                 r1 = DOSTRUE;
                 break;
@@ -1419,6 +1424,7 @@ void handler_main(void)
                 if (M.readonly) { r2 = ERROR_DISK_WRITE_PROTECTED; break; }
                 bstr_to_c((BSTR)dp->dp_Arg3, name, sizeof(name));
                 if ((e = split_parent(LOCK(dp->dp_Arg2), name, &dir, dirpath, leaf))) { r2 = err_of(e); break; }
+                if (!path_fits(dirpath, leaf)) { r2 = ERROR_INVALID_COMPONENT_NAME; break; }
                 memset(&sa, 0, sizeof(sa));
                 e = lookup_name(&dir, leaf, &nfh, &a, &ha, real);
                 if (e == 0) {                   /* it exists (perhaps in another case) */
@@ -1441,6 +1447,7 @@ void handler_main(void)
                     r2 = ioerr(e);
                     break;
                 }
+                if (!path_fits(dirpath, real)) { r2 = ERROR_INVALID_COMPONENT_NAME; break; }
                 join_path(path, dirpath, real);
                 if (!(l = new_lock(&nfh, NF3REG, a.fileid_lo, path, SHARED_LOCK))) { r2 = ERROR_NO_FREE_STORE; break; }
                 if (!(f = alloc(sizeof(*f)))) { free_lock(l); r2 = ERROR_NO_FREE_STORE; break; }
@@ -1528,6 +1535,7 @@ void handler_main(void)
                 if (M.readonly) { r2 = ERROR_DISK_WRITE_PROTECTED; break; }
                 bstr_to_c((BSTR)dp->dp_Arg2, name, sizeof(name));
                 if ((e = split_parent(LOCK(dp->dp_Arg1), name, &dir, dirpath, leaf))) { r2 = err_of(e); break; }
+                if (!path_fits(dirpath, leaf)) { r2 = ERROR_INVALID_COMPONENT_NAME; break; }
                 if (lookup_name(&dir, leaf, &nfh, &a, &ha, real) == 0) { r2 = ERROR_OBJECT_EXISTS; break; }
                 memset(&sa, 0, sizeof(sa));
                 sa.set_mode = 1; sa.mode = 0755;

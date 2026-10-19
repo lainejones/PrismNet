@@ -322,7 +322,7 @@ static const u8 *reply_unit(struct Smb *s, long flen, int idx, u32 *status, u32 
     for (i = 0; ; i++) {
         const u8 *h = s->rx + off;
         u32 next = g32(h + 20), ulen = next ? next : (u32)flen - off;
-        if (off + HDR > (u32)flen || ulen < HDR || off + ulen > (u32)flen)
+        if (off + HDR > (u32)flen || ulen < HDR || ulen > (u32)flen - off)
             return NULL;
         if (i == idx) {
             *status = g32(h + 8);
@@ -435,7 +435,7 @@ static u32 to_utf16_upper(const char *s, u8 *out, int upper)
 /* build the AUTHENTICATE message from the CHALLENGE (ch, chlen) into out */
 static u32 ntlm_auth(struct Smb *s, const u8 *ch, u32 chlen, u8 *out)
 {
-    u8 nthash[16], ntowf[16], proof[16], cc[8], buf[160], *p;
+    u8 nthash[16], ntowf[16], proof[16], cc[8], buf[2 * (63 + 31) + 4], *p;   /* UTF-16 user + domain */
     u32 flags = g32(ch + 20) & (NTLM_OURS | 0x00800000UL), n, tinfo_len = g16(ch + 40);
     u32 tinfo_off = g32(ch + 44), ntlen = 0;
     const u8 *tinfo = ch + tinfo_off, *ts = NULL;

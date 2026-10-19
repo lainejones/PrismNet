@@ -26,10 +26,10 @@ OBJ    ?= build/obj
 OUT    ?= out
 
 LWIP_SRC = $(wildcard lwip/src/core/*.c) $(wildcard lwip/src/core/ipv4/*.c) \
-           lwip/src/netif/ethernet.c lwip/src/apps/netbiosns/netbiosns.c \
+           lwip/src/netif/ethernet.c \
            lwip/src/apps/sntp/sntp.c \
            $(wildcard lwip/src/apps/mdns/*.c)
-PORT_SRC = port/pnsys.c port/sanaif.c port/serslip.c port/pnclient.c port/pnmem.c port/chksum.S
+PORT_SRC = port/pnsys.c port/sanaif.c port/serslip.c port/pnclient.c port/pnmem.c port/netbiosns.c port/chksum.S
 
 LWIP_OBJ = $(patsubst lwip/src/%.c,$(OBJ)/lwip/%.o,$(LWIP_SRC))
 # libnix's 64 KB stdio buffers stop programs starting on small machines

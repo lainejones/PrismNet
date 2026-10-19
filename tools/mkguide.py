@@ -243,7 +243,7 @@ class Manual:
 
 
 if __name__ == '__main__':
-    ver = '(' + os.environ.get('PN_GUIDEVER', 'dev') + ')'
+    ver = os.environ.get('PN_GUIDEVER', '(dev)')     # e.g. "0.6 (18.10.2026)"
     m = Manual(SRC)
     n, bad = m.write(OUT, ver)
     print('mkguide: %d nodes -> %s' % (n, OUT))

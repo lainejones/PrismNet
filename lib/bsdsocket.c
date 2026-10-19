@@ -2183,7 +2183,7 @@ struct Library *pn_lib_init(BPTR seglist REG(d0), struct ExecBase *sysbase REG(a
     lib->lib.lib_Node.ln_Name = (char *)pn_libname;
     lib->lib.lib_Flags        = LIBF_SUMUSED | LIBF_CHANGED;
     lib->lib.lib_Version      = 4;
-    lib->lib.lib_Revision     = 3;
+    lib->lib.lib_Revision     = 4;      /* keep in step with $VER in lib_start.S */
     lib->lib.lib_IdString     = (APTR)pn_idstring;
     lib->seglist              = seglist;
     AddLibrary(&lib->lib);

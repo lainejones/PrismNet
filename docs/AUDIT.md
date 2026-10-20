@@ -55,12 +55,21 @@ matters). The rest is listed as "not reproduced" with what it would take.
   rename** (low). **The read cache is keyed by the low 32 bits of the fileid**
   (only matters across btrfs subvolumes/ZFS datasets in one export).
 - **SMB: `Protect` rewrites FileAttributes to exactly NORMAL or READONLY**, so
-  HIDDEN/SYSTEM/ARCHIVE on the server are cleared; needs a writable share with a
-  hidden file (morning). **Unsigned error replies are accepted on a signed
-  session**, and three "error" statuses carry data (BUFFER_OVERFLOW,
-  END_OF_FILE, NO_MORE_FILES); needs a signed session to test (morning).
-  **No MessageId check on replies** (a server splitting a compound reply would
-  desynchronise the stream; no server here does).
+  HIDDEN/SYSTEM/ARCHIVE on the server are cleared. *Reproduced and fixed
+  2026-10-20* (`tools/smb/audittest.sh` against a Synology, signing on): a
+  file with HIDDEN+ARCHIVE (22) became 01 after read-only and 80 after
+  writable; now `smb2_setattr` reads the attributes first and changes only
+  READONLY: 23, then 22.
+- **SMB: unsigned replies are accepted on a signed session** when their status
+  is not OK - including BUFFER_OVERFLOW, which carries read data. *Fixed
+  2026-10-20*: the Synology signs every reply, errors too (the same script logs
+  it), so now only the two end-of-session statuses (USER_SESSION_DELETED,
+  NETWORK_SESSION_EXPIRED), which a server can no longer sign, pass unsigned,
+  without data. `make smbunit` feeds forged unsigned replies: the old code
+  takes the BUFFER_OVERFLOW and the error, the new one drops them.
+- **No MessageId check on replies** (a server splitting a compound reply would
+  desynchronise the stream; no server here does, and with signing a forged
+  reply fails its signature anyway). Left as it is.
 - **Prefs: the scroller position is not reset on a tab switch** (cosmetic,
   needs `prefsmaxheight`); **failed gadget rebuilds under memory exhaustion**
   leave stale pointers in Prefs and PrismMon (needs a few KB free).

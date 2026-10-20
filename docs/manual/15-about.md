@@ -19,6 +19,12 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **0.6.5** (2026-10-20): checks for updates. `C:PrismNetUpdate` (68020 and
+  AmiSSL 5) asks GitHub or a mirror whether a newer PrismNet is out, and can
+  download and install it; PrismNet Prefs has **Updates**, **Mirror** and
+  **Check now** on its Startup page. The installer asks all its questions
+  before it stops PrismNet, so an update takes the network away for only a
+  few seconds. See [Checking for updates](02-installing.md#checking-for-updates).
 - **0.6.4** (2026-10-19): serial links queue a burst of packets instead of
   dropping it: no more lost sends on SLIP, sending at full line speed, and the
   built-in SLIP is now as fast as `slip.device`. A rewritten

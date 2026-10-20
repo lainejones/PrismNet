@@ -3,7 +3,8 @@
 /*
  * upd_cfg.h - PrismNet's settings for the shared update tool (update.c).
  * Another product copies update.c and gives its own copy of this file and of
- * upd_load_prefs().
+ * upd_load_prefs(); PrismRTG's tools/update/update.c is the same file, so
+ * change it in both.
  */
 #ifndef UPD_CFG_H
 #define UPD_CFG_H
@@ -16,9 +17,9 @@
 #define UPD_ASSET       "PrismNet-"                 /* the release archive: <asset><version>.lha */
 #define UPD_INSTALLER   "Install_PrismNet"          /* the Installer script in the archive */
 #ifndef UPD_VERSION                                 /* a test build may claim another */
-#define UPD_VERSION     "0.6.4"                     /* this release (dist.sh checks it) */
+#define UPD_VERSION     "0.6.5"                     /* this release (dist.sh checks it) */
 #endif
-#define UPD_RELDATE     "19.10.2026"
+#define UPD_RELDATE     "20.10.2026"
 #define UPD_PREFS_NAME  "ENV:PrismNet/startup"      /* named in messages */
 #define UPD_MIRROR_MAX  200
 

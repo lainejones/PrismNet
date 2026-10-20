@@ -39,7 +39,18 @@ PORT_OBJ = $(patsubst port/%.S,$(OBJ)/port/%.o,$(patsubst port/%.c,$(OBJ)/port/%
 CORE_SRC = core/core.c core/csock.c core/resolv.c core/config.c core/netstats.c
 CORE_OBJ = $(patsubst core/%.c,$(OBJ)/core/%.o,$(CORE_SRC))
 
-all: nettools servers nfs smb $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag
+all: nettools servers nfs smb update $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag
+
+# The update check (C:PrismNetUpdate): the shared update tool, 68020+ like
+# AmiSSL itself. Needs the AmiSSL SDK (https://github.com/jens-maus/amissl,
+# Apache 2.0) in AMISSL_INC; without it the tool is skipped with a note.
+AMISSL_INC ?= $(HOME)/amissl-sdk/include
+UPD_SRC = tools/update/update.c tools/update/upd_prismnet.c tools/update/upd_cfg.h
+update:
+	@if [ -d "$(AMISSL_INC)" ]; then $(MAKE) --no-print-directory $(OUT)/PrismNetUpdate; 	 else echo "note: no AmiSSL SDK in $(AMISSL_INC), PrismNetUpdate not built"; fi
+$(OUT)/PrismNetUpdate: $(UPD_SRC)
+	@mkdir -p $(OUT)
+	$(CC) -m68020 -O2 -noixemul -Wall -Wno-pointer-sign -fomit-frame-pointer -I"$(AMISSL_INC)" -s -o $@ tools/update/update.c tools/update/upd_prismnet.c
 
 $(OBJ)/liblwip.a: $(LWIP_OBJ)
 	$(AR) rcs $@ $^
@@ -249,7 +260,7 @@ diag:
 clean:
 	rm -rf build $(OUT)
 
-.PHONY: small servers all clean core020 diag nettools pktlog nfs nfstool smb cryptotest smbtool
+.PHONY: update small servers all clean core020 diag nettools pktlog nfs nfstool smb cryptotest smbtool
 
 # Diagnostic core that logs every frame (PrismNet LOG shows them).
 pktlog:

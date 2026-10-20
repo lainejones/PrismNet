@@ -108,6 +108,10 @@ struct PrefShare {
     BOOL readonly, indevs;
 };
 
+/* UPDATES=: the Updates cycle and its startup keywords */
+static const char *upd_labels[] = { "Off", "GitHub", "Mirror", "GitHub, then mirror", NULL };
+static const char *upd_source[] = { "OFF", "GITHUB", "MIRROR", "BOTH" };
+
 struct Prefs {
     struct PrefIf ifs[MAXIF];
     int    nifs;
@@ -128,6 +132,8 @@ struct Prefs {
     BOOL   sh_loaded_devs[MAXSHARES];
     int    nloaded;
     char   inetd[96];                   /* startup INETD= ("" = the default, C:inetd) */
+    UBYTE  updates;                     /* startup UPDATES=: 0 off, 1 GitHub, 2 mirror, 3 both */
+    char   mirror[201];                 /* startup MIRROR= (C:PrismNetUpdate) */
     /* the Services tab: the ftp line of ENV:PrismNet/services */
     BOOL   have_services, ftp_on, ftp_anon, ftp_ro;
     char   ftp_port[8], ftp_prog[96], ftp_anondir[128], ftp_pasv[16], ftp_extra[96];
@@ -541,6 +547,8 @@ static void load_prefs(struct Prefs *p, const char *dir)
             else if (ieq(tok, "COMMAND")) copy(p->command, v, sizeof(p->command));
             else if (ieq(tok, "MEMORY"))  copy(p->memory, v, sizeof(p->memory));
             else if (ieq(tok, "INETD"))   copy(p->inetd, v, sizeof(p->inetd));
+            else if (ieq(tok, "UPDATES")) p->updates = ieq(v, "GITHUB") ? 1 : ieq(v, "MIRROR") ? 2 : ieq(v, "BOTH") ? 3 : 0;
+            else if (ieq(tok, "MIRROR"))  copy(p->mirror, v, sizeof(p->mirror));
         }
         FreeVec(t);
     }
@@ -666,6 +674,8 @@ static BOOL save_prefs(const struct Prefs *p, const char *dir)
     if (p->command[0]) sprintf(text + strlen(text), "COMMAND=%s\n", p->command);
     if (p->memory[0]) sprintf(text + strlen(text), "MEMORY=%s\n", p->memory);
     if (p->inetd[0]) sprintf(text + strlen(text), "INETD=%s\n", p->inetd);
+    if (p->updates) sprintf(text + strlen(text), "UPDATES=%s\n", upd_source[p->updates & 3]);
+    if (p->mirror[0]) sprintf(text + strlen(text), "MIRROR=%s\n", p->mirror);
     sprintf(path, "%s/startup", dir);
     if (!save_file(path, text)) return FALSE;
     if (!save_services(p, dir)) return FALSE;
@@ -930,7 +940,7 @@ static const char *validate(const struct Prefs *p, int *bad_if)
 enum { G_IFLIST = 1, G_ADD, G_REMOVE, G_NAME, G_MODE, G_DEVICE, G_PICK, G_UNIT,
        G_ADDR, G_MASK, G_GW, G_MTU, G_HOST, G_DOMAIN, G_DEFGW, G_DNS1, G_DNS2, G_DNS3,
        G_USER, G_REALNAME, G_WORKGROUP, G_ROUTES, G_ACCOUNTS,
-       G_AUTO, G_BOOT, G_HOSTS, G_BAUD, G_RTSCTS, G_MEMORY,
+       G_AUTO, G_BOOT, G_HOSTS, G_BAUD, G_RTSCTS, G_MEMORY, G_UPDATES, G_MIRROR, G_CHECK,
        G_SHLIST, G_SHADD, G_SHREMOVE, G_SHNAME, G_SHTYPE, G_SHHOST, G_SHBROWSE, G_SHSHARE,
        G_SHVOL, G_SHUSER, G_SHUID, G_SHGID, G_SHBOOT, G_SHRO, G_SHMOUNT, G_SHUNMOUNT,
        G_FTPON, G_FTPPORT, G_FTPRO, G_FTPANON, G_FTPDIR, G_FTPPICK, G_FTPPASV, G_FTPINFO, G_FTPNOTE,
@@ -1080,6 +1090,7 @@ static void store_globals(struct Gui *gui)
     gcopy(gui, G_REALNAME, P.realname, sizeof(P.realname));
     gcopy(gui, G_WORKGROUP, P.workgroup, sizeof(P.workgroup));
     gcopy(gui, G_MEMORY, P.memory, sizeof(P.memory));
+    gcopy(gui, G_MIRROR, P.mirror, sizeof(P.mirror));
 }
 
 static void build_shlist(struct Gui *gui);
@@ -1109,6 +1120,8 @@ static void show_all(struct Gui *gui)
     sets(gui, G_REALNAME, P.realname);
     sets(gui, G_WORKGROUP, P.workgroup);
     sets(gui, G_MEMORY, P.memory);
+    sets(gui, G_MIRROR, P.mirror);
+    if (gui->g[G_UPDATES]) GT_SetGadgetAttrs(gui->g[G_UPDATES], gui->win, NULL, GTCY_Active, (ULONG)(P.updates & 3), TAG_END);
     if (gui->g[G_AUTO]) GT_SetGadgetAttrs(gui->g[G_AUTO], gui->win, NULL, GTCB_Checked, P.autostart, TAG_END);
     if (gui->g[G_BOOT]) GT_SetGadgetAttrs(gui->g[G_BOOT], gui->win, NULL, GTCB_Checked, P.atboot, TAG_END);
 }
@@ -1117,6 +1130,54 @@ static LONG ask(struct Gui *gui, const char *title, const char *text, const char
 {
     struct EasyStruct es = { sizeof(struct EasyStruct), 0, (STRPTR)title, (STRPTR)text, (STRPTR)buttons };
     return EasyRequestArgs(gui ? gui->win : NULL, &es, NULL, NULL);
+}
+
+/* ---- Check now: C:PrismNetUpdate with the settings as they are in the window */
+
+static void check_update(struct Gui *gui)
+{
+    char cmd[320], line[160], text[300];
+    BPTR f;
+    LONG rc;
+
+    if (!P.updates) {
+        ask(gui, "PrismNet update", "Updates are off: choose GitHub or a mirror first.", "OK");
+        return;
+    }
+    sprintf(cmd, "C:PrismNetUpdate SOURCE=%s%s%s >T:PrismNetUpdate.out", upd_source[P.updates & 3],
+            P.mirror[0] ? " MIRROR=" : "", P.mirror);
+    rc = SystemTags((STRPTR)cmd, SYS_Input, 0, SYS_Output, 0, NP_StackSize, 65536, TAG_DONE);
+    /* its last line is the result (a note about an unverified connection
+     * can come before it) */
+    line[0] = 0;
+    if ((f = Open((STRPTR)"T:PrismNetUpdate.out", MODE_OLDFILE))) {
+        char one[160];
+        while (FGets(f, (STRPTR)one, sizeof(one))) {
+            char *e = strpbrk(one, "\r\n");
+            if (e) *e = 0;
+            if (one[0]) strcpy(line, one);
+        }
+        Close(f);
+    }
+    if (rc == -1 || !line[0]) {
+        ask(gui, "PrismNet update", "C:PrismNetUpdate is not installed.", "OK");
+        return;
+    }
+    if (!strncmp(line, "PrismNetUpdate: ", 16))
+        memmove(line, line + 16, strlen(line + 16) + 1);
+    if (rc != RETURN_WARN) {
+        ask(gui, "PrismNet update", line, "OK");
+        return;
+    }
+    sprintf(text, "%s\n\nDownload it and run its installer now?\n"
+                  "The installer asks its usual questions;\nyour settings are kept.", line);
+    if (ask(gui, "PrismNet update", text, "Download and install|Not now")) {
+        sprintf(cmd, "C:PrismNetUpdate GET SOURCE=%s%s%s", upd_source[P.updates & 3],
+                P.mirror[0] ? " MIRROR=" : "", P.mirror);
+        SystemTags((STRPTR)cmd, SYS_Asynch, TRUE, SYS_Input, 0,
+                   SYS_Output, (ULONG)Open((STRPTR)"CON:0/40/640/200/PrismNet update/CLOSE/WAIT", MODE_NEWFILE),
+                   NP_StackSize, 65536, TAG_DONE);
+    }
 }
 
 #include "prefsshares_gui.c"
@@ -1310,7 +1371,7 @@ static BOOL make_gadgets(struct Gui *gui)
 
     case PG_START:  /* ---- Startup -------------------------------------------- */
         fy = y;
-        add_frame(gui, fx0, fy, fx1 - fx0, FRAME_H(fh, 2), "Startup");
+        add_frame(gui, fx0, fy, fx1 - fx0, FRAME_H(fh, 4), "Startup");
         y = fy + TITLE(fh);
         MK(CHECKBOX_KIND, G_AUTO, x0, y + (gh - fh - 3) / 2, 26, fh + 3, "Start when needed", PLACETEXT_RIGHT,
            GTCB_Checked, P.autostart, GTCB_Scaled, TRUE);
@@ -1319,6 +1380,13 @@ static BOOL make_gadgets(struct Gui *gui)
         lab = tlen(gui, "Memory budget (KB)") + 12;
         MK(STRING_KIND, G_MEMORY, x0 + lab, y + row, 64, gh, "Memory budget (KB)", PLACETEXT_LEFT,
            GTST_MaxChars, 6);
+        /* update checks (C:PrismNetUpdate): where to look, and a check now */
+        bw = tlen(gui, "Check now") + 16;
+        MK(CYCLE_KIND, G_UPDATES, x0 + lab, y + 2 * row, 120, gh, "Updates", PLACETEXT_LEFT,
+           GTCY_Labels, (ULONG)upd_labels, GTCY_Active, (ULONG)(P.updates & 3));
+        MK(BUTTON_KIND, G_CHECK, x0 + lab + 132, y + 2 * row, bw, gh, "Check now", PLACETEXT_IN, GT_Underscore, 0);
+        MK(STRING_KIND, G_MIRROR, x0 + lab, y + 3 * row, x1 - x0 - lab, gh, "Mirror", PLACETEXT_LEFT,
+           GTST_MaxChars, 200);
         break;
 
     case PG_SHARE:  /* ---- Network shares ------------------------------------- */
@@ -2203,9 +2271,11 @@ static int run_gui(void)
                     if (gui.sel >= 0 && gui.sel < P.nifs)
                         P.ifs[gui.sel].rtscts = (gui.g[G_RTSCTS]->Flags & GFLG_SELECTED) != 0;
                     break;
-                case G_MEMORY:
+                case G_MEMORY: case G_MIRROR:
                     store_globals(&gui);
                     break;
+                case G_UPDATES: P.updates = (UBYTE)(code & 3); break;
+                case G_CHECK:   store_globals(&gui); check_update(&gui); break;
                 case G_AUTO:   P.autostart = (gui.g[G_AUTO]->Flags & GFLG_SELECTED) != 0; break;
                 case G_BOOT:   P.atboot = (gui.g[G_BOOT]->Flags & GFLG_SELECTED) != 0; break;
                 case G_HOSTS:  edit_hosts(&gui); break;

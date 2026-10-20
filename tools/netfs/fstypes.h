@@ -56,6 +56,7 @@ struct Fattr {
     u32 size_hi, size_lo;
     u32 fileid_hi, fileid_lo;
     u32 atime, mtime, ctime;         /* seconds since 1970, UTC */
+    u32 dosattrs;                    /* SMB: the server's FILE_ATTRIBUTE_* bits (NFS: 0) */
 };
 
 struct Fsstat {

@@ -180,6 +180,13 @@ int main(int argc, char **argv)
     } else if (!strcmp(argv[2], "touch") && argc > 4) {   /* touch path unixtime */
         fprintf(stderr, "touch: %ld\n",
                 smb2_setattr(&s, argv[3], 0, 0, 1, (u32)atol(argv[4]), 0, 0));
+    } else if (!strcmp(argv[2], "attrs") && argc > 3) {     /* the raw FILE_ATTRIBUTE_* bits */
+        struct Fattr a;
+        long e = smb2_getattr(&s, argv[3], &a);
+        if (e) fprintf(stderr, "attrs: %ld\n", e);
+        else printf("attrs %s: %08lx\n", argv[3], (unsigned long)a.dosattrs);
+    } else if (!strcmp(argv[2], "setattrs") && argc > 4) {  /* set them exactly (hex) */
+        fprintf(stderr, "setattrs: %ld\n", smb2_setdosattrs(&s, argv[3], (u32)strtoul(argv[4], NULL, 16)));
     } else if (!strcmp(argv[2], "readonly") && argc > 3) {
         fprintf(stderr, "readonly: %ld\n", smb2_setattr(&s, argv[3], 0, 0, 0, 0, 1, 0444));
     } else if (!strcmp(argv[2], "writable") && argc > 3) {

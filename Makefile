@@ -159,7 +159,7 @@ build/cryptotest: tools/smb/crypto.c tools/smb/cryptotest.c $(SMB_H)
 smbtool: build/smbtool
 build/smbtool: tools/smb/smb2.c tools/smb/crypto.c tools/smb/smbtool.c tools/netfs/net_posix.c tools/netfs/nbname.c $(SMB_H)
 	@mkdir -p build
-	gcc $(SMB_HOST) -o $@ tools/smb/smb2.c tools/smb/crypto.c tools/smb/smbtool.c tools/netfs/net_posix.c tools/netfs/nbname.c
+	gcc $(SMB_HOST) -DSMB_SIGNLOG -o $@ tools/smb/smb2.c tools/smb/crypto.c tools/smb/smbtool.c tools/netfs/net_posix.c tools/netfs/nbname.c
 
 # Host test of the NFS protocol layer (native gcc, run in WSL):
 #   make nfstool && build/nfstool 192.168.1.10:/volume1/amigatest ls

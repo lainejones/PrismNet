@@ -74,6 +74,36 @@ int main(void)
         k = ntlm_auth(&s, ch, 56 + 64, out);
         check("a wrapping TargetInfo offset is ignored", k <= NTLM_TOKEN_MAX && k < 300);
     }
+    {
+        /* signed session, plain-text reply without a signature (audit 2026-10-18) */
+        static struct Smb s;
+        static u8 rx[256];
+        u32 st, bl;
+        const u8 *b;
+        memset(&s, 0, sizeof(s));
+        s.rx = rx;
+        s.sign = 1;
+        memset(rx, 0, sizeof(rx));
+        rx[0] = 0xfe; rx[1] = 'S'; rx[2] = 'M'; rx[3] = 'B';
+        p16(rx + 4, HDR);
+        p32(rx + 16, F_REPLY);                  /* no F_SIGNED */
+        p32(rx + 8, 0x80000005UL);              /* BUFFER_OVERFLOW: a read with data */
+        b = reply_unit(&s, HDR + 32, 0, &st, &bl);
+        check("an unsigned BUFFER_OVERFLOW on a signed session is dropped", b == NULL);
+        p32(rx + 8, 0xC0000034UL);              /* OBJECT_NAME_NOT_FOUND */
+        b = reply_unit(&s, HDR + 32, 0, &st, &bl);
+        check("an unsigned error on a signed session is dropped", b == NULL);
+        p32(rx + 8, ST_OK);
+        b = reply_unit(&s, HDR + 32, 0, &st, &bl);
+        check("an unsigned success on a signed session is dropped", b == NULL);
+        p32(rx + 8, ST_SESSION_DELETED);
+        b = reply_unit(&s, HDR + 32, 0, &st, &bl);
+        check("an unsigned USER_SESSION_DELETED is let through", b != NULL && st == ST_SESSION_DELETED);
+        s.sign = 0;
+        p32(rx + 8, 0x80000005UL);
+        b = reply_unit(&s, HDR + 32, 0, &st, &bl);
+        check("without signing, unsigned replies are taken as before", b != NULL);
+    }
     printf(fails ? "%d FAILED\n" : "all passed\n", fails);
     return fails != 0;
 }

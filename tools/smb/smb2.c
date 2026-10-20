@@ -37,10 +37,14 @@
 #define ST_MORE_PROCESSING     0xC0000016UL
 #define ST_NO_MORE_FILES       0x80000006UL
 #define ST_END_OF_FILE         0xC0000011UL
+#define ST_SESSION_DELETED     0xC0000203UL     /* USER_SESSION_DELETED */
+#define ST_SESSION_EXPIRED     0xC000035CUL     /* NETWORK_SESSION_EXPIRED */
 
 #define HDR 64
-#ifdef SMB_TRACE                                /* host builds: dump every frame */
+#if defined(SMB_TRACE) || defined(SMB_SIGNLOG)
 #include <stdio.h>
+#endif
+#ifdef SMB_TRACE                                /* host builds: dump every frame */
 static void trace(const char *dir, const u8 *p, u32 n)
 {
     u32 i;
@@ -328,8 +332,18 @@ static const u8 *reply_unit(struct Smb *s, long flen, int idx, u32 *status, u32 
             *status = g32(h + 8);
             *blen = ulen - HDR;
             if (s->sign && !s->rx_enc && *status != ST_PENDING) {
+#ifdef SMB_SIGNLOG                              /* host test builds: is each reply signed? */
+                fprintf(stderr, "signlog: command %02lx status %08lx %s\n", (unsigned long)g16(h + 12),
+                        (unsigned long)*status, (g32(h + 16) & F_SIGNED) ? "signed" : "UNSIGNED");
+#endif
+                /* On a signed session every reply is signed, errors too (Samba,
+                 * Windows; checked against a Synology). Only the end of the
+                 * session itself can come unsigned, as the server has no key
+                 * left: that one is let through, and has no data. Anything else
+                 * unsigned is dropped - an unsigned BUFFER_OVERFLOW would
+                 * otherwise hand over read data nobody signed. */
                 if (!(g32(h + 16) & F_SIGNED))
-                    return *status == ST_OK ? NULL : h + HDR;   /* errors may come unsigned */
+                    return (*status == ST_SESSION_DELETED || *status == ST_SESSION_EXPIRED) ? h + HDR : NULL;
                 if (check_sig(s, (u8 *)h, ulen))
                     return NULL;                /* forged or broken: drop */
             }
@@ -790,6 +804,7 @@ static void to_fattr(const u8 *t, struct Fattr *a)
     ft_to_unix(t + 8, &a->atime);
     ft_to_unix(t + 16, &a->mtime);
     ft_to_unix(t + 24, &a->ctime);
+    a->dosattrs = attrs;
 }
 
 /* a CREATE body at b (in a unit); returns its length */
@@ -1153,13 +1168,32 @@ long smb2_setattr(struct Smb *s, const char *path, int set_size, u32 size,
             int i;
             for (i = 0; i < 8; i++) bi[16 + i] = (u8)(ft >> (8 * i));   /* LastWriteTime */
         }
-        if (set_mode)
-            p32(bi + 32, (mode & 0200) ? 0x80 /* NORMAL */ : 0x01 /* READONLY */);
+        if (set_mode) {
+            /* only the READONLY bit follows the owner write bit; HIDDEN,
+             * SYSTEM, ARCHIVE and the rest stay as they are on the server */
+            struct Fattr a;
+            u32 at;
+            if ((e = smb2_getattr(s, path, &a)))
+                return e;
+            at = a.dosattrs & ~0x81UL;              /* without READONLY and NORMAL */
+            if (!(mode & 0200)) at |= 0x01;
+            p32(bi + 32, at ? at : 0x80);           /* 0 would mean "unchanged" */
+        }
         if ((e = open_set_close(s, path, A_WRITE_ATTR | A_READ_ATTR | A_SYNCHRONIZE, 0,
                                 SMB2_OPEN, 4 /* FileBasicInformation */, bi, 40, NULL)))
             return e;
     }
     return 0;
+}
+
+/* the file's FILE_ATTRIBUTE_* bits, exactly (0 is not allowed: NORMAL instead) */
+long smb2_setdosattrs(struct Smb *s, const char *path, u32 attrs)
+{
+    u8 bi[40];
+    memset(bi, 0, 40);                          /* times 0 = leave unchanged */
+    p32(bi + 32, attrs ? attrs : 0x80);
+    return open_set_close(s, path, A_WRITE_ATTR | A_READ_ATTR | A_SYNCHRONIZE, 0,
+                          SMB2_OPEN, 4 /* FileBasicInformation */, bi, 40, NULL);
 }
 
 /* ---- share list (stage 3): SRVSVC NetrShareEnum over \\host\IPC$ ----------

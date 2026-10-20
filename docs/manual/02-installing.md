@@ -21,7 +21,13 @@ does:
 3. **PrismNet Prefs** goes to `SYS:Prefs`, and **PrismMon** wherever you
    choose.
 4. **Network shares** (optional): the NFS client, the SMB client, or both.
-   See [Network shares](09-shares.md).
+   See [Network shares](09-shares.md). If `smb2-handler` (and its
+   `filesysbox.library`) is installed, choosing the SMB client asks whether to
+   move them to `C:Backup`; the library moves only when no other file system
+   in `L:` uses it. With both SMB clients installed, FileSysBox can hold the
+   system's list of volumes while it waits for another file system, and then
+   `List`, `Info` and `Mount` hang until a reboot. "Remove PrismNet" puts them
+   back.
 5. **Servers** (optional): the FTP server, the telnet server, or both. See
    [Servers](10-servers.md).
 6. **Settings.** If you have no PrismNet settings yet, it asks for:

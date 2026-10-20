@@ -110,6 +110,13 @@
             (copyfiles (source (tackon bakdir nm)) (dest "C:") (nogauge))
             (delete (tackon bakdir nm))
           )))
+    ; another SMB client the installer moved aside (its filesysbox.library came
+    ; back with the libraries above)
+    (if (and (exists (tackon bakdir "smb2-handler") (noreq)) (not (exists "L:smb2-handler" (noreq))))
+      (
+        (copyfiles (source (tackon bakdir "smb2-handler")) (dest "L:") (nogauge))
+        (delete (tackon bakdir "smb2-handler"))
+      ))
     ; the drawer goes only if nothing else is left in it
     (run (cat "Delete >NIL: " bakdir " QUIET"))
     ; the share clients, if they were installed: the handlers, the tools, and
@@ -250,6 +257,34 @@
                       "PrismNet Prefs, Shares tab, writes the mount files for you.")
                 (choices "NFS client (NAS / Linux shares)" "SMB client (Windows / macOS / NAS shares)")
                 (default 0)))
+;; another SMB client (smb2-handler, built on FileSysBox): offer to move it
+;; aside. FileSysBox also runs other file systems, so filesysbox.library is
+;; moved only when nothing else in L: uses it.
+(set smb2_there (exists "L:smb2-handler" (noreq)))
+(set fsb_there (exists "LIBS:filesysbox.library" (noreq)))
+(set fsb_others 0)
+(if fsb_there
+    (if (= 0 (run "Search >NIL: L:~(smb2-handler) filesysbox.library QUICK" (safe)))
+        (set fsb_others 1)))
+(set fsb_move (if fsb_there (= fsb_others 0) 0))
+(set smb2_move 0)
+(if (BITAND shares 2)
+    (if (or smb2_there fsb_move)
+        (set smb2_move
+            (askbool (prompt (cat "Another SMB client is installed:\n\n"
+                                  (if smb2_there "L:smb2-handler\n" "")
+                                  (if fsb_move "LIBS:filesysbox.library (used only by it)\n" "")
+                                  (if (and fsb_there fsb_others) "(filesysbox.library stays: other file systems use it)\n" "")
+                                  "\nMove it to C:Backup? PrismNet's SMB client takes its place; "
+                                  "\"Remove PrismNet\" puts it back."))
+                     (help "With both clients installed, FileSysBox can hold the system's list of "
+                           "volumes while it waits for another file system, and the two can "
+                           "stop each other (List, Info and Mount then hang until a reboot).\n\n"
+                           "Mount files that use L:smb2-handler stop working when it is moved: "
+                           "set the share up again in PrismNet Prefs, Shares tab (or edit "
+                           "SYS:Storage/DOSDrivers/PSMB0).")
+                     (choices "Move to C:Backup" "Keep it")
+                     (default 0)))))
 (set servers
     (askoptions (prompt "Install servers?\n\n"
                         "They let other computers reach this Amiga. Nothing listens "
@@ -404,6 +439,19 @@
         (set mounts_kept (cat mounts_kept "SYS:Storage/DOSDrivers/PNFS0 is already there and was kept.\n"))
         (copyfiles (source "Storage/DOSDrivers") (dest "SYS:Storage/DOSDrivers")
                    (choices "PNFS0" "PNFS0.info") (nogauge)))
+  ))
+(if smb2_move
+  (
+    (if smb2_there
+      (
+        (set bak_src "L:smb2-handler") (set bak_name "smb2-handler") (P_SAVE_BAK)
+        (if (exists (tackon bakdir "smb2-handler") (noreq)) (delete "L:smb2-handler"))
+      ))
+    (if fsb_move
+      (
+        (set bak_src "LIBS:filesysbox.library") (set bak_name "filesysbox.library") (P_SAVE_BAK)
+        (if (exists (tackon bakdir "filesysbox.library") (noreq)) (delete "LIBS:filesysbox.library"))
+      ))
   ))
 (if (BITAND shares 2)
   (

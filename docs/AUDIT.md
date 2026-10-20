@@ -177,10 +177,12 @@ works" like Roadshow/Miami, with the size cost in mind:
    the AmiSSL-Tunnel shim. (Mixing a real AmiSSL's OpenSSL command with a shim
    `amisslmaster.library` earlier in LIBS: crashes - not a stack matter.)
 7. **IPv6**: lwIP has it; about +30 KB of core and a second ARP-like reader per
-   interface. Few home LANs here need it yet; keep it for after 1.0.
+   interface. Few home LANs here need it yet. *Future (2026-10-20): left out to
+   keep PrismNet small, until users ask for it.*
 8. **Serial links**: a native PPP dialer with chat script, so a modem/null-modem
    user is not dependent on a third-party `ppp-serial.device`. Bigger (PPP in
-   lwIP is ~40 KB); SLIP works today.
+   lwIP is ~40 KB); SLIP works today. *Future (2026-10-20): left out to keep
+   PrismNet small, until users ask for it.*
 9. **Real-hardware soak**: the A1200 PCMCIA `cnet.device` stall and the
    lost-request path above can only be settled there. That, more than any
    feature, is what "optimized for speed" needs next — the emulator's card never

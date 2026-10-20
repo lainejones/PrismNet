@@ -56,6 +56,82 @@ The installer tells you to reboot at the end if another stack was there.
 Run the installer from the new archive and choose **Install or update**. It
 replaces the programs and keeps your settings.
 
+The installer asks all its questions first, while PrismNet keeps running, so
+you can still look things up or cancel. Cancelling at any question leaves the
+installed PrismNet as it was. If PrismNet is running, the last question asks
+whether to start it again after the update (the default). Then it stops
+PrismNet, copies the new files and starts it again: the network is gone for
+only a few seconds.
+
+To find out whether there is a newer release, use **Check now** on the
+Startup page of PrismNet Prefs, or `C:PrismNetUpdate` in a Shell (see
+[Checking for updates](02-installing.md#checking-for-updates)).
+
+## Checking for updates
+
+`C:PrismNetUpdate` asks whether a newer PrismNet has been released, and can
+download and install it. The installer puts it in `C:` on a 68020 or better;
+it needs PrismNet running and **AmiSSL 5**, because everything is fetched
+over HTTPS. It checks the server's certificate against the ones in
+`AmiSSL:Certs`; without them it says the connection is not verified and
+carries on.
+
+It never runs by itself. Check from PrismNet Prefs (**Startup** page):
+
+- **Updates** says where to look: **Off**, **GitHub** (PrismNet's releases
+  on GitHub), **Mirror**, or **GitHub, then mirror** (the mirror only when
+  GitHub can't be reached).
+- **Mirror** is the mirror's address (see below).
+- **Check now** checks with the settings in the window and tells you the
+  result. When a newer release exists, **Download and install** fetches it to
+  `T:`, unpacks it and starts its installer in a window; the installer's
+  usual questions follow.
+
+Or from a Shell:
+
+```
+PrismNetUpdate [GET] [FETCH] [SOURCE=GITHUB|MIRROR|BOTH]
+               [MIRROR=https://...] [QUIET]
+```
+
+Without arguments it checks with the settings saved by Prefs (`UPDATES=` and
+`MIRROR=` in `ENV:PrismNet/startup`). `SOURCE=` and `MIRROR=` override them.
+`GET` downloads, unpacks and runs the installer; `FETCH` only downloads and
+unpacks it to `T:`. The return code says what it found: 0 up to date, 5 a
+newer release exists, 10 it could not check (no stack, no AmiSSL, no
+connection), 20 the download or install failed. So a script can check
+quietly (`FailAt 21` keeps the script going when it could not check):
+
+```
+FailAt 21
+PrismNetUpdate QUIET
+If ERROR
+  Echo "Could not check for a PrismNet update."
+Else
+  If WARN
+    Echo "A new PrismNet is out."
+  EndIf
+EndIf
+```
+
+### A mirror
+
+A mirror lets machines check somewhere other than GitHub, for example your
+own server, or a network without access to GitHub. The address is either:
+
+- a **Forgejo or Gitea repository** that carries PrismNet's releases, e.g.
+  `https://git.example.org/someone/PrismNet`: its release list is read like
+  GitHub's; or
+- a **directory** on any HTTPS server holding a file `latest.txt`, whose first
+  line is the version and the archive:
+
+  ```
+  0.6.5 PrismNet-0.6.5.lha
+  ```
+
+  The archive is a name in the same directory or a full `https://` address.
+  Put the release archive next to it and change the line for each release.
+
 ## Removing
 
 Run the installer and choose **Remove PrismNet**. It deletes PrismNet's

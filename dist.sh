@@ -29,7 +29,9 @@ if [ -n "$stale" ]; then
     exit 1
 fi
 
-rm -rf dist
+# everything but dist/aminet: the upload pair there may have been edited by
+# hand (the uploader's address) and must survive a rebuild
+rm -rf dist/PrismNet dist/PrismNet.info dist/PrismNet.readme
 mkdir -p $D/C $D/L $D/Libs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Docs
 
 # the installer says which version it installs

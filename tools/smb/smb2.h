@@ -88,6 +88,7 @@ long  smb2_rename(struct Smb *s, const char *from, const char *to);
 /* size: set_size; times: mtime (UTC seconds) when set_mtime; readonly bit
  * from the owner write bit when set_mode */
 long  smb2_setdosattrs(struct Smb *s, const char *path, u32 attrs);
+long  smb2_readsmall(struct Smb *s, const char *path, u32 count, const u8 **data, u32 *got, int *eof);
 long  smb2_setattr(struct Smb *s, const char *path, int set_size, u32 size,
                    int set_mtime, u32 mtime, int set_mode, u32 mode);
 

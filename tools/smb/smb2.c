@@ -1186,6 +1186,54 @@ long smb2_setattr(struct Smb *s, const char *path, int set_size, u32 size,
     return 0;
 }
 
+/* CREATE + READ from the start + CLOSE, compounded: a file read whole in one
+ * round trip instead of three (an icon, a small text). *data / *got / *eof as
+ * smb2_read; no handle is left open. */
+long smb2_readsmall(struct Smb *s, const char *path, u32 count, const u8 **data, u32 *got, int *eof)
+{
+    u32 len[3], st, bl, off, i, rst = 0, rdl = 0, doff;
+    u8 *b;
+    const u8 *r, *rd = NULL;
+    long fl, e;
+
+    if (s->sock < 0) return NET_ECLOSED;
+    b = unit(s, 0, C_CREATE, 0);
+    len[0] = HDR + create_body(b, path, 0x00120089UL, 0);  /* as smb2_open, a file */
+    off = (len[0] + 7) & ~7UL;
+    b = unit(s, off, C_READ, 1);
+    p16(b, 49);
+    b[2] = 0x50;
+    p32(b + 4, count);                          /* offset 0 */
+    memset(b + 16, 0xff, 16);                   /* the FileId just opened */
+    len[1] = HDR + 49;
+    off += (len[1] + 7) & ~7UL;
+    b = unit(s, off, C_CLOSE, 1);
+    p16(b, 24);
+    memset(b + 8, 0xff, 16);
+    len[2] = HDR + 24;
+    if ((e = send_units(s, len, 3)) < 0) return e;
+    if ((fl = recv_frame(s)) < 0) return fl;
+    for (i = 0; i < 3; i++) {
+        if (!(r = reply_unit(s, fl, (int)i, &st, &bl))) { smb2_close(s); return FS_EPROTO; }
+        if (i == 0) {
+            s->ntstatus = (long)st;
+            if (st != ST_OK) return map_status(st);
+            if (bl < 88) return FS_EPROTO;
+        } else if (i == 1) {
+            rst = st; rd = r; rdl = bl;
+        }
+    }
+    *eof = 0;
+    if (rst == ST_END_OF_FILE) { *got = 0; *eof = 1; *data = rd; return 0; }
+    if (rst != ST_OK && rst != 0x80000005UL) return map_status(rst);   /* BUFFER_OVERFLOW */
+    doff = rd[2];
+    *got = g32(rd + 4);
+    if (doff < HDR || doff - HDR > rdl || *got > rdl - (doff - HDR) || *got > count) return FS_EPROTO;
+    *data = rd - HDR + doff;                    /* the offset counts from this unit's header */
+    *eof = *got < count;
+    return 0;
+}
+
 /* the file's FILE_ATTRIBUTE_* bits, exactly (0 is not allowed: NORMAL instead) */
 long smb2_setdosattrs(struct Smb *s, const char *path, u32 attrs)
 {

@@ -53,6 +53,164 @@ static struct DirSlot {
 } dirs[NDIR];
 static u32 stamp, dirbufsize;
 
+/* The last few folders listed in full, kept for a few seconds so the lookups
+ * that follow a listing (Workbench fetching every icon, a program checking each
+ * name) are answered without asking the server - "not there" included, since
+ * the listing was complete. Several, because Workbench lists other folders
+ * (the volume's root, for its Disk.info) in between. Any change made through
+ * this handler drops them all. Each folder's entries sit in one buffer that
+ * grows as the listing comes in: [u32 record length][Fattr][name\0], longword
+ * aligned. */
+#define LC_SLOTS 3
+#define LC_FIRST 4096                   /* first buffer; doubles as needed */
+#define LC_BIG   65536                  /* a folder bigger than this is not kept */
+#define LC_SECS  10                     /* how long a listing is trusted */
+static struct LSlot {
+    char dir[FS_FHSIZE];
+    u8  *pool;
+    u32  size, used, t;
+    int  state;                         /* 0 none, 1 being built, 2 complete */
+} lcs[LC_SLOTS];
+
+/* Recently looked-up paths: every open resolves its path one name at a time
+ * (Amiga, then Amiga\Games, then the file), so the folders on the way would
+ * otherwise cost a round trip each, for every file. Same lifetime as lcs. */
+#define AC_N 16
+static struct { char path[FS_FHSIZE]; struct Fattr a; u32 t, use; } ac[AC_N];
+static u32 ac_clock;
+
+static int ac_find(const char *path, struct Fattr *a)
+{
+    int i;
+    for (i = 0; i < AC_N; i++)
+        if (ac[i].use && !strcmp(ac[i].path, path)) {
+            if (now_secs() - ac[i].t > LC_SECS) { ac[i].use = 0; return 0; }
+            *a = ac[i].a;
+            ac[i].use = ++ac_clock;
+            return 1;
+        }
+    return 0;
+}
+
+static void ac_put(const char *path, const struct Fattr *a)
+{
+    int i, old = 0;
+    for (i = 0; i < AC_N; i++) {
+        if (ac[i].use && !strcmp(ac[i].path, path)) { old = i; break; }
+        if (ac[i].use < ac[old].use) old = i;
+    }
+    strcpy(ac[old].path, path);
+    ac[old].a = *a;
+    ac[old].t = now_secs();
+    ac[old].use = ++ac_clock;
+}
+
+static void lc_drop(void)
+{
+    int i;
+    for (i = 0; i < LC_SLOTS; i++) lcs[i].state = 0;
+    for (i = 0; i < AC_N; i++) ac[i].use = 0;
+}
+
+static void lc_free(void)
+{
+    int i;
+    for (i = 0; i < LC_SLOTS; i++) {
+        if (lcs[i].pool) FreeVec(lcs[i].pool);
+        lcs[i].pool = NULL;
+        lcs[i].size = lcs[i].used = 0;
+        lcs[i].state = 0;
+    }
+}
+
+static struct LSlot *lc_slot(const char *dir, int state)
+{
+    int i;
+    for (i = 0; i < LC_SLOTS; i++)
+        if (lcs[i].state == state && !strcmp(lcs[i].dir, dir)) return &lcs[i];
+    return NULL;
+}
+
+/* a listing of dir starts from its first entry */
+static void lc_begin(const char *dir)
+{
+    struct LSlot *l = lc_slot(dir, 1), *x;
+    int i;
+    if (!l && (x = lc_slot(dir, 2))) x->state = 0;      /* the old copy is replaced */
+    if (!l) {                           /* a free slot, else the oldest */
+        l = &lcs[0];
+        for (i = 0; i < LC_SLOTS; i++) {
+            if (!lcs[i].state) { l = &lcs[i]; break; }
+            if (lcs[i].t < l->t) l = &lcs[i];
+        }
+    }
+    strcpy(l->dir, dir);
+    l->used = 0;
+    l->t = now_secs();
+    l->state = 1;
+}
+
+static void lc_add(const char *dir, const char *name, const struct Fattr *a)
+{
+    struct LSlot *l = lc_slot(dir, 1);
+    u32 need = (4 + sizeof(struct Fattr) + strlen(name) + 1 + 3) & ~3UL;
+    if (!l) return;
+    if (l->used + need > l->size) {     /* grow, or give up on a huge folder */
+        u32 ns = l->size ? l->size * 2 : LC_FIRST;
+        u8 *np;
+        while (ns < l->used + need) ns *= 2;
+        if (ns > LC_BIG || !(np = AllocVec(ns, MEMF_PUBLIC))) { l->state = 0; return; }
+        if (l->pool) { CopyMem(l->pool, np, l->used); FreeVec(l->pool); }
+        l->pool = np;
+        l->size = ns;
+    }
+    *(u32 *)(l->pool + l->used) = need;
+    CopyMem((APTR)a, l->pool + l->used + 4, sizeof(struct Fattr));
+    strcpy((char *)l->pool + l->used + 4 + sizeof(struct Fattr), name);
+    l->used += need;
+}
+
+static void lc_done(const char *dir)    /* the listing reached its end */
+{
+    struct LSlot *l = lc_slot(dir, 1);
+    if (l) { l->state = 2; l->t = now_secs(); }
+}
+
+static void lc_abort(const char *dir)   /* a listing that did not run from the start */
+{
+    struct LSlot *l = lc_slot(dir, 1);
+    if (l) l->state = 0;
+}
+
+static int lc_same(const char *a, const char *b)  /* names match as the Amiga sees them */
+{
+    for (; *a && *b; a++, b++) {
+        char x = *a, y = *b;
+        if (x >= 'A' && x <= 'Z') x += 32;
+        if (y >= 'A' && y <= 'Z') y += 32;
+        if (x != y) return 0;
+    }
+    return *a == *b;
+}
+
+/* 1 found (*a, *real), 0 known not to exist, -1 ask the server */
+static int lc_find(const char *dir, const char *name, struct Fattr *a, const char **real)
+{
+    struct LSlot *l = lc_slot(dir, 2);
+    u32 off;
+    if (!l) return -1;
+    if (now_secs() - l->t > LC_SECS) { l->state = 0; return -1; }
+    for (off = 0; off < l->used; off += *(u32 *)(l->pool + off)) {
+        const char *nm = (const char *)l->pool + off + 4 + sizeof(struct Fattr);
+        if (lc_same(nm, name)) {
+            CopyMem(l->pool + off + 4, a, sizeof(struct Fattr));
+            *real = nm;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static const char *P(const struct Fh *fh) { return (const char *)fh->data; }
 
 static void set_fh(struct Fh *fh, const char *path)
@@ -228,6 +386,7 @@ static void forget_handles(void)
     int i;
     for (i = 0; i < NOPEN; i++) opens[i].used = 0;
     for (i = 0; i < NDIR; i++) { dirs[i].open = 0; dirs[i].path[0] = 0; dirs[i].len = dirs[i].pos = 0; }
+    lc_drop();                          /* the share may have changed meanwhile */
 }
 
 static void smb_cleanup(void)
@@ -238,6 +397,7 @@ static void smb_cleanup(void)
     if (tx) FreeVec(tx);
     if (rx) FreeVec(rx);
     for (i = 0; i < NDIR; i++) { if (dirs[i].buf) FreeVec(dirs[i].buf); dirs[i].buf = NULL; }
+    lc_free();
     tx = rx = NULL;
 }
 
@@ -312,8 +472,14 @@ static int smb_connected(void) { return smb.sock >= 0; }
 
 static long smb_getattr(const struct Fh *fh, struct Fattr *a)
 {
-    long e = smb2_getattr(&smb, P(fh), a);
-    if (!e) a->fileid_lo = smb2_fnv(P(fh));
+    long e;
+    if (ac_find(P(fh), a))
+        return 0;
+    DBG("srv getattr %s", P(fh));
+    if (!(e = smb2_getattr(&smb, P(fh), a))) {
+        a->fileid_lo = smb2_fnv(P(fh));
+        ac_put(P(fh), a);
+    }
     return e;
 }
 
@@ -324,6 +490,22 @@ static long smb_lookup(const struct Fh *dir, const char *name, struct Fh *out,
     u32 dl = strlen(P(dir));
     long e;
 
+    if (strcmp(name, "..")) {           /* from the last listing, if it is this folder */
+        const char *real;
+        int k = lc_find(P(dir), name, a, &real);
+        if (k == 0)
+            return NFS3ERR_NOENT;
+        if (k == 1 && dl + 1 + strlen(real) + 1 <= FS_FHSIZE) {
+            strcpy(path, P(dir));
+            if (dl) strcat(path, "\\");
+            strcat(path, real);
+            a->fileid_lo = smb2_fnv(path);
+            ac_put(path, a);            /* the Examine that usually follows */
+            set_fh(out, path);
+            *ha = 1;
+            return 0;
+        }
+    }
     if (!strcmp(name, "..")) {          /* the parent is just a shorter path */
         char *cut;
         strcpy(path, P(dir));
@@ -336,9 +518,13 @@ static long smb_lookup(const struct Fh *dir, const char *name, struct Fh *out,
         if (dl) strcat(path, "\\");
         strcat(path, name);
     }
-    if ((e = smb2_getattr(&smb, path, a)))
-        return e;
-    a->fileid_lo = smb2_fnv(path);
+    if (!ac_find(path, a)) {
+        DBG("srv lookup %s", path);
+        if ((e = smb2_getattr(&smb, path, a)))
+            return e;
+        a->fileid_lo = smb2_fnv(path);
+        ac_put(path, a);
+    }
     set_fh(out, path);
     *ha = 1;
     return 0;
@@ -368,6 +554,7 @@ static struct Open *open_for(const struct Fh *fh, int rw, long *err)
     if (lru->used)                      /* make room */
         smb2_closefile(&smb, &lru->id);
     lru->used = 0;
+    DBG("srv open %s", P(fh));
     *err = rw ? smb2_openw(&smb, P(fh), SMB2_OPEN, &lru->id, NULL)
               : smb2_open(&smb, P(fh), 0, &lru->id, NULL);
     if (*err)
@@ -415,9 +602,21 @@ static long smb_read(const struct Fh *fh, u32 hi, u32 lo, u32 count,
                      const u8 **data, u32 *got, int *eof)
 {
     long e;
-    struct Open *o = open_for(fh, 0, &e);
+    struct Open *o;
+    int i;
 
-    if (!o) { DBG("smb: open failed %ld status %lx", e, (unsigned long)smb.ntstatus); return e; }
+    /* from the start, with no handle open on it: open, read and close in one
+     * round trip; a longer file opens a handle for the rest as before */
+    if (!hi && !lo) {
+        for (i = 0; i < NOPEN && !(opens[i].used && !strcmp(opens[i].path, P(fh))); i++)
+            ;
+        if (i == NOPEN)
+        {
+            DBG("srv readsmall %s", P(fh));
+            return smb2_readsmall(&smb, P(fh), count, data, got, eof);
+        }
+    }
+    if (!(o = open_for(fh, 0, &e))) { DBG("smb: open failed %ld status %lx", e, (unsigned long)smb.ntstatus); return e; }
     e = smb2_read(&smb, &o->id, hi, lo, count, data, got, eof);
     if (e) DBG("smb: read at %lu failed %ld status %lx", lo, e, (unsigned long)smb.ntstatus);
     return e;
@@ -475,6 +674,7 @@ static long smb_readdir(const struct Fh *dir, u32 cookie[2], u8 verf[8], u32 max
         d->open = 1;
         d->len = d->pos = d->seq = 0;
         d->eof = 0;
+        if (!skip) lc_begin(d->path); else lc_abort(d->path);
     }
     d->last = ++dir_clock;
     for (;;) {
@@ -492,6 +692,7 @@ static long smb_readdir(const struct Fh *dir, u32 cookie[2], u8 verf[8], u32 max
             }
             restart = 0;
             if (end) {
+                lc_done(d->path);
                 smb2_closefile(&smb, &d->id);
                 d->open = 0;
                 d->path[0] = 0;
@@ -524,6 +725,7 @@ static long smb_readdir(const struct Fh *dir, u32 cookie[2], u8 verf[8], u32 max
             cookie[1] = d->seq;
             return 0;
         }
+        lc_add(d->path, name, &a);
         d->seq++;
         cookie[0] = (u32)(d - dirs) + 1;
         cookie[1] = d->seq;
@@ -533,6 +735,7 @@ static long smb_readdir(const struct Fh *dir, u32 cookie[2], u8 verf[8], u32 max
 static long smb_fsstat(const struct Fh *root, struct Fsstat *s)
 {
     (void)root;
+    DBG("srv fsstat");
     return smb2_fsstat(&smb, s);
 }
 
@@ -540,6 +743,7 @@ static long smb_fsstat(const struct Fh *root, struct Fsstat *s)
 
 static long smb_setattr(const struct Fh *fh, const struct Sattr *sa)
 {
+    lc_drop();
     return smb2_setattr(&smb, P(fh), sa->set_size, sa->size, sa->set_mtime, sa->mtime,
                         sa->set_mode, sa->mode);
 }
@@ -551,6 +755,7 @@ static long smb_write(const struct Fh *fh, u32 hi, u32 lo, const u8 *data, u32 c
     long e;
     struct Open *o = open_for(fh, 1, &e);
 
+    lc_drop();                          /* the folder changes */
     memset(verf, 0, 8);
     if (!o) return e;
     return smb2_write(&smb, &o->id, hi, lo, data, count, written);
@@ -574,6 +779,7 @@ static long smb_create(const struct Fh *dir, const char *name, int guarded,
     struct Smb2Id id;
     long e;
 
+    lc_drop();                          /* the folder changes */
     (void)sa;
     if (!join(path, dir, name))
         return NFS3ERR_NAMETOOLONG;
@@ -593,6 +799,7 @@ static long smb_mkdir(const struct Fh *dir, const char *name, const struct Sattr
     char path[FS_FHSIZE];
     long e;
 
+    lc_drop();                          /* the folder changes */
     (void)sa;
     if (!join(path, dir, name))
         return NFS3ERR_NAMETOOLONG;
@@ -608,6 +815,7 @@ static long del(const struct Fh *dir, const char *name, int isdir)
 {
     char path[FS_FHSIZE];
 
+    lc_drop();                          /* the folder changes */
     if (!join(path, dir, name))
         return NFS3ERR_NAMETOOLONG;
     close_path(path);
@@ -622,6 +830,7 @@ static long smb_rename(const struct Fh *fdir, const char *fname,
 {
     char from[FS_FHSIZE], to[FS_FHSIZE];
 
+    lc_drop();                          /* the folder changes */
     if (!join(from, fdir, fname) || !join(to, tdir, tname))
         return NFS3ERR_NAMETOOLONG;
     close_path(from);

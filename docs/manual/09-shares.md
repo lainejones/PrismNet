@@ -58,6 +58,40 @@ GlobVec   = -1
 Startup   = "nas.lan/public VOLUME=NAS USER=amiga"
 ```
 
+### A complete example: a NAS folder on the desktop
+
+This is a whole SMB mount file, ready to copy. Save it as `SYS:NAS`, put a
+project icon next to it (`SYS:NAS.info`) with `C:Mount` as its default tool
+and the tool type `ACTIVATE=1`, and drag that icon onto the Workbench
+desktop (or use *Icons > Leave Out*). Double-clicking it then mounts the share
+as `NAS:` and connects straight away:
+
+```
+/* The NAS's "share" folder as NAS: (PrismNet SMB client) */
+Handler    = L:prismsmb-handler
+StackSize  = 16384
+Priority   = 5
+GlobVec    = -1
+Activate   = 1
+Startup    = "192.168.1.10/share VOLUME=NAS USER=name"
+```
+
+Change three things on the `Startup` line:
+
+- `192.168.1.10`: the server's address (or its name).
+- `share`: the shared folder's name on the server (`SMBShares 192.168.1.10
+  USER=name` lists them).
+- `name`: your account on the server.
+
+The first time the share is used, a small window asks for that account's
+password once; it is kept in `ENVARC:PrismNet/smb/`, so later mounts don't
+ask again. `ShareUnmount NAS:` takes the volume away; double-click the icon
+to have it back.
+
+To have it mounted at every boot instead, put the file (and its icon) in
+`DEVS:DOSDrivers` and leave out the `Activate` line, so it connects only when
+`NAS:` is first used rather than while the Amiga boots.
+
 ## NFS options
 
 After `server:/export`:

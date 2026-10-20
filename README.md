@@ -139,8 +139,8 @@ any AmiTCP-compatible stack.
 | Machine | Network |
 |---|---|
 | Amiga 4000, 68060 | ZZ9000 Ethernet |
-| Amiga 2000, 68030 | X-Surf |
-| Amiga 1200, 68030 | A314 |
+| Amiga 2000, 68030 | X-Surf ([xsurfnet.device](https://github.com/lainejones/XSurfNet) and `x-surf.device`) |
+| Amiga 1200, 68030 | A314; ZuluSCSI DaynaPORT |
 | Amiga 500, 68030 | BlueSCSI DaynaPORT |
 | CD32, 68030 | built-in SLIP over `serial.device` (115200 baud) |
 | WinUAE, OS 3.2 | NE2000 PCMCIA, X-Surf |

@@ -56,10 +56,10 @@ widely used TCP/IP implementation, running as an Amiga task.
 | Machine | Network |
 |---|---|
 | Amiga 4000, 68060 | ZZ9000 Ethernet (`ZZ9000Net.device`) |
-| Amiga 2000, 68030 | X-Surf (`x-surf.device`) |
-| Amiga 1200, 68030 | A314 (`a314eth.device`) |
+| Amiga 2000, 68030 | X-Surf (`xsurfnet.device`, `x-surf.device`) |
+| Amiga 1200, 68030 | A314 (`a314eth.device`); ZuluSCSI DaynaPORT (`scsidayna.device`) |
 | Amiga 500, 68030 | BlueSCSI DaynaPORT (`scsidayna.device`) |
-| CD32, 68030 | serial SLIP (`slip.device`) |
+| CD32, 68030 | serial SLIP (built-in, and `slip.device`) |
 | WinUAE, A1200 OS 3.2 | emulated NE2000 PCMCIA (`cnet.device`) and X-Surf |
 
 Programs used with it include AWeb, IBrowse, Amelinium, wget, AmiSSL-based

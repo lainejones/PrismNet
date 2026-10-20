@@ -67,6 +67,7 @@ enum { A_GET, A_FETCH, A_SOURCE, A_MIRROR, A_QUIET, A_STK, A_COUNT };
 
 struct Library *SocketBase, *AmiSSLMasterBase, *AmiSSLBase, *AmiSSLExtBase;
 static BOOL quiet;
+static const char *why = "";          /* the reason a check failed, for the last line */
 
 static void say(const char *fmt, ...)
 {
@@ -378,6 +379,10 @@ static BOOL fetch(const char *url, struct Fetch *f)
     }
     if (f->status != 200) {
         say(UPD_TOOL ": %s answered %ld\n", u.host, f->status);
+        /* GitHub answers 403 or 429 once an address has made its 60 API
+         * calls in the hour that it allows without an account */
+        if ((f->status == 403 || f->status == 429) && !strcmp(u.host, "api.github.com"))
+            why = ": GitHub's hourly limit is used up, try again later";
         return FALSE;
     }
     return TRUE;
@@ -719,7 +724,7 @@ int main(void)
     else if ((source == UPD_MIRROR || source == UPD_BOTH) && from_mirror(mirror, &mine, &l))
         ;
     else {
-        say(UPD_TOOL ": could not check for an update\n");
+        say(UPD_TOOL ": could not check for an update%s\n", why);
         goto done;
     }
     if (!ver_parse(l.tag, &theirs)) {

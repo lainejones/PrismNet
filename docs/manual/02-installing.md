@@ -114,6 +114,11 @@ Else
 EndIf
 ```
 
+GitHub answers about 60 checks an hour from one internet address (all the
+computers behind your router count together). When that is used up the check
+says so; try again later, or set **GitHub, then mirror** so a mirror answers
+instead.
+
 ### A mirror
 
 A mirror lets machines check somewhere other than GitHub, for example your

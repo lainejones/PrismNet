@@ -19,6 +19,16 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0** (2026-10-20): the first full release, on five real Amigas (68030 and 68060;
+  X-Surf, ZZ9000, BlueSCSI and ZuluSCSI DaynaPORT, A314, built-in SLIP).
+  Network shares: a folder of icons on an SMB share loads about 2.8 times
+  faster (the client remembers the folders it just listed and reads a small
+  file in one request); `Protect` no longer clears a file's hidden, system
+  and archive attributes on the server; a signed SMB session no longer
+  accepts unsigned replies. The installer offers to move `smb2-handler` and
+  its `filesysbox.library` aside when the SMB client goes in. The manual was
+  checked against the program and corrected; *Getting connected* now starts
+  with Prefs and PrismMon.
 - **0.6.5** (2026-10-20): checks for updates. `C:PrismNetUpdate` (68020 and
   AmiSSL 5) asks GitHub or a mirror whether a newer PrismNet is out, and can
   download and install it; PrismNet Prefs has **Updates**, **Mirror** and

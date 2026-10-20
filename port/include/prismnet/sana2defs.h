@@ -47,6 +47,8 @@ struct IOSana2Req {
 #define S2_CopyToBuff       (S2_Dummy + 1)
 #define S2_CopyFromBuff     (S2_Dummy + 2)
 #define S2_PacketFilter     (S2_Dummy + 3)
+#define S2_DMACopyToBuff32  (S2_Dummy + 4)   /* SANA-II R3: a0 = ios2_Data -> buffer or NULL */
+#define S2_DMACopyFromBuff32 (S2_Dummy + 5)
 
 /* Commands (CMD_READ / CMD_WRITE are the standard exec ones) */
 #define S2_DEVICEQUERY          (CMD_NONSTD + 0)

@@ -128,9 +128,35 @@ static ULONG copy_from_buff(register APTR to __asm("a0"),
     return pbuf_copy_partial(p, to, (u16_t)n, LINK_ROOM) == n;
 }
 
+/* SANA-II R3 direct buffers: the driver reads or writes the packet in place
+ * and skips its own copy. Driver -> us: a receive pbuf is one pool buffer, and
+ * copy_to_buff above writes at payload + LINK_ROOM, which is longword aligned;
+ * the room there (PBUF_POOL_BUFSIZE - LINK_ROOM) holds any Ethernet frame. */
+static APTR dma_to_buff(register APTR cookie __asm("a0"))
+{
+    struct pbuf *p = (struct pbuf *)cookie;
+
+    if (p->len < LINK_ROOM + 1514 || ((ULONG)p->payload + LINK_ROOM) & 3)
+        return NULL;
+    return (UBYTE *)p->payload + LINK_ROOM;
+}
+
+/* Us -> driver: only when the packet is one contiguous, longword-aligned
+ * block; otherwise NULL and the driver uses copy_from_buff. */
+static APTR dma_from_buff(register APTR cookie __asm("a0"))
+{
+    struct pbuf *p = (struct pbuf *)cookie;
+
+    if (p->next != NULL || p->len < LINK_ROOM || ((ULONG)p->payload + LINK_ROOM) & 3)
+        return NULL;
+    return (UBYTE *)p->payload + LINK_ROOM;
+}
+
 static struct TagItem buffer_tags[] = {
     { S2_CopyToBuff,   (ULONG)copy_to_buff },
     { S2_CopyFromBuff, (ULONG)copy_from_buff },
+    { S2_DMACopyToBuff32,   (ULONG)dma_to_buff },
+    { S2_DMACopyFromBuff32, (ULONG)dma_from_buff },
     { TAG_DONE,        0 }
 };
 

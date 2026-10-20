@@ -91,14 +91,14 @@ After `server/share`:
 |---|---|
 | `VOLUME=name` | the volume name (default: the share name) |
 | `USER=name` | the account on the server; asks for the password once |
-| `DOMAIN=name` | the domain or workgroup (default `WORKGROUP`) |
+| `DOMAIN=name` | the domain or workgroup (default: none; most servers don't need one) |
 | `GUEST` | connect without an account |
 | `PASSWORD=secret` | the password here instead of the window |
 | `TZ=+H[:MM]` | the time zone, hours east of UTC (default: from Locale) |
 | `READONLY` | never write |
 | `SIGN=AUTO` or `YES` | sign only when the server asks (default), or always |
 | `ENCRYPT=AUTO`, `YES` or `NO` | encrypt when the share demands it (default `AUTO`) |
-| `MAXPROTO=2.1`, `3.0`, `3.0.2` or `3.1.1` | the highest SMB version to use (default 3.1.1) |
+| `MAXPROTO=2.0.2`, `2.1`, `3.0`, `3.0.2` or `3.1.1` | the highest SMB version to use (default 3.1.1) |
 | `IDLE=s`, `RETRY=s`, `TIMEOUT=s` | as for NFS |
 | `PORT=n` | the server port (default 445) |
 

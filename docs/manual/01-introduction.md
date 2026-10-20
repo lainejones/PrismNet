@@ -24,6 +24,9 @@ the network hardware through its SANA-II driver.
   (Windows, macOS, a NAS, Samba) as an ordinary Amiga volume.
 - **Servers** (optional): an FTP server, so a PC can copy files to and from
   the Amiga, and a telnet server that gives a Shell over the network.
+- **An update check**: PrismNet Prefs (or `PrismNetUpdate` in a Shell) tells
+  you when a newer PrismNet is out and can install it. See
+  [Checking for updates](02-installing.md#checking-for-updates).
 
 The networking core is [lwIP](https://savannah.nongnu.org/projects/lwip/), a
 widely used TCP/IP implementation, running as an Amiga task.

@@ -66,6 +66,11 @@ connections per second (`CONNECTS`), upload speed (`UPLOAD` KB to a discard
 server on `SINKPORT`), and the cost of one library call (`CALLS`). In
 `Tools/Net` only.
 
+## PrismNetUpdate
+
+In `C:` on a 68020 or better: checks for a newer PrismNet and can install
+it. See [Checking for updates](02-installing.md#checking-for-updates).
+
 ## bsdtest, ugtest
 
 In `Tools`: self-tests of `bsdsocket.library` (needs internet access) and

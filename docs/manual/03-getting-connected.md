@@ -25,7 +25,8 @@ Usually there is nothing to do: with **Start when needed** on (the
 default), the first program that opens `bsdsocket.library` starts PrismNet
 and waits until it has an address.
 
-To start it yourself, open **PrismMon** (in `SYS:Tools`) and click
+To start it yourself, open **PrismMon** (where the installer put it,
+usually `SYS:Tools`) and click
 **Start**. Its Status tab shows the address once DHCP has given one (that
 can take a few seconds). Or, in a Shell:
 
@@ -80,6 +81,8 @@ works three ways:
 
 - **Windows** finds it by NetBIOS: `ping AMIGA`, or `ftp AMIGA` when the
   FTP server runs. NetBIOS uses the first 15 characters, before any dot.
-- **macOS, Linux and Windows 10/11** find it by mDNS: `ping amiga.local`.
+- **macOS, Linux and Windows 10/11** find it by mDNS: `ping amiga.local`,
+  if the network driver accepts multicast (see
+  [Known problems](13-troubleshooting.md#known-problems)).
 - **Your router** often learns the name from DHCP and answers it in its own
   DNS.

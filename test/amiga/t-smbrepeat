@@ -1,0 +1,38 @@
+; SMB: the current handler, ten tree walks and ten List ALL over pn-audit/A
+; (40 files + B; B: 40 files + C), counting what comes back - the audit saw
+; A/B empty once in four List ALL runs. Needs the smbuser password once (the
+; password window); the saved copy is deleted at the end.
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START
+Wait 6
+Mount DH0:PrismNet/smb/PSR
+Echo "start" >DH0:PrismNet/smbrepeat.log
+If NOT EXISTS PSR:pn-audit/A/B/C
+  Echo "creating pn-audit" >>DH0:PrismNet/smbrepeat.log
+  MakeDir PSR:pn-audit PSR:pn-audit/A PSR:pn-audit/A/B PSR:pn-audit/A/B/C
+  Set i 1
+  Lab mk
+  Echo "a" >PSR:pn-audit/A/f$i
+  Echo "b" >PSR:pn-audit/A/B/g$i
+  Set i `Eval $i + 1`
+  If NOT $i GT 40 VAL
+    Skip mk BACK
+  EndIf
+EndIf
+Set r 1
+Lab round
+Echo "==== round $r walk" >>DH0:PrismNet/smbrepeat.log
+DH0:PrismNet/walk PSR:pn-audit/A LIMIT=400 >>DH0:PrismNet/smbrepeat.log
+Echo "==== round $r list" >>DH0:PrismNet/smbrepeat.log
+List PSR:pn-audit/A ALL QUICK >>DH0:PrismNet/smbrepeat.log
+If $r EQ 5 VAL
+  Echo "---- idle 130 s (the server drops the connection)" >>DH0:PrismNet/smbrepeat.log
+  Wait 130
+EndIf
+Set r `Eval $r + 1`
+If NOT $r GT 10 VAL
+  Skip round BACK
+EndIf
+Delete ENVARC:PrismNet/smb ENV:PrismNet/smb ALL QUIET
+Echo "DONE" >>DH0:PrismNet/smbrepeat.log

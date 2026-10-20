@@ -27,7 +27,7 @@ faster.
 
 For a 68000 with 1 to 2 MB (an A500, an A2000, or an A1200 without fast
 RAM) there is a second build of the PrismNet command: `Tools/Small/PrismNet`
-in the archive. The installer offers it when less than 3 MB is free;
+in the archive. The installer offers it when the machine has less than 3 MB in all;
 or copy it over `C:PrismNet` yourself. It has a smaller receive window,
 buffer limits and stack, is built for size, and uses about 175 KB when
 idle, with a 96 KB budget. Everything else (the libraries, Prefs, the

@@ -6,13 +6,18 @@ Installer (in `SYS:Utilities` on OS 3.x).
 
 ## What the installer does
 
+It asks all its questions first and only then copies anything, so you can
+cancel at any question and nothing has changed. In order of what it then
+does:
+
 1. **Libraries.** `bsdsocket.library` and `usergroup.library` go to `LIBS:`.
    If another stack's libraries are there, it asks first, and saves them in
    `C:Backup` (the first copy saved is never overwritten).
 2. **The command.** `PrismNet` goes to `C:`. If another stack put its own
-   `ping` or `traceroute` in `C:`, you're asked before each is replaced; the
+   `ping`, `traceroute` or `nslookup` in `C:`, you're asked before each is replaced; the
    old ones go to `C:Backup` too. PrismNet's versions are always in
-   `Tools/Net` in the archive.
+   `Tools/Net` in the archive. On a 68020 or better, `PrismNetUpdate` (the
+   [update check](#checking-for-updates)) goes to `C:` as well.
 3. **PrismNet Prefs** goes to `SYS:Prefs`, and **PrismMon** wherever you
    choose.
 4. **Network shares** (optional): the NFS client, the SMB client, or both.
@@ -153,8 +158,13 @@ Everything is plain files, so you can also copy them yourself:
 |---|---|
 | `Libs/bsdsocket.library`, `Libs/usergroup.library` | `LIBS:` |
 | `C/PrismNet`, `C/ping`, `C/traceroute`, `C/nslookup` | `C:` |
+| `C/PrismNetUpdate` (the update check; 68020 or better) | `C:` |
 | `Prefs/PrismNet` (+ `.info`) | `SYS:Prefs` |
-| `Tools/PrismMon` (+ `.info`) | anywhere, e.g. `SYS:Tools` |
+| `Tools/PrismMon` (+ `.info`), `PrismNet.guide` (+ `.info`) | anywhere, e.g. `SYS:Tools` |
 | `Storage/PrismNet/*` | edit, then copy to `ENVARC:PrismNet` and `ENV:PrismNet` |
+| shares (optional): `L/prismnfs-handler`, `L/prismsmb-handler` | `L:` |
+| shares: `C/ShareUnmount`, `C/SMBShares` | `C:` |
+| shares: `Storage/DOSDrivers/PNFS0`, `PSMB0` (+ `.info`) | edit, then `DEVS:DOSDrivers` or `SYS:Storage/DOSDrivers` |
+| servers (optional): `C/inetd`, `C/ftpd`, `C/telnetd` | `C:`; see [Servers](10-servers.md) |
 
 Then see [Getting connected](03-getting-connected.md).

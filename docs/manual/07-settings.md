@@ -83,6 +83,8 @@ INETD=C:inetd
 | `COMMAND=` | where the PrismNet command is, for that start |
 | `MEMORY=` | the memory budget in KB; see [Small machines](12-memory.md) |
 | `INETD=` | where the server dispatcher is (default `C:inetd`) |
+| `UPDATES=` | where `PrismNetUpdate` looks: `OFF` (default), `GITHUB`, `MIRROR` or `BOTH` (GitHub, then the mirror); see [Checking for updates](02-installing.md#checking-for-updates) |
+| `MIRROR=` | the mirror: a Forgejo/Gitea repository's address, or an HTTPS directory with `latest.txt` |
 
 ## time
 

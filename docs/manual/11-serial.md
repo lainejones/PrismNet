@@ -52,7 +52,7 @@ fill in *Speed* and, if the cable has the lines, *RTS/CTS*.
   lose bytes, and TCP has to resend.
 
 PrismNet keeps up to 8 writes queued to `serial.device` and lets up to 64 more
-packets wait behind them (16 and 4 in the small core), so a burst of TCP data
+packets wait behind them (4 and 16 in the small core), so a burst of TCP data
 never has to be refused.
 
 ## Through a SANA-II driver

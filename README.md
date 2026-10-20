@@ -23,12 +23,13 @@ you already have run unchanged. The networking core is
 | **Clock** | sets the Amiga's time from the network (SNTP) at start-up, or on demand with `PrismNet SETCLOCK` |
 | **Starting** | on demand (the first program that needs it), at boot, or by hand; `PrismNet STOP` and `START` |
 | **Commands** | `PrismNet STATUS`, `NETSTAT`, `ROUTE`, `ARP`, `LOG`, `SETCLOCK`, `START`/`STOP`, `TRACE=` request log |
-| **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `httpbench`, `SMBShares`, `ShareUnmount` |
+| **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `httpbench`, `SMBShares`, `ShareUnmount`, `PrismNetUpdate` |
 | **GUIs** | PrismNet Prefs (6 tabs, Roadshow import), PrismMon (live status, traffic, connections, memory, log) |
 | **Shares** | own NFS v3 and SMB 2/3 clients: a NAS, Windows, macOS or Samba folder as an Amiga volume |
 | **Servers** | FTP server, telnet server (AmigaDOS Shell), inetd to start them on demand; user accounts with passwords |
 | **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
-| **Install** | Amiga Installer: install, update (keeps settings), remove (puts the old stack's files back) |
+| **Install** | Amiga Installer: install, update (keeps settings; all questions first, a few seconds offline), remove (puts the old stack's files back) |
+| **Updates** | checks GitHub or a mirror for a newer release and installs it (68020+, AmiSSL 5) |
 | **Docs** | AmigaGuide manual on the Amiga, the same manual here |
 | **Needs** | AmigaOS 3.1 or newer, any 68000 or better |
 
@@ -129,7 +130,10 @@ any AmiTCP-compatible stack.
 - **Install_PrismNet** installs, updates (keeping your settings) and
   removes. It saves another stack's libraries and tools and puts them back
   on removal, asks for your driver and address, and offers the optional
-  parts: the share clients and the servers.
+  parts: the share clients and the servers. It asks everything before it
+  touches anything, and an update takes the network away for a few seconds.
+- **PrismNetUpdate** checks for a newer release (from PrismNet Prefs or a
+  Shell) and can download and install it.
 - **The manual**, as an AmigaGuide on the Amiga and as pages here.
 
 ![The manual in MultiView](docs/images/manual-multiview.png)
@@ -165,8 +169,8 @@ Roadshow, AmiTCP or Miami.
 
 ## Not there yet
 
-IPv6, alias addresses, and the bpf, mbuf and network-monitor hooks (they
-exist and return 0).
+IPv6, alias addresses, and the bpf, mbuf and network-monitor hooks and DHCP
+address messages (they exist and return 0).
 
 **Known issue:** on the CD32's `slip.device` 37.4 (1993), `PrismNet STOP`
 followed by `START` can leave the stack stuck opening the driver until a

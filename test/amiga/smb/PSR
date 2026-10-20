@@ -1,0 +1,6 @@
+/* PrismNet SMB test: the current handler, Synology amigatest as smbuser, signed */
+Handler    = DH0:PrismNet/prismsmb-handler.cur
+StackSize  = 16384
+Priority   = 5
+GlobVec    = -1
+Startup    = "192.168.50.2/amigatest VOLUME=amigasmbcur USER=smbuser SIGN=YES TZ=-5"

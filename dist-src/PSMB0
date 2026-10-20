@@ -17,14 +17,14 @@
  * Options after the share:
  *   VOLUME=name      volume name on Workbench (default: the share name)
  *   USER=name        account on the server (asks for the password once)
- *   DOMAIN=name      domain or workgroup (default WORKGROUP)
+ *   DOMAIN=name      domain or workgroup (default: none)
  *   GUEST            connect without an account
  *   PASSWORD=secret  give the password here instead of the window
  *   TZ=+H[:MM]       time zone, hours east of UTC (default: from Locale)
  *   READONLY         never write
  *   SIGN=AUTO|YES    sign only when the server asks (default), or always
  *   ENCRYPT=AUTO|YES|NO  encrypt when the share demands it (default AUTO)
- *   MAXPROTO=2.1|3.0|3.0.2|3.1.1  highest dialect to use (default 3.1.1)
+ *   MAXPROTO=2.0.2|2.1|3.0|3.0.2|3.1.1  highest dialect (default 3.1.1)
  *   IDLE=s           disconnect after s quiet seconds, 0 = never (default 60)
  *   RETRY=s          keep retrying a lost server for s seconds (default 30)
  *   TIMEOUT=s        seconds per call (default 15)

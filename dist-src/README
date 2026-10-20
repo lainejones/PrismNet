@@ -27,6 +27,9 @@ libraries are saved in C:Backup. Optional: network-share clients (NFS,
 SMB) and servers (FTP, telnet).
 
 Run it again to update (your settings are kept) or to remove PrismNet.
+It asks every question first; an update takes the network away for only
+a few seconds. On a 68020 or better, PrismNet Prefs > Startup > Check now
+(or PrismNetUpdate in a Shell) tells you when a newer PrismNet is out.
 
 Using it
 --------

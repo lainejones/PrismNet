@@ -74,7 +74,7 @@ developers: send it with a problem report.
   see [Serial links](11-serial.md)): it restarts fine and is as fast.
 - **`amiga.local` does not resolve** on some cards: the network driver
   refuses the mDNS group address. `PrismNet LOG` then says "refused
-  multicast". The X-Surf driver 1.16 and the A314's a314eth.device do; the
+  multicast". `x-surf.device` 1.16 and the A314's `a314eth.device` refuse it; the
   DaynaPORT driver from 1.7 on (scsidayna.device, with `MULTICAST=1`), the
   ZZ9000 and [xsurfnet.device](https://github.com/lainejones/XSurfNet) accept it. Windows still finds the Amiga
   by its NetBIOS name (`ping A2000`).

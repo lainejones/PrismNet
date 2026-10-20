@@ -40,10 +40,16 @@ void core_log(const char *fmt, ...);
 #define SLIP_ESC_ESC  0xDD
 
 #define SER_MTU       1006          /* the traditional SLIP MTU */
+/* Writes queued to serial.device at once, and packets waiting behind them.
+ * A TCP burst must fit in the two together: a refused segment is only resent
+ * later, and on an 11 KB/s line that cost a third of the sending speed. A
+ * waiting packet holds its escaped copy (at most 2 KB) until it is written. */
 #ifdef PN_SMALL
 #define SER_NWR       4
+#define SER_BQ        16
 #else
 #define SER_NWR       8
+#define SER_BQ        64
 #endif
 #define SER_RBUF      8192          /* serial.device's own receive buffer */
 #define SER_RDLEN     (2 * SER_MTU + 2)   /* longest escaped packet */
@@ -54,6 +60,9 @@ struct serslip {
     struct IOExtSer *ctl;           /* open and parameters */
     struct IOExtSer *wr[SER_NWR];
     UBYTE           *wbuf[SER_NWR]; /* escaped packet being written, or NULL */
+    UBYTE           *bq[SER_BQ];    /* escaped packets waiting for a write */
+    ULONG            bqlen[SER_BQ];
+    UWORD            bq_head, bq_n;
     BOOL             rd_busy[SER_NRD];
     BOOL             esc, overflow;
     ULONG            flen;
@@ -136,6 +145,15 @@ static void read_done(struct sanaif *s, struct serslip *z, int i)
 
 /* ---- transmit ----------------------------------------------------------- */
 
+static void start_write(struct serslip *z, int i, UBYTE *buf, ULONG len)
+{
+    z->wbuf[i] = buf;
+    z->wr[i]->IOSer.io_Command = CMD_WRITE;
+    z->wr[i]->IOSer.io_Length  = len;
+    z->wr[i]->IOSer.io_Data    = buf;
+    SendIO((struct IORequest *)z->wr[i]);
+}
+
 static err_t serslip_output(struct netif *netif, struct pbuf *p, const ip4_addr_t *ipaddr)
 {
     struct sanaif *s = (struct sanaif *)netif->state;
@@ -147,7 +165,11 @@ static err_t serslip_output(struct netif *netif, struct pbuf *p, const ip4_addr_
     (void)ipaddr;
     for (i = 0; i < SER_NWR && z->wbuf[i]; i++)
         ;
-    if (i == SER_NWR || !(buf = pn_mem_malloc(2 * p->tot_len + 1))) {
+    if ((i == SER_NWR || z->bq_n) && z->bq_n >= SER_BQ) {
+        s->stats.tx_dropped++;
+        return ERR_MEM;
+    }
+    if (!(buf = pn_mem_malloc(2 * p->tot_len + 1))) {
         s->stats.tx_dropped++;
         return ERR_MEM;
     }
@@ -163,13 +185,16 @@ static err_t serslip_output(struct netif *netif, struct pbuf *p, const ip4_addr_
         }
     }
     *o++ = SLIP_END;                    /* the only END: EOF mode stops the write there */
-    z->wbuf[i] = buf;
-    z->wr[i]->IOSer.io_Command = CMD_WRITE;
-    z->wr[i]->IOSer.io_Length  = o - buf;
-    z->wr[i]->IOSer.io_Data    = buf;
-    SendIO((struct IORequest *)z->wr[i]);
     s->stats.tx_packets++;
     s->stats.tx_bytes += p->tot_len;
+    if (i == SER_NWR || z->bq_n) {      /* behind the others, keeps the order */
+        UWORD k = (z->bq_head + z->bq_n) % SER_BQ;
+        z->bq[k] = buf;
+        z->bqlen[k] = o - buf;
+        z->bq_n++;
+        return ERR_OK;
+    }
+    start_write(z, i, buf, o - buf);
     return ERR_OK;
 }
 
@@ -179,6 +204,14 @@ static void write_done(struct sanaif *s, struct serslip *z, int i)
         s->stats.tx_errors++;
     pn_mem_free(z->wbuf[i]);
     z->wbuf[i] = NULL;
+    if (z->bq_n) {                      /* the next waiting packet takes the slot */
+        UBYTE *buf = z->bq[z->bq_head];
+        ULONG len = z->bqlen[z->bq_head];
+        z->bq[z->bq_head] = NULL;
+        z->bq_head = (z->bq_head + 1) % SER_BQ;
+        z->bq_n--;
+        start_write(z, i, buf, len);
+    }
 }
 
 /* ---- netif and lifetime ------------------------------------------------- */
@@ -335,6 +368,11 @@ void serslip_close(struct sanaif *s)
         for (i = 0; i < SER_NRD; i++)
             if (z->rd[i])
                 DeleteIORequest((struct IORequest *)z->rd[i]);
+        while (z->bq_n) {
+            pn_mem_free(z->bq[z->bq_head]);
+            z->bq_head = (z->bq_head + 1) % SER_BQ;
+            z->bq_n--;
+        }
         if (z->ctl) {
             if (s->dev_open)
                 CloseDevice((struct IORequest *)z->ctl);

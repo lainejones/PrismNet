@@ -309,6 +309,8 @@ static void start_tx(struct sanaif *s, struct sanaif_req *r, struct pbuf *p)
     }
 }
 
+static void p2p_start_tx(struct sanaif *s, struct sanaif_req *r, struct pbuf *q);
+
 /* send queued frames while there are free write requests */
 static void drain_txq(struct sanaif *s)
 {
@@ -319,8 +321,12 @@ static void drain_txq(struct sanaif *s)
         s->txq[s->txq_head] = NULL;
         s->txq_head = (UBYTE)((s->txq_head + 1) % SANAIF_TXQ);
         s->txq_n--;
-        start_tx(s, r, p);
-        pbuf_free(p);                   /* the queue's reference */
+        if (s->p2p) {
+            p2p_start_tx(s, r, p);      /* our private copy: the write owns it now */
+        } else {
+            start_tx(s, r, p);
+            pbuf_free(p);               /* the queue's reference */
+        }
     }
 }
 
@@ -353,11 +359,14 @@ static err_t sanaif_linkoutput(struct netif *netif, struct pbuf *p)
 static err_t sanaif_p2p_output(struct netif *netif, struct pbuf *p, const ip4_addr_t *ipaddr)
 {
     struct sanaif *s = (struct sanaif *)netif->state;
-    struct sanaif_req *r = free_tx(s);
+    struct sanaif_req *r;
     struct pbuf *q;
 
     (void)ipaddr;
-    if (!r) {
+    /* Behind the others when frames are already waiting (keeps the order),
+     * and while the queue has room: a slow serial link takes a TCP burst
+     * there instead of losing it (every lost segment cost a retransmit). */
+    if ((s->txq_n || !(r = free_tx(s))) && s->txq_n >= SANAIF_TXQ) {
         s->stats.tx_dropped++;
         return ERR_MEM;
     }
@@ -369,6 +378,17 @@ static err_t sanaif_p2p_output(struct netif *netif, struct pbuf *p, const ip4_ad
         return ERR_MEM;
     }
     pbuf_copy_partial(p, (UBYTE *)q->payload + LINK_ROOM, p->tot_len, 0);
+    if (s->txq_n || !(r = free_tx(s))) {
+        s->txq[(s->txq_head + s->txq_n) % SANAIF_TXQ] = q;
+        s->txq_n++;
+        return ERR_OK;
+    }
+    p2p_start_tx(s, r, q);
+    return ERR_OK;
+}
+
+static void p2p_start_tx(struct sanaif *s, struct sanaif_req *r, struct pbuf *q)
+{
     r->io.ios2_Req.io_Command = CMD_WRITE;
     r->io.ios2_Req.io_Flags   = 0;
     memset(r->io.ios2_DstAddr, 0, sizeof(r->io.ios2_DstAddr));
@@ -379,7 +399,6 @@ static err_t sanaif_p2p_output(struct netif *netif, struct pbuf *p, const ip4_ad
     r->busy = TRUE;
     r->seen = 0;
     SendIO((struct IORequest *)&r->io);
-    return ERR_OK;
 }
 
 static LONG ctl_cmd(struct sanaif *s, UWORD cmd);

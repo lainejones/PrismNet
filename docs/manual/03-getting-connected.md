@@ -1,32 +1,56 @@
 # Getting connected
 
+Everything here can be done from Workbench with PrismNet Prefs and PrismMon;
+the Shell commands are there for scripts and for those who prefer them.
+
+## Setting up the network card
+
+The installer asks for the card's driver and whether the router gives the
+address (DHCP) or you type it in. To change that later, open **PrismNet
+Prefs** (`SYS:Prefs/PrismNet`), **Interfaces** tab:
+
+1. **Device**: the card's SANA-II driver; `...` picks it from
+   `DEVS:Networks`. **Unit** is almost always 0.
+2. **Mode**: **DHCP** for most home networks. For **Static**, fill in
+   *Address*, *Netmask* and *Gateway* (the router), and give the name
+   servers on the **Network** tab.
+3. **Save**. If PrismNet is running, Prefs offers to restart it with the new
+   settings.
+
+See [PrismNet Prefs](04-prefs.md) for every field.
+
 ## Starting PrismNet
 
 Usually there is nothing to do: with **Start when needed** on (the
 default), the first program that opens `bsdsocket.library` starts PrismNet
-and waits until it has an address. To start it yourself, open a Shell:
+and waits until it has an address.
+
+To start it yourself, open **PrismMon** (in `SYS:Tools`) and click
+**Start**. Its Status tab shows the address once DHCP has given one (that
+can take a few seconds). Or, in a Shell:
 
 ```
 PrismNet START
 ```
 
-It starts the stack in the background, waits for the addresses (DHCP can
-take a few seconds) and prints the status. If it can't start, it says why:
-a driver it can't open, not enough memory, no settings.
+which starts the stack in the background, waits for the addresses and
+prints the status. If it can't start, PrismMon's Log tab (or the Shell)
+says why: a driver it can't open, not enough memory, no settings.
 
 To have it running from boot, tick **Start at boot** in PrismNet Prefs
 (Startup tab), or answer yes in the installer.
 
 ## Checking it works
 
-```
-PrismNet STATUS
-```
+In **PrismMon**, the **Status** tab shows whether PrismNet runs, each
+interface's address and link, and the DNS servers; **Interfaces** adds the
+netmask, gateway and the packets going in and out. An address and a link
+that is up, with packets counting in both directions, mean the card works.
+Then open a web page in your browser: if it loads, DNS and the internet
+work too.
 
-shows each interface with its address, netmask, gateway and link state,
-the DNS servers, how much memory the stack uses, and how many programs are
-using it. Then try, in this
-order:
+In a Shell, `PrismNet STATUS` shows the same, and `ping` tests each step,
+in this order:
 
 ```
 ping 192.168.1.1          your router: the network card and cabling work
@@ -39,13 +63,15 @@ all three answer, every network program should work.
 
 ## Stopping it
 
+Click **Stop** in PrismMon, or in a Shell:
+
 ```
 PrismNet STOP
 ```
 
-closes every connection and lets go of the network card. Programs that
-still have `bsdsocket.library` open get errors until it is started again.
-PrismMon has Start and Stop buttons too.
+Either closes every connection and lets go of the network card. Programs
+that still have `bsdsocket.library` open get errors until it is started
+again.
 
 ## How other computers find the Amiga
 

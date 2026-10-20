@@ -70,11 +70,13 @@ developers: send it with a problem report.
 - **CD32 with `slip.device` 37.4 (1993)**: after `PrismNet STOP`, a
   `PrismNet START` can hang while opening the driver; the machine gets
   sluggish and the network stays down until a reboot. A reboot starts
-  cleanly. Other drivers restart fine.
+  cleanly. Use PrismNet's built-in SLIP instead (`DEVICE=serial.device`,
+  see [Serial links](11-serial.md)): it restarts fine and is as fast.
 - **`amiga.local` does not resolve** on some cards: the network driver
   refuses the mDNS group address. `PrismNet LOG` then says "refused
-  multicast". The X-Surf driver 1.16 does; the DaynaPORT driver from 1.6 on
-  (scsidayna.device) and the ZZ9000 accept it. Windows still finds the Amiga
+  multicast". The X-Surf driver 1.16 and the A314's a314eth.device do; the
+  DaynaPORT driver from 1.7 on (scsidayna.device, with `MULTICAST=1`), the
+  ZZ9000 and [xsurfnet.device](https://github.com/lainejones/XSurfNet) accept it. Windows still finds the Amiga
   by its NetBIOS name (`ping A2000`).
 - **IPv6** isn't supported yet.
 

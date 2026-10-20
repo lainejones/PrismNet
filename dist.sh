@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=0.6.3
+VER=0.6.4
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").

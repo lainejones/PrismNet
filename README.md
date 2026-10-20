@@ -142,7 +142,7 @@ any AmiTCP-compatible stack.
 | Amiga 2000, 68030 | X-Surf |
 | Amiga 1200, 68030 | A314 |
 | Amiga 500, 68030 | BlueSCSI DaynaPORT |
-| CD32, 68030 | serial SLIP |
+| CD32, 68030 | built-in SLIP over `serial.device` (115200 baud) |
 | WinUAE, OS 3.2 | NE2000 PCMCIA, X-Surf |
 
 ## Installing
@@ -170,7 +170,8 @@ exist and return 0).
 
 **Known issue:** on the CD32's `slip.device` 37.4 (1993), `PrismNet STOP`
 followed by `START` can leave the stack stuck opening the driver until a
-reboot. Other drivers restart fine.
+reboot. PrismNet's built-in SLIP doesn't have the problem and is as fast; see
+[Serial links](docs/manual/11-serial.md) for moving over.
 
 ## Licence
 

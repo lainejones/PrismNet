@@ -183,6 +183,16 @@ $(OUT)/PrismNet: $(CORE_OBJ) $(PORT_OBJ) $(OBJ)/liblwip.a $(STDIO_OBJ)
 	@mkdir -p $(OUT)
 	$(CC) $(LDFLAGS) -Wl,-u,___stkinit -s -o $@ $^
 
+# developer tools: pcsample (sampling profiler, see docs/PERFORMANCE.md) and an
+# unstripped core with the same code as out/PrismNet, for tools/pcsample.py
+prof-tools: $(OUT)/pcsample $(OUT)/PrismNet.sym
+$(OUT)/pcsample: tools/pcsample.c
+	@mkdir -p $(OUT)
+	$(CC) $(CPU) -O2 -noixemul -Wall -Wno-pointer-sign -fomit-frame-pointer -s -o $@ $<
+$(OUT)/PrismNet.sym: $(CORE_OBJ) $(PORT_OBJ) $(OBJ)/liblwip.a $(STDIO_OBJ)
+	@mkdir -p $(OUT)
+	$(CC) $(LDFLAGS) -Wl,-u,___stkinit -o $@ $^
+
 $(OUT)/carddiag: $(OBJ)/tools/carddiag.o $(STDIO_OBJ)
 	@mkdir -p $(OUT)
 	$(CC) $(LDFLAGS) -s -o $@ $^

@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=0.6.4
+VER=0.6.5
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -17,6 +17,7 @@ for pair in "out/PrismNet:core port lwip/src" "out/small/PrismNet:core port lwip
             "out/prismnfs-handler:tools/nfs tools/netfs" "out/ShareUnmount:tools/netfs/shareunmount.c" \
             "out/prismsmb-handler:tools/smb/smb_start.S tools/netfs/core.c tools/netfs/names.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/smb/backend.c tools/smb/smb2.c tools/smb/crypto.c tools/smb/passreq.c tools/netfs/*.h tools/smb/*.h" \
             "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" \
+            "out/PrismNetUpdate:tools/update" \
             "out/SMBShares:tools/smb/smbshares.c tools/smb/smb2.c tools/smb/crypto.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/netfs/*.h tools/smb/*.h"; do
     bin=${pair%%:*}; srcs=${pair#*:}
     if [ ! -f "$bin" ] || [ -n "$(find $srcs -newer "$bin" \( -name '*.c' -o -name '*.h' -o -name '*.S' \) 2>/dev/null | head -1)" ]; then
@@ -31,7 +32,11 @@ fi
 rm -rf dist
 mkdir -p $D/C $D/L $D/Libs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Docs
 
-cp dist-src/Install_PrismNet dist-src/README $D/
+# the installer says which version it installs
+sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
+cp dist-src/README $D/
+# the update tool must name the same version (tools/update/upd_cfg.h)
+grep -q "PrismNetUpdate $VER " out/PrismNetUpdate || { echo "dist.sh: out/PrismNetUpdate is not $VER" >&2; exit 1; }
 cp LICENSE                               $D/Docs/
 cp lwip/COPYING                          $D/Docs/lwIP-COPYING
 cp out/PrismNet out/ping out/traceroute out/nslookup $D/C/
@@ -40,6 +45,7 @@ cp out/prismnfs-handler                  $D/L/            # optional NFS client
 cp out/prismsmb-handler                  $D/L/            # optional SMB client
 cp out/ShareUnmount out/SMBShares        $D/C/
 cp out/inetd out/ftpd out/telnetd        $D/C/            # optional servers
+cp out/PrismNetUpdate                    $D/C/            # the update check (68020+)
 cp dist-src/PNFS0 dist-src/PSMB0         $D/Storage/DOSDrivers/
 PN_GUIDEVER="$VER ($(date +%d.%m.%Y))" python tools/mkguide.py docs/manual $D/PrismNet.guide >/dev/null   # the manual
 cp out/PrismNetPrefs                     $D/Prefs/PrismNet

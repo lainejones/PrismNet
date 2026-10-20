@@ -83,6 +83,11 @@ password can't log in to the FTP or telnet server; the list shows it as
   block that Prefs and the installer manage).
 - **Memory budget (KB)**: the most memory PrismNet may use for packets and
   connections. Empty means the default. See [Small machines](12-memory.md).
+- **Updates**: where **Check now** looks for a newer PrismNet: Off, GitHub,
+  Mirror, or GitHub, then mirror. **Check now** checks and, when there is a
+  newer release, offers to download and install it.
+- **Mirror**: a mirror's address, for Mirror or GitHub, then mirror.
+  See [Checking for updates](02-installing.md#checking-for-updates).
 
 ## Shares
 

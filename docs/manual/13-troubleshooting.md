@@ -57,6 +57,27 @@ request the program sent to the stack (the operation, socket, arguments,
 result and error code) between the log messages. It is meant for the
 developers: send it with a problem report.
 
+## A WHDLoad game hangs on a black screen
+
+WHDLoad takes the whole Amiga over for a game. A network card that keeps
+signalling new packets then has nobody to answer it, and some games hang
+(The Settlers does, with an X-Surf); others don't mind. The cure is to
+switch the network off while a game runs. WHDLoad runs a command of your
+choice before each game and another after it, so this does it for every
+game. The installer offers it when WHDLoad is installed; by hand, add two
+lines to `S:WHDLoad.prefs`:
+
+```
+ExecuteStartup=C:PrismNet STOP HOLD QUIET
+ExecuteCleanup=C:PrismNet START
+```
+
+or run `rx WHDLoadHooks.rexx ADD` from the archive's Tools drawer (`REMOVE`
+takes them out again). `HOLD` keeps PrismNet off until the game ends, even
+if something asks for the network meanwhile. If you already have
+ExecuteStartup/ExecuteCleanup commands, put the PrismNet ones in the
+scripts they run.
+
 ## The FTP or telnet server doesn't answer
 
 - Is the server switched on? Prefs, Services tab; `ENV:PrismNet/services`

@@ -65,6 +65,18 @@
     (if (exists "C:PrismNet" (noreq))
         (run "C:PrismNet STOP >NIL:")))
 
+; Tools/WHDLoadHooks.rexx edits S:WHDLoad.prefs (Installer can't edit a
+; line); ARexx needs RexxMast, which a normal boot starts but a minimal one
+; may not. whd_rc = WHDLoadHooks.rexx's answer, or -1 without ARexx.
+(procedure P_WHDHOOKS
+    (if (not (exists "SYS:System/RexxMast" (noreq)))
+        (set whd_rc -1)
+      (
+        (run "SYS:System/RexxMast >NIL:")
+        (run "WaitForPort >NIL: REXX")
+        (set whd_rc (run (cat "RX Tools/WHDLoadHooks.rexx " whd_mode) (safe)))
+      )))
+
 ; =========================================================================
 ; REMOVE
 ; =========================================================================
@@ -119,6 +131,9 @@
       ))
     ; the drawer goes only if nothing else is left in it
     (run (cat "Delete >NIL: " bakdir " QUIET"))
+    ; WHDLoad: PrismNet's ExecuteStartup/ExecuteCleanup lines out again
+    (if (exists "S:WHDLoad.prefs" (noreq))
+        ((set whd_mode "REMOVE") (P_WHDHOOKS)))
     ; the share clients, if they were installed: the handlers, the tools, and
     ; the mount files only while they are still PrismNet's (a user's own copy stays)
     (if (exists "L:prismnfs-handler" (noreq)) (delete "L:prismnfs-handler"))
@@ -300,6 +315,38 @@
                 (choices "FTP server (copy files to and from this Amiga)"
                          "Telnet server (a Shell from another computer)")
                 (default 0)))
+
+;; WHDLoad: a network card's interrupts hang some games once WHDLoad has taken
+;; the machine over; WHDLoad's ExecuteStartup/ExecuteCleanup stop PrismNet for
+;; the game and start it after
+(set whd_add 0)
+(set whd_note "")
+(if (or (exists "C:WHDLoad" (noreq)) (exists "S:WHDLoad.prefs" (noreq)))
+  (
+    (set whd_mode "CHECK") (P_WHDHOOKS)
+    (if (= whd_rc 0)
+        (set whd_add
+            (askbool (prompt "WHDLoad is installed.\n\n"
+                             "Switch the network off while a WHDLoad game runs, and back on "
+                             "when you quit it?")
+                     (help "WHDLoad takes the whole Amiga over for a game. A network card "
+                           "that keeps signalling new packets then hangs some games: a black "
+                           "screen until you reset (The Settlers does it with an X-Surf).\n\n"
+                           "This adds two lines to S:WHDLoad.prefs:\n"
+                           "ExecuteStartup=C:PrismNet STOP HOLD QUIET\n"
+                           "ExecuteCleanup=C:PrismNet START\n\n"
+                           "\"Remove PrismNet\" takes them out again.")
+                     (choices "Yes" "No") (default 1))))
+    (if (= whd_rc 10)
+        (set whd_note (cat "WHDLoad already runs commands of its own before and after a game "
+                           "(ExecuteStartup/ExecuteCleanup in S:WHDLoad.prefs): add "
+                           "\"C:PrismNet STOP HOLD QUIET\" and \"C:PrismNet START\" to them "
+                           "so the network is off while a game runs.\n")))
+    (if (= whd_rc -1)
+        (set whd_note (cat "WHDLoad: add ExecuteStartup=C:PrismNet STOP HOLD QUIET and "
+                           "ExecuteCleanup=C:PrismNet START to S:WHDLoad.prefs so the network "
+                           "is off while a game runs (ARexx was not available to do it).\n")))
+  ))
 
 ; ---- questions: settings ----------------------------------------------------------
 (set arc "ENVARC:PrismNet")
@@ -544,6 +591,13 @@
         (help "PrismNet Prefs can switch this off later.")
         (command "C:PrismNet START >NIL:"))
     (if atboot (run (cat "\"" (tackon prefsdir "PrismNet") "\" BOOT=NO >NIL:"))))
+(if whd_add
+    ((set whd_mode "ADD") (P_WHDHOOKS)
+     (if (<> whd_rc 0)
+       (
+         (set whd_add 0)
+         (set whd_note "WHDLoad: S:WHDLoad.prefs could not be changed; see the manual, Troubleshooting.\n")
+       ))))
 (complete 90)
 
 (if startnow
@@ -557,6 +611,8 @@
          (if servers "Servers: give users a password in Prefs > Users\n" "")
          (if (<> kept " ") (cat "Kept your own" kept "in C:; PrismNet's are in Tools/Net of the archive.\n") "")
          mounts_kept
+         (if whd_add "WHDLoad games: the network is off while one runs.\n" "")
+         whd_note
          "\nIn a Shell: PrismNet STATUS, START, STOP, LOG.\n"
          (if foreign "\nReboot now so programs use PrismNet instead of your old stack." ""))
 (exit (quiet))

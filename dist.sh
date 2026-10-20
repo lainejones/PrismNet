@@ -54,6 +54,7 @@ cp out/PrismNetPrefs                     $D/Prefs/PrismNet
 cp icons/PrismNetPrefs.info              $D/Prefs/PrismNet.info
 cp out/PrismMon icons/PrismMon.info      $D/Tools/
 cp out/bsdtest out/ugtest                $D/Tools/
+cp dist-src/WHDLoadHooks.rexx            $D/Tools/        # WHDLoad hooks (installer + by hand)
 cp out/small/PrismNet                    $D/Tools/Small/  # the core for 1-2 MB machines
 cp out/ping out/traceroute out/nslookup out/httpbench $D/Tools/Net/
 cp tools/bench/benchserver.py tools/bench/namequery.py $D/Tools/Net/

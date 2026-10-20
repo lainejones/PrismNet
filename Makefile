@@ -139,7 +139,10 @@ $(OUT)/hashbench: tools/smb/hashbench.c tools/smb/crypto.c
 $(OUT)/SMBShares: tools/smb/smbshares.c tools/smb/smb2.c tools/smb/crypto.c tools/netfs/net_amiga.c tools/netfs/nbname.c $(SMB_H)
 	@mkdir -p $(OUT)
 	$(CC) $(CFLAGS) -Itools/netfs -Itools/smb $(LDFLAGS) -s -o $@ tools/smb/smbshares.c tools/smb/smb2.c tools/smb/crypto.c tools/netfs/net_amiga.c tools/netfs/nbname.c
-smb: $(OUT)/prismsmb-handler $(OUT)/hashbench $(OUT)/SMBShares
+smb: $(OUT)/prismsmb-handler $(OUT)/hashbench $(OUT)/SMBShares $(OUT)/dirbench
+$(OUT)/dirbench: tools/netfs/dirbench.c
+	@mkdir -p $(OUT)
+	$(CC) $(CFLAGS) $(LDFLAGS) -s -o $@ $<
 
 # Host tests of the SMB layer (native gcc, WSL): crypto vectors, smbtool
 SMB_HOST = -O1 -Wall -Itools/netfs -Itools/smb

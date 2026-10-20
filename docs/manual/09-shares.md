@@ -114,3 +114,12 @@ which PrismNet always does when asked; it costs some speed on a slow CPU.
 Around 600 KB/s both ways on a 68030 with fast RAM over Ethernet. A mounted
 NFS share costs about 64 KB; SMB with signing is slower on a 68000 or
 68020 (the hashing takes CPU time).
+
+**Folders with icons.** Showing a folder as icons means opening every
+`.info` file in it. The SMB client keeps the last three folders it listed for
+10 seconds and answers from them whether a file is there, and reads a small
+file with a single request (open, read and close together), so an icon costs
+one trip to the server instead of four or five. A folder of 195 entries with
+105 icons took 3.3 s to load its icons on an A4000, against 9.3 s before.
+Anything changed from the Amiga is seen at once; a file another computer adds
+to a folder just listed can take up to those 10 seconds to appear.

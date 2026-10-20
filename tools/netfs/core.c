@@ -84,6 +84,8 @@ struct NFile {
     int verf_set;
     u8  verf[8];                        /* write verifier of this file's WRITEs */
     LONG werr;                          /* sticky error from a failed write-behind */
+    u32 eofpos;                         /* where the server said the file ends... */
+    int eofknown;                       /* ...until it is written to or resized */
 };
 
 struct NetState M;
@@ -714,6 +716,8 @@ static LONG do_read(struct NFile *f, u8 *buf, LONG len, LONG *err)
         int eof;
         long e;
 
+        if (f->eofknown && f->pos >= f->eofpos)
+            break;                      /* known to end here: no round trip to learn it again */
         if (f->lk->fl.fl_Key == (LONG)M.cfileid && f->pos >= M.coff && f->pos < M.coff + M.clen) {
             n = M.coff + M.clen - f->pos;
             if (n > (u32)len) n = len;
@@ -736,6 +740,10 @@ static LONG do_read(struct NFile *f, u8 *buf, LONG len, LONG *err)
         if (e) {
             *err = ioerr(e);
             return total ? total : -1;
+        }
+        if (eof) {
+            f->eofknown = 1;
+            f->eofpos = f->pos + got;
         }
         if (!got)
             break;
@@ -973,6 +981,7 @@ static LONG do_write(struct NFile *f, const u8 *buf, LONG len, LONG *err)
     LONG total = 0;
     long e;
 
+    f->eofknown = 0;
     if (M.readonly) { *err = ERROR_DISK_WRITE_PROTECTED; return -1; }
     if (f->werr)    { *err = f->werr; return -1; }
     if (!f->wbuf && !(f->wbuf = AllocVec(M.wsize, MEMF_PUBLIC))) {
@@ -1465,6 +1474,7 @@ void handler_main(void)
                 r1 = -1;
                 if (M.readonly) { r2 = ERROR_DISK_WRITE_PROTECTED; break; }
                 if ((r2 = sync_file(f))) break;
+                f->eofknown = 0;
                 ns = dp->dp_Arg3 == OFFSET_END ? (LONG)f->size + dp->dp_Arg2
                    : dp->dp_Arg3 == OFFSET_CURRENT ? (LONG)f->pos + dp->dp_Arg2 : dp->dp_Arg2;
                 if (ns < 0) { r2 = ERROR_SEEK_ERROR; break; }

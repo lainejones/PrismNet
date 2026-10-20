@@ -67,14 +67,18 @@
 
 ; Tools/WHDLoadHooks.rexx edits S:WHDLoad.prefs (Installer can't edit a
 ; line); ARexx needs RexxMast, which a normal boot starts but a minimal one
-; may not. whd_rc = WHDLoadHooks.rexx's answer, or -1 without ARexx.
+; may not. RX and WaitForPort are in SYS:Rexxc, which only a Shell's path
+; has: started from its icon the installer found neither (seen on the
+; A2000), so they are called by their full names. whd_rc =
+; WHDLoadHooks.rexx's answer, or -1 without ARexx.
 (procedure P_WHDHOOKS
-    (if (not (exists "SYS:System/RexxMast" (noreq)))
+    (if (or (not (exists "SYS:System/RexxMast" (noreq))) (not (exists "SYS:Rexxc/RX" (noreq))))
         (set whd_rc -1)
       (
         (run "SYS:System/RexxMast >NIL:")
-        (run "WaitForPort >NIL: REXX")
-        (set whd_rc (run (cat "RX Tools/WHDLoadHooks.rexx " whd_mode) (safe)))
+        (if (exists "SYS:Rexxc/WaitForPort" (noreq))
+            (run "SYS:Rexxc/WaitForPort >NIL: REXX"))
+        (set whd_rc (run (cat "SYS:Rexxc/RX Tools/WHDLoadHooks.rexx " whd_mode) (safe)))
       )))
 
 ; =========================================================================

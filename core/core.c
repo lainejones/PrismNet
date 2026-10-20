@@ -52,9 +52,10 @@ unsigned long __stack = 16384;
 #define CORE_PRI 3   /* above normal apps so the stack isn't starved */
 
 #define TEMPLATE "START/S,RUN/S,STOP/S,STATUS/S,LOG/S,NETSTAT/S,DEVICE/K,UNIT/K/N,IP/K,NETMASK/K," \
-                 "GATEWAY/K,DNS/K,DNS2/K,HOSTNAME/K,TRACE/K,QUIET/S,SETCLOCK/S,ROUTE/S,ARP/S"
+                 "GATEWAY/K,DNS/K,DNS2/K,HOSTNAME/K,TRACE/K,QUIET/S,SETCLOCK/S,ROUTE/S,ARP/S,HOLD/S"
 enum { A_START, A_RUN, A_STOP, A_STATUS, A_LOG, A_NETSTAT, A_DEVICE, A_UNIT, A_IP, A_NETMASK,
-       A_GATEWAY, A_DNS, A_DNS2, A_HOSTNAME, A_TRACE, A_QUIET, A_SETCLOCK, A_ROUTE, A_ARP, A_COUNT };
+       A_GATEWAY, A_DNS, A_DNS2, A_HOSTNAME, A_TRACE, A_QUIET, A_SETCLOCK, A_ROUTE, A_ARP, A_HOLD,
+       A_COUNT };
 
 struct PnCore core;
 
@@ -1047,28 +1048,56 @@ static int cmd_status(void)
     return RETURN_OK;
 }
 
-static int cmd_stop(void)
+/* STOP waits for the core's process itself, not only its port: the port
+ * goes first and the network devices are closed after it, so a program
+ * that takes the machine over as soon as STOP returns (WHDLoad's
+ * ExecuteStartup) could still have the card's interrupt live. HOLD keeps
+ * it from being started again by a program until START. */
+static int cmd_stop(BOOL hold)
 {
     struct MsgPort *port;
+    struct Task *task = NULL;
+    char name[40];
+    BOOL gone = FALSE;
     int i;
 
+    if (hold) {
+        BPTR f = Open((CONST_STRPTR)PN_HELD_FILE, MODE_NEWFILE);
+        if (f) {
+            Write(f, "held by PrismNet STOP HOLD until PrismNet START\n", 48);
+            Close(f);
+        }
+    }
+    name[0] = 0;
     Forbid();
-    if ((port = FindPort((CONST_STRPTR)PN_PORTNAME)) != NULL)
-        Signal(port->mp_SigTask, SIGBREAKF_CTRL_C);
+    if ((port = FindPort((CONST_STRPTR)PN_PORTNAME)) != NULL) {
+        task = port->mp_SigTask;
+        if (task->tc_Node.ln_Name) {
+            strncpy(name, task->tc_Node.ln_Name, sizeof(name) - 1);
+            name[sizeof(name) - 1] = 0;
+        }
+        Signal(task, SIGBREAKF_CTRL_C);
+    }
     Permit();
     if (!port) {
-        printf("PrismNet is not running.\n");
-        return RETURN_WARN;
+        if (!quiet)
+            printf(hold ? "PrismNet is not running; held off until PrismNet START.\n"
+                        : "PrismNet is not running.\n");
+        return hold ? RETURN_OK : RETURN_WARN;
     }
-    for (i = 0; i < 50; i++) {          /* wait up to 5 s for it to go */
+    for (i = 0; i < 100 && !gone; i++) {    /* up to 10 s for the process to end */
+        struct Task *t;
         Forbid();
-        port = FindPort((CONST_STRPTR)PN_PORTNAME);
+        t = name[0] ? FindTask((CONST_STRPTR)name) : NULL;
+        gone = !FindPort((CONST_STRPTR)PN_PORTNAME) && t != task;
         Permit();
-        if (!port) break;
-        Delay(5);
+        if (!gone)
+            Delay(5);
     }
-    printf(port ? "PrismNet is stopping.\n" : "PrismNet stopped.\n");
-    return RETURN_OK;
+    if (!quiet)
+        printf(!gone ? "PrismNet is stopping.\n" :
+               hold ? "PrismNet stopped; held off until PrismNet START.\n" : "PrismNet stopped.\n");
+    return gone ? RETURN_OK : RETURN_WARN;
 }
 
 /* The reason the core gave for not starting, if it left one. */
@@ -1892,12 +1921,15 @@ int main(void)
         return RETURN_FAIL;
     }
     if (args[A_STATUS]) { rc = cmd_status(); FreeArgs(rda); return rc; }
-    if (args[A_STOP])   { rc = cmd_stop();   FreeArgs(rda); return rc; }
+    quiet = args[A_QUIET] != 0;
+    if (args[A_STOP])   { rc = cmd_stop(args[A_HOLD] != 0); FreeArgs(rda); return rc; }
     if (args[A_LOG])    { rc = cmd_log();    FreeArgs(rda); return rc; }
     if (args[A_NETSTAT]){ rc = cmd_netstat(); FreeArgs(rda); return rc; }
     if (args[A_ROUTE])  { rc = cmd_route();   FreeArgs(rda); return rc; }
     if (args[A_ARP])    { rc = cmd_arp();     FreeArgs(rda); return rc; }
     if (args[A_SETCLOCK]){ rc = cmd_setclock(); FreeArgs(rda); return rc; }
+    /* anything that starts the core ends a STOP HOLD */
+    DeleteFile((CONST_STRPTR)PN_HELD_FILE);
     /* START (or no arguments at all): detach and report. DEVICE= or RUN: foreground. */
     if (args[A_START] || (!args[A_RUN] && !args[A_DEVICE])) {
         rc = cmd_start((const char *)args[A_TRACE]);

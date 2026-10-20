@@ -22,6 +22,10 @@
 #include <exec/nodes.h>
 
 #define PN_PORTNAME        "PrismNet.core"
+/* "PrismNet STOP HOLD" (before a WHDLoad game) leaves this file: no
+ * auto-start while it is there, until "PrismNet START" (ENV: is in RAM, so
+ * a reboot clears it too) */
+#define PN_HELD_FILE       "ENV:PrismNet/held"
 #define PN_PROTO_VERSION   1
 
 enum {

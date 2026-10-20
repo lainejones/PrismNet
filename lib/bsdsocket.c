@@ -315,6 +315,10 @@ static BOOL autostart_core(struct PnBase *b)
     if (!lock)
         return FALSE;                   /* not configured */
     UnLock(lock);
+    if ((lock = Lock((CONST_STRPTR)PN_HELD_FILE, ACCESS_READ)) != 0) {
+        UnLock(lock);
+        return FALSE;                   /* held off (STOP HOLD) until START */
+    }
 
     strcpy(cmd, "C:PrismNet");
     if ((fh = Open((CONST_STRPTR)"ENV:PrismNet/startup", MODE_OLDFILE)) != 0) {

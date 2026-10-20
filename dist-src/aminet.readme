@@ -34,6 +34,8 @@ What you get
   point-to-point driver.
 - An update check (68020+ with AmiSSL 5): PrismNet Prefs tells you when a
   newer PrismNet is out and can install it.
+- WHDLoad games: the installer can switch the network off while a game runs
+  and back on when you quit it (some games hang otherwise).
 - Tools: ping, traceroute, nslookup, httpbench.
 - An AmigaGuide manual.
 

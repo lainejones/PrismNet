@@ -19,6 +19,17 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.1** (2026-10-20): WHDLoad games. A game that takes the whole Amiga
+  over could hang on a black screen while the network card kept signalling
+  (The Settlers with an X-Surf). `PrismNet STOP HOLD` stops the network and
+  keeps it stopped until `START`, and the installer offers WHDLoad's hooks
+  to do that around every game (see Troubleshooting). `STOP` now returns
+  only once PrismNet has really let go of the card. The installer opens in
+  Intermediate mode and names itself PrismNet. The update check: a mirror
+  that is not a Forgejo repository falls back to `latest.txt`, the result
+  line names the step that failed, and a beta looks at the newest version
+  rather than at the release GitHub lists first. The manual shows a
+  complete SMB mount file.
 - **1.0** (2026-10-20): the first full release, on five real Amigas (68030 and 68060;
   X-Surf, ZZ9000, BlueSCSI and ZuluSCSI DaynaPORT, A314, built-in SLIP).
   Network shares: a folder of icons on an SMB share loads about 2.8 times

@@ -181,6 +181,35 @@ waits on the driver for the rest, so the ZZ9000Net path (frames copied over
 Zorro III from the card's ARM side) looks like the ceiling, not the stack.
 Roadshow on the same machine would settle it; not measured yet.
 
+## Where an A2000's download time goes (2026-10-20, 0.6.5 + xsurfnet 1.2)
+
+A2000, TF536 68030 at 50 MHz, X-Surf with xsurfnet.device 1.2, `httpbench` 4 x 4 MB:
+**915 KB/s**, and the CPU is 100 % busy (CPUMeter). Sampled with `pcsample` every 2 ms
+(the sampling itself costs about 10 %: 821 KB/s while it runs).
+
+Samples taken while the PrismNet task had been pre-empted:
+
+| Share | Where |
+|---:|---|
+| 19 % | `pn_chksum` - the TCP checksum of each received segment |
+| 18 % | the OS (exec in ROM: messages, signals, Disable/Enable) |
+| 17 % | `tcp_input` - spread evenly over its 9 KB, no single hot loop |
+| 7 % | the driver's own request handling (and its software interrupt) |
+| 6 % | `sanaif_poll` |
+| 5 % | `ip4_input` |
+| 4 % | `pbuf_cat` - appending a segment to a socket's receive queue walks the chain |
+| 3 % each | `pbuf_alloc`, `inet_chksum_pseudo`, `pn_systime`, `pn_mem_malloc` |
+
+The receiving program's task is nearly always either waiting for PrismNet's
+semaphore or woken and waiting for the CPU; its own work is a few per cent.
+
+**The checksum is at memory speed.** On the same machine `pn_chksum` sums 15.9 MB/s
+of 1460-byte segments in fast RAM (about 92 us a segment); a `movem.l` burst
+variant was slower (14.4 MB/s) and was dropped. What is left to gain in the core
+is a few per cent per item (the receive queue, the per-frame driver calls, the
+clock read), or skipping the receive checksum on Ethernet, which was measured
+before at about 5 % and kept on: it is what catches a driver or bus fault.
+
 ## Tools
 
 - `httpbench ... CALLS=n`: n× `getsockopt(SO_TYPE)` and n× `recv(MSG_DONTWAIT)` on
@@ -189,6 +218,13 @@ Roadshow on the same machine would settle it; not measured yet.
   passes (`PrismNet LOG`), and the first `LOG` request also logs pbuf pool use,
   queued SANA-II reads, every TCP pcb's window state and every pending request.
   The profiling marks themselves cost ~26 ticks (~37 µs) each.
+- `make prof-tools`: `out/pcsample` and `out/PrismNet.sym` (an unstripped core with
+  the same code as `out/PrismNet`). `pcsample TASK TASK2 SECONDS=n US=2000 TO=file`
+  (TASK2 may be a name prefix ending in `*`, written `**` inside quotes) records the
+  saved context of each watched task whenever it has just been pre-empted;
+  `MSYS_NO_PATHCONV=1 python tools/pcsample.py file out/PrismNet.sym CODEBASE CODESIZE`
+  maps the PCs onto functions (CODEBASE/CODESIZE from NetHarness `TASKS`). Code outside
+  the core shows up as addresses; NetHarness `DISASM`/`PEEK` tell what they are.
 - `make diag`: `out/diag/PrismNet` publishes its loop state in a public port
   `PrismNet.diag`; `out/diag/pndiag` reads it **without** messaging the core (so it
   can't wake a core that has lost a wakeup). Run it from a background loop.

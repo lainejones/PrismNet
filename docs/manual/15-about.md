@@ -19,6 +19,10 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **0.6.3** (2026-10-19): offers network drivers SANA-II's direct buffers
+  (`S2_DMACopyToBuff32`/`S2_DMACopyFromBuff32`), so a driver that supports them
+  skips a copy of every packet: faster uploads on the A1200's A314, the
+  A4000's ZZ9000 and the X-Surf with xsurfnet.device 1.1.
 - **0.6.2** (2026-10-19): with two network cards, a NetBIOS name query is
   answered with the address of the card it came in on; a driver that refuses
   the multicast write command gets plain writes instead.

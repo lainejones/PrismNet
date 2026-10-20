@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=0.6.5
+VER=1.0
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -34,6 +34,8 @@ mkdir -p $D/C $D/L $D/Libs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/Prism
 
 # the installer says which version it installs
 sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
+# the Aminet readme goes next to the archive (dist/PrismNet.readme), not in it
+sed "s/@VER@/$VER/" dist-src/aminet.readme > dist/PrismNet.readme
 cp dist-src/README $D/
 # the update tool must name the same version (tools/update/upd_cfg.h)
 grep -q "PrismNetUpdate $VER " out/PrismNetUpdate || { echo "dist.sh: out/PrismNetUpdate is not $VER" >&2; exit 1; }

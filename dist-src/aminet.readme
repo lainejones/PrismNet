@@ -1,0 +1,80 @@
+Short:        Open-source TCP/IP stack, AmigaOS 3.1+
+Author:       Laine Jones
+Uploader:     Laine Jones (UPLOADER-EMAIL)
+Type:         comm/tcp
+Version:      @VER@
+Architecture: m68k-amigaos >= 3.1.0
+Requires:     a SANA-II network driver
+Distribution: Aminet
+URL:          https://github.com/lainejones/PrismNet
+
+PrismNet is a free, open-source TCP/IP stack for classic Amigas: AmigaOS 3.1
+or newer, any 68000 or better. It connects the Amiga to your network and the
+internet through any SANA-II network driver, and provides the same
+bsdsocket.library as AmiTCP, Miami and Roadshow, so the network programs you
+already have - web browsers, wget, FTP, IRC, mail - run unchanged. The
+networking core is lwIP 2.2.1.
+
+What you get
+------------
+- bsdsocket.library (the AmiTCP 4 API, plus the Roadshow extensions newer
+  programs use) and usergroup.library.
+- The PrismNet command: START, STOP, STATUS, NETSTAT, ROUTE, ARP, LOG,
+  SETCLOCK.
+- PrismNet Prefs: network cards, DHCP or fixed addresses, DNS, routes,
+  users, network shares and servers. It can import a Roadshow setup.
+- PrismMon: addresses, traffic, open connections, memory and the log, live.
+- DHCP, DNS (with mDNS for name.local), the clock from the network (SNTP),
+  NetBIOS and mDNS names so other computers find the Amiga by name.
+- Network shares (optional): an NFS export or an SMB 2/3 share (Windows,
+  macOS, a NAS, Samba) as an ordinary Amiga volume, signing and encryption
+  included.
+- Servers (optional): FTP and telnet, started on demand by inetd.
+- Serial links: built-in SLIP over serial.device, or any SANA-II
+  point-to-point driver.
+- An update check (68020+ with AmiSSL 5): PrismNet Prefs tells you when a
+  newer PrismNet is out and can install it.
+- Tools: ping, traceroute, nslookup, httpbench.
+- An AmigaGuide manual.
+
+Memory is taken as needed within a budget: about 290 KB while running, or
+about 175 KB with the small core for 1-2 MB machines (the installer offers
+it).
+
+Requirements
+------------
+- AmigaOS 3.1 or newer, any 68000 or better.
+- A SANA-II driver for your network hardware in DEVS:Networks (an Ethernet
+  card, a PCMCIA card, a SCSI DaynaPORT, an A314, ...), or a serial port.
+
+Installing
+----------
+Unpack the archive and double-click Install_PrismNet. It installs the
+libraries, the PrismNet command, PrismNet Prefs, PrismMon and the manual,
+and asks for your network driver and DHCP or a fixed address. Another
+stack's libraries and tools are saved in C:Backup, and "Remove PrismNet"
+puts them back. The installer asks all its questions first; updating keeps
+your settings and takes the network away for only a few seconds.
+
+Tested on
+---------
+Amiga 4000 (68060, ZZ9000 Ethernet), Amiga 2000 (68030, X-Surf), Amiga 1200
+(68030, A314 and ZuluSCSI DaynaPORT), Amiga 500 (68030, BlueSCSI
+DaynaPORT), CD32 (68030, built-in SLIP at 115200 baud), and WinUAE.
+
+Source and help
+---------------
+Source, manual and issues: https://github.com/lainejones/PrismNet
+Please report problems with the output of "PrismNet STATUS" and
+"PrismNet LOG".
+
+Thanks
+------
+The lwIP authors (Adam Dunkels, the Swedish Institute of Computer Science
+and the lwIP contributors). The SMB and NFS clients are written from the
+public specifications.
+
+Licence
+-------
+PrismNet is licensed under the GNU GPL version 3 (GPL-3.0-only). lwIP is
+under the BSD licence. Both licence texts are in the Docs drawer.

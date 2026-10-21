@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=1.0.3
+VER=1.0.4
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -67,7 +67,11 @@ I=dist-src/icons
 cp $I/Install_PrismNet.info $I/README.info $I/PrismNet.guide.info $D/
 cp $I/PNFS0.info $I/PSMB0.info           $D/Storage/DOSDrivers/
 cp $I/PrismNet.info                      dist/PrismNet.info      # the archive's own drawer
-for dr in C L Libs Prefs Tools Storage Docs Storage/PrismNet Storage/DOSDrivers Tools/Net Tools/Small; do
+# the top-level drawers: one icon each, each with its place in the window
+for dr in C L Libs Prefs Tools Storage Docs; do
+    cp $I/$dr.info $D/$dr.info
+done
+for dr in Storage/PrismNet Storage/DOSDrivers Tools/Net Tools/Small; do
     cp $I/drawer.info $D/$dr.info
 done
 

@@ -475,9 +475,11 @@
 (copyfiles (prompt "Installing PrismMon") (help @copyfiles-help)
            (source "Tools") (dest mondir) (choices "PrismMon" "PrismMon.info") (nogauge))
 (run (cat "Protect >NIL: \"" (tackon mondir "PrismMon") "\" +e"))
-; the manual, next to the monitor
-(copyfiles (prompt "Installing the PrismNet manual") (help @copyfiles-help)
-           (source "") (dest mondir) (choices "PrismNet.guide" "PrismNet.guide.info") (nogauge))
+; the manual, next to the monitor (not on the floppy, which has no room for
+; it: it is in the .lha and on GitHub)
+(if (exists "PrismNet.guide" (noreq))
+    (copyfiles (prompt "Installing the PrismNet manual") (help @copyfiles-help)
+               (source "") (dest mondir) (choices "PrismNet.guide" "PrismNet.guide.info") (nogauge)))
 
 ; ---- optional parts --------------------------------------------------------------
 (set mounts_kept "")
@@ -610,10 +612,12 @@
 (complete 100)
 (message "PrismNet is installed.\n\n"
          "PrismNet Prefs: " (tackon prefsdir "PrismNet") "\n"
-         "PrismMon and the manual: " mondir "\n"
+         (if (exists "PrismNet.guide" (noreq)) "PrismMon and the manual: " "PrismMon: ") mondir "\n"
+         (if (exists "PrismNet.guide" (noreq)) ""
+             "The manual is in the PrismNet .lha and on GitHub (lainejones/PrismNet).\n")
          (if shares "Network shares: set them up in Prefs > Shares\n" "")
          (if servers "Servers: give users a password in Prefs > Users\n" "")
-         (if (<> kept " ") (cat "Kept your own" kept "in C:; PrismNet's are in Tools/Net of the archive.\n") "")
+         (if (<> kept " ") (cat "Kept your own" kept "in C:; PrismNet's are in the C drawer of the archive.\n") "")
          mounts_kept
          (if whd_add "WHDLoad games: the network is off while one runs.\n" "")
          whd_note

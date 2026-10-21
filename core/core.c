@@ -40,7 +40,7 @@
 #include "core.h"
 #include "config.h"
 
-static const char version[] = "$VER: PrismNet 1.0.1 (20.10.2026) core";
+static const char version[] = "$VER: PrismNet 1.0.2 (21.10.2026) core";
 
 /* libnix startup swaps to a stack this big: lwIP callbacks nest deeply and
  * "Run" only gives the shell's default (often 4 KB). The gate's stress runs
@@ -2098,7 +2098,7 @@ int main(void)
         rc = RETURN_FAIL;
         goto out_sys;
     }
-    core_log("PrismNet 1.0.1 (lwIP %s) started, host %s, %d interface%s", LWIP_VERSION_STRING,
+    core_log("PrismNet 1.0.2 (lwIP %s) started, host %s, %d interface%s", LWIP_VERSION_STRING,
              core.hostname, nifs, nifs == 1 ? "" : "s");
 
     setup_default_route();

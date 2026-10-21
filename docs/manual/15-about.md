@@ -19,6 +19,11 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.2** (2026-10-21): an install floppy, `PrismNet-<version>.adf` (880 KB),
+  for Amigas with no other way to get the archive across yet. To fit on one
+  disk it leaves out the manual (in the `.lha` and on GitHub), the
+  duplicate network tools of `Tools/Net` and the test programs; the
+  installer copies the manual only when it is there.
 - **1.0.1** (2026-10-20): WHDLoad games. A game that takes the whole Amiga
   over could hang on a black screen while the network card kept signalling
   (The Settlers with an X-Surf). `PrismNet STOP HOLD` stops the network and

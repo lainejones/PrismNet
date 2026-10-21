@@ -17,7 +17,7 @@
 #define UPD_ASSET       "PrismNet-"                 /* the release archive: <asset><version>.lha */
 #define UPD_INSTALLER   "Install_PrismNet"          /* the Installer script in the archive */
 #ifndef UPD_VERSION                                 /* a test build may claim another */
-#define UPD_VERSION     "1.0.3"                     /* this release (dist.sh checks it) */
+#define UPD_VERSION     "1.0.4"                     /* this release (dist.sh checks it) */
 #endif
 #define UPD_RELDATE     "20.10.2026"
 #define UPD_PREFS_NAME  "ENV:PrismNet/startup"      /* named in messages */

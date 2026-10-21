@@ -19,6 +19,15 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.4** (2026-10-21): the update check no longer crashes the Amiga. With
+  AmiSSL 5 it could bring the machine down (gurus of every kind, mostly on the
+  second or third check): started from a Shell with a small stack it ran a
+  second copy of itself meant to have 64 KB of stack, which got the Shell's
+  4 KB instead, and AmiSSL overran it. It now runs on its own 64 KB stack.
+  The install floppy opens to a proper window with the installer in the top
+  row, and the drawer and floppy icons show on an OS 3.0/3.1 Workbench too
+  (they had only an 8x8 classic image). Install 1.0.4 by hand: an older
+  check may crash while looking for it.
 - **1.0.3** (2026-10-21): the update check works with GitHub again. GitHub began
   answering pretty-printed (a space after each colon) and every check through
   GitHub ended in "could not check for an update"; install 1.0.3 by hand once.

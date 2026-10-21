@@ -19,6 +19,9 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.3** (2026-10-21): the update check works with GitHub again. GitHub began
+  answering pretty-printed (a space after each colon) and every check through
+  GitHub ended in "could not check for an update"; install 1.0.3 by hand once.
 - **1.0.2** (2026-10-21): an install floppy, `PrismNet-<version>.adf` (880 KB),
   for Amigas with no other way to get the archive across yet. To fit on one
   disk it leaves out the manual (in the `.lha` and on GitHub), the

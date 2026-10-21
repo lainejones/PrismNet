@@ -113,6 +113,8 @@
 
     ; programs (the installer recorded where PrismMon and Prefs went)
     (if (exists "C:PrismNet" (noreq)) (delete "C:PrismNet"))
+    ; the update check (installed since 0.6.5; Remove left it behind until 1.0.5)
+    (if (exists "C:PrismNetUpdate" (noreq)) (delete "C:PrismNetUpdate"))
     ; network tools: delete only PrismNet's, then put back another stack's
     ; copy the installer saved in C:Backup
     (foreach "C" "(ping|traceroute|nslookup)"

@@ -62,7 +62,7 @@ cp out/ping out/traceroute out/nslookup out/httpbench $D/Tools/Net/
 cp tools/bench/benchserver.py tools/bench/namequery.py $D/Tools/Net/
 cp -r config/ENVARC-PrismNet/.           $D/Storage/PrismNet/
 
-# Icons: committed .info files only (tools/icons/regen_dist_icons.sh makes them)
+# Icons: the committed .info files in dist-src/icons and icons/, copied as they are
 I=dist-src/icons
 cp $I/Install_PrismNet.info $I/README.info $I/PrismNet.guide.info $D/
 cp $I/PNFS0.info $I/PSMB0.info           $D/Storage/DOSDrivers/

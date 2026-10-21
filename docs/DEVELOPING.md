@@ -114,8 +114,9 @@ converter turns those into buttons.
 laid out like SYS: (`C`, `Libs`, `Prefs`, `Tools`, `Storage`, `Docs`, each
 with a drawer icon), with `Install_PrismNet`, the README, `PrismNet.guide`
 and their icons. It refuses to package a
-binary older than its sources. Icons are committed `.info` files
-(`tools/icons/regen_dist_icons.sh` makes them).
+binary older than its sources. Icons are the committed `.info` files in
+`dist-src/icons/` and `icons/`, copied as they are; to change one, edit the
+`.info` itself (an icon editor on the Amiga) and commit it.
 
 **Installer test matrix** (all passed on 0.6.1, 2026-10-19, WinUAE *PrismNet
 install*, driven over NetHarness): (1) everything yes: both share clients, both

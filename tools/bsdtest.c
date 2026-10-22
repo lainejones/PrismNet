@@ -222,6 +222,14 @@ static void test_addrinfo(const char *host, ULONG expect_addr)
     LONG e, n;
 
     printf("[getaddrinfo/getnameinfo]\n");
+    /* Roadshow's newer calls (freeaddrinfo -804 ... getnameinfo -822): a
+     * stack whose library stops before them - the classic AmiTCP set, e.g.
+     * WinUAE's emulated bsdsocket.library - has no such entries, and the
+     * call jumped past the end of its table (an illegal instruction) */
+    if (SocketBase->lib_NegSize < 822) {
+        printf("  skipped: this bsdsocket.library has no getaddrinfo/getnameinfo\n");
+        return;
+    }
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_CANONNAME;

@@ -19,6 +19,11 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.5** (2026-10-21): Remove now also deletes C:PrismNetUpdate (it was
+  left behind). bsdtest no longer crashes on a bsdsocket.library that lacks
+  the newer getaddrinfo/getnameinfo calls (WinUAE's emulated one), and on a
+  stack other than PrismNet lists that stack's known differences as notes
+  instead of failures.
 - **1.0.4** (2026-10-21): the update check no longer crashes the Amiga. With
   AmiSSL 5 it could bring the machine down (gurus of every kind, mostly on the
   second or third check): started from a Shell with a small stack it ran a

@@ -34,6 +34,7 @@ GATEWAY=192.168.1.1
 | `CONFIG=` | `DHCP` or `STATIC` |
 | `ADDRESS=`, `NETMASK=`, `GATEWAY=` | the fixed address, for `STATIC` |
 | `MTU=` | the largest packet, if the driver's own value is wrong |
+| `STALL=` | milliseconds a packet may sit with the driver before PrismNet resets the card (500 to 60000, default 2000). Raise it for a card that is legitimately slow at times: a DaynaPORT on a SCSI bus shared with a ZuluSCSI's disks wants 10000 |
 | `SLIP=YES`, `BAUD=`, `RTSCTS=YES` | SLIP straight over a serial port; see [Serial links](11-serial.md) |
 
 ## routes

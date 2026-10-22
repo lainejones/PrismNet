@@ -19,6 +19,12 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.6** (2026-10-22): `STALL=` in an interface file sets how long a
+  packet may sit with the driver before PrismNet resets the card (the
+  default stays 2 seconds). A DaynaPORT on a SCSI bus it shares with a
+  ZuluSCSI's disks holds packets for seconds while the ZuluSCSI commits
+  writes, and PrismNet kept resetting it; `STALL=10000` lets it be. Found
+  on an A1200 with a DataFlyer SCSI+.
 - **1.0.5** (2026-10-21): Remove now also deletes C:PrismNetUpdate (it was
   left behind). bsdtest no longer crashes on a bsdsocket.library that lacks
   the newer getaddrinfo/getnameinfo calls (WinUAE's emulated one), and on a

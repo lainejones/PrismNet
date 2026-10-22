@@ -27,10 +27,18 @@
 
 struct Library *SocketBase;
 static LONG my_errno, my_herrno;
-static int fails, passes;
+static int fails, passes, notes;
+static BOOL prismnet;                   /* the library is PrismNet's own */
 
 #define CHECK(cond, ...) do { if (cond) { passes++; } else { fails++; printf("  FAIL: "); \
                          printf(__VA_ARGS__); printf(" (errno %ld)\n", (long)my_errno); } } while (0)
+/* A point where stacks are known to differ (an error code, socket events on
+ * accepted sockets): on PrismNet a failure, on another stack a note that is
+ * not counted - this tool tests PrismNet, and runs on others too. */
+#define CHECK_PN(cond, ...) do { if (cond) { passes++; } else if (prismnet) { fails++; \
+                         printf("  FAIL: "); printf(__VA_ARGS__); printf(" (errno %ld)\n", (long)my_errno); } \
+                         else { notes++; printf("  note: this stack differs: "); printf(__VA_ARGS__); \
+                         printf(" (errno %ld)\n", (long)my_errno); } } while (0)
 
 static void test_resolver(const char *host, struct sockaddr_in *sa, int port)
 {
@@ -115,7 +123,7 @@ static void test_http(struct sockaddr_in *sa, const char *host, const char *path
         CHECK(total > 1000, "received data");
     }
     CHECK(CloseSocket(s) == 0, "CloseSocket");
-    CHECK(CloseSocket(s) == -1 && my_errno == EBADF, "double close -> EBADF");
+    CHECK_PN(CloseSocket(s) == -1 && my_errno == EBADF, "double close -> EBADF");
 }
 
 static void test_nonblocking(struct sockaddr_in *sa)
@@ -345,9 +353,9 @@ static void test_msg_and_events(void)
     mh.msg_iov = iov;
     mh.msg_iovlen = 3;
     CHECK(sendmsg(cs, &mh, 0) == 9, "sendmsg 3 iovecs");
-    CHECK(wait_signal(evsig, 3000), "event signal for FD_READ");
+    CHECK_PN(wait_signal(evsig, 3000), "event signal for FD_READ");
     mask = 0;
-    CHECK(GetSocketEvents(&mask) == as && (mask & FD_READ), "FD_READ on accepted socket");
+    CHECK_PN(GetSocketEvents(&mask) == as && (mask & FD_READ), "FD_READ on accepted socket");
     iov[0].iov_base = a;  iov[0].iov_len = 4;
     iov[1].iov_base = b2; iov[1].iov_len = sizeof(b2);
     memset(&mh, 0, sizeof(mh));
@@ -357,9 +365,9 @@ static void test_msg_and_events(void)
     CHECK(n == 9 && !memcmp(a, "hell", 4) && !memcmp(b2, "o iov", 5), "recvmsg scatter (%ld)", (long)n);
 
     CloseSocket(cs);
-    CHECK(wait_signal(evsig, 3000), "event signal for FD_CLOSE");
+    CHECK_PN(wait_signal(evsig, 3000), "event signal for FD_CLOSE");
     mask = 0;
-    CHECK(GetSocketEvents(&mask) == as && (mask & FD_CLOSE), "FD_CLOSE after peer close");
+    CHECK_PN(GetSocketEvents(&mask) == as && (mask & FD_CLOSE), "FD_CLOSE after peer close");
     CloseSocket(as);
     CloseSocket(ls);
 
@@ -399,6 +407,7 @@ int main(void)
         return RETURN_FAIL;
     }
     printf("bsdtest: %s\n", (char *)SocketBase->lib_IdString);
+    prismnet = SocketBase->lib_IdString && strstr((char *)SocketBase->lib_IdString, "PrismNet") != NULL;
     if (SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(my_errno))), (ULONG)&my_errno,
                        SBTM_SETVAL(SBTC_HERRNOLONGPTR), (ULONG)&my_herrno,
                        SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG)"bsdtest",
@@ -434,6 +443,10 @@ int main(void)
 
     CloseLibrary(SocketBase);
     if (rda) FreeArgs(rda);
-    printf("bsdtest: %d passed, %d failed -> %s\n", passes, fails, fails ? "FAIL" : "PASS");
+    if (notes)
+        printf("bsdtest: %d passed, %d failed, %d differences of this stack (not counted) -> %s\n",
+               passes, fails, notes, fails ? "FAIL" : "PASS");
+    else
+        printf("bsdtest: %d passed, %d failed -> %s\n", passes, fails, fails ? "FAIL" : "PASS");
     return fails ? RETURN_WARN : RETURN_OK;
 }

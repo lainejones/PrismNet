@@ -108,6 +108,7 @@ static int load_iface(struct PnIfConfig *ic, const char *name, const char *path,
         if (ieq(tok, "DEVICE"))        strncpy(ic->device, v, sizeof(ic->device) - 1);
         else if (ieq(tok, "UNIT"))     ic->unit = strtoul(v, NULL, 10);
         else if (ieq(tok, "MTU"))      ic->mtu = strtoul(v, NULL, 10);
+        else if (ieq(tok, "STALL"))    ic->stall = strtoul(v, NULL, 10);
         else if (ieq(tok, "SLIP"))     ic->slip = ieq(v, "YES") || ieq(v, "ON") || ieq(v, "1");
         else if (ieq(tok, "BAUD"))     ic->baud = strtoul(v, NULL, 10);
         else if (ieq(tok, "RTSCTS"))   ic->rtscts = ieq(v, "YES") || ieq(v, "ON") || ieq(v, "1");
@@ -142,6 +143,12 @@ static int load_iface(struct PnIfConfig *ic, const char *name, const char *path,
         snprintf(num, sizeof(num), "%lu", (unsigned long)ic->mtu);
         warnf(warn, "%s: MTU %s out of range, using the driver's", name, num);
         ic->mtu = 0;
+    }
+    if (ic->stall && (ic->stall < 500 || ic->stall > 60000)) {
+        char num[12];
+        snprintf(num, sizeof(num), "%lu", (unsigned long)ic->stall);
+        warnf(warn, "%s: STALL %s ms out of range (500-60000), using the default", name, num);
+        ic->stall = 0;
     }
     if (!ic->dhcp && !ic->netmask)
         ic->netmask = PP_HTONL(0xffffff00UL);

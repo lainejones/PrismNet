@@ -107,7 +107,9 @@ Key decisions:
 ## Configuration (`ENV:PrismNet/`)
 
 ```
-interfaces/eth0      DEVICE=cnet.device  UNIT=0  CONFIG=DHCP  [MTU=1500]
+interfaces/eth0      DEVICE=cnet.device  UNIT=0  CONFIG=DHCP  [MTU=1500] [STALL=2000]
+                     # STALL: ms a write may sit with the driver before PrismNet resets it
+                     # (default 2000; a DaynaPORT on a SCSI bus shared with a busy disk needs 10000)
                      # static: CONFIG=STATIC ADDRESS=192.168.1.40 NETMASK=255.255.255.0
 routes               DEFAULT 192.168.1.1
 dns                  NAMESERVER 192.168.1.1

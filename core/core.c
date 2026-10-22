@@ -2070,6 +2070,8 @@ int main(void)
             continue;
         }
         pi->cfg = *ic;
+        if (ic->stall)
+            pi->s.stall_ms = pi->s.stall_base = ic->stall;
         {
             struct DateStamp ds;
             DateStamp(&ds);

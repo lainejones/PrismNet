@@ -65,6 +65,7 @@ struct sanaif {
     struct sanaif_stats stats;
     ULONG               open_wire_error;  /* ios2_WireError if OpenDevice failed */
     ULONG               stall_ms;         /* watchdog: current stall limit */
+    ULONG               stall_base;       /* ... its starting value (STALL= in the interface file, 0 = default) */
     LONG                mcast_err;        /* last S2_ADD/DELMULTICASTADDRESS error, 0 = fine */
     u32_t               tx_progress;      /* sys_now() of the last completed write */
     BOOL                no_s2mcast;       /* driver lacks S2_MULTICAST: use CMD_WRITE */

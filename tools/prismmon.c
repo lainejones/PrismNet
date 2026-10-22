@@ -661,7 +661,7 @@ static struct NewMenu newmenu[] = {
 static void about(struct Mon *m)
 {
     struct EasyStruct es = { sizeof(struct EasyStruct), 0, (STRPTR)"About PrismMon",
-        (STRPTR)"PrismMon 1.0.5\nPrismNet network monitor\n\nOpen source (GPL-3) - lwIP inside", (STRPTR)"OK" };
+        (STRPTR)"PrismMon 1.0.6\nPrismNet network monitor\n\nOpen source (GPL-3) - lwIP inside", (STRPTR)"OK" };
     EasyRequestArgs(m->win, &es, NULL, NULL);
 }
 

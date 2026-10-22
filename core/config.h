@@ -41,6 +41,7 @@ struct PnIfConfig {
     BOOL  dhcp;
     ULONG address, netmask, gateway;    /* network order, 0 = unset */
     ULONG mtu;                          /* 0 = device default */
+    ULONG stall;                        /* ms a write may be held before the driver is reset, 0 = default */
     BOOL  slip;                         /* built-in SLIP over a serial port */
     ULONG baud;                         /* ... its speed, 0 = 19200 */
     BOOL  rtscts;                       /* ... with RTS/CTS handshake */

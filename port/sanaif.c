@@ -266,7 +266,7 @@ static void tx_done(struct sanaif *s, struct sanaif_req *r)
             s->no_s2mcast = TRUE;
         s->stats.tx_errors++;
     } else {
-        s->stall_ms = SANAIF_TX_STALL_MS;
+        s->stall_ms = s->stall_base ? s->stall_base : SANAIF_TX_STALL_MS;
         s->stats.tx_packets++;
         s->stats.tx_bytes += r->io.ios2_DataLength;
     }
@@ -741,7 +741,7 @@ BOOL sanaif_watchdog(struct sanaif *s, u32_t now)
         } else if (now - r->seen >= s->stall_ms && now - s->tx_progress >= s->stall_ms) {
             /* a write held this long AND nothing completed meanwhile: on a
              * slow link (serial, PLIP) writes queue up but keep completing */
-            if (s->stall_ms < SANAIF_TX_STALL_MAX_MS)
+            if (s->stall_ms < SANAIF_TX_STALL_MAX_MS || s->stall_ms < 4 * s->stall_base)
                 s->stall_ms *= 2;
             reset_device(s);
             sanaif_poll(s);             /* requeue the reads, send what is queued */

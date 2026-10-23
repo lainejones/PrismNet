@@ -16,7 +16,7 @@ for pair in "out/PrismNet:core port lwip/src" "out/small/PrismNet:core port lwip
             "out/PrismMon:tools/prismmon.c" "out/ping:tools/net" "out/nslookup:tools/net" \
             "out/prismnfs-handler:tools/nfs tools/netfs" "out/ShareUnmount:tools/netfs/shareunmount.c" \
             "out/prismsmb-handler:tools/smb/smb_start.S tools/netfs/core.c tools/netfs/names.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/smb/backend.c tools/smb/smb2.c tools/smb/crypto.c tools/smb/passreq.c tools/netfs/*.h tools/smb/*.h" \
-            "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" \
+            "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" "out/httpd:tools/srv/httpd.c"\
             "out/PrismNetUpdate:tools/update" \
             "out/SMBShares:tools/smb/smbshares.c tools/smb/smb2.c tools/smb/crypto.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/netfs/*.h tools/smb/*.h"; do
     bin=${pair%%:*}; srcs=${pair#*:}
@@ -48,7 +48,7 @@ cp out/bsdsocket.library out/usergroup.library $D/Libs/
 cp out/prismnfs-handler                  $D/L/            # optional NFS client
 cp out/prismsmb-handler                  $D/L/            # optional SMB client
 cp out/ShareUnmount out/SMBShares        $D/C/
-cp out/inetd out/ftpd out/telnetd        $D/C/            # optional servers
+cp out/inetd out/ftpd out/telnetd out/httpd $D/C/            # optional servers
 cp out/PrismNetUpdate                    $D/C/            # the update check (68020+)
 cp dist-src/PNFS0 dist-src/PSMB0         $D/Storage/DOSDrivers/
 PN_GUIDEVER="$VER ($(date +%d.%m.%Y))" python tools/mkguide.py docs/manual $D/PrismNet.guide >/dev/null   # the manual

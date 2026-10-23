@@ -125,7 +125,10 @@
  * and crashed within seconds; segments are filled by chaining instead. */
 #define TCP_OVERSIZE                0
 #define LWIP_TCP_KEEPALIVE          1
-#define TCP_LISTEN_BACKLOG          0   /* PrismNet keeps its own accept queue */
+/* A SYN past a listener's backlog is dropped (the client sends it again), as
+ * on BSD, instead of the connection being reset. Connections waiting in
+ * PrismNet's own accept queue count too (tcp_backlog_delayed in csock.c). */
+#define TCP_LISTEN_BACKLOG          1
 #define SO_REUSE                    1   /* SO_REUSEADDR */
 
 /* ---- loopback (127.0.0.1) --------------------------------------------- */

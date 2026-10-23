@@ -23,7 +23,8 @@ the network hardware through its SANA-II driver.
 - **Network shares** (optional): mount an NFS export or an SMB share
   (Windows, macOS, a NAS, Samba) as an ordinary Amiga volume.
 - **Servers** (optional): an FTP server, so a PC can copy files to and from
-  the Amiga, and a telnet server that gives a Shell over the network.
+  the Amiga, a telnet server that gives a Shell over the network, and a web
+  server that shows a folder of the Amiga in any browser.
 - **An update check**: PrismNet Prefs (or `PrismNetUpdate` in a Shell) tells
   you when a newer PrismNet is out and can install it. See
   [Checking for updates](02-installing.md#checking-for-updates).

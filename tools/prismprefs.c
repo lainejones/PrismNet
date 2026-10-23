@@ -139,6 +139,8 @@ struct Prefs {
     char   ftp_port[8], ftp_prog[96], ftp_anondir[128], ftp_pasv[16], ftp_extra[96];
     BOOL   tel_on;                      /* the telnet line */
     char   tel_port[8], tel_prog[96], tel_extra[96];
+    BOOL   web_on;                      /* the http line */
+    char   web_port[8], web_prog[96], web_root[128], web_extra[96];
     char   svc_other[4096];             /* every other line of the file, kept as it was */
     BOOL   svc_full;                    /* ... and there were more than fit */
 };
@@ -944,7 +946,7 @@ enum { G_IFLIST = 1, G_ADD, G_REMOVE, G_NAME, G_MODE, G_DEVICE, G_PICK, G_UNIT,
        G_SHLIST, G_SHADD, G_SHREMOVE, G_SHNAME, G_SHTYPE, G_SHHOST, G_SHBROWSE, G_SHSHARE,
        G_SHVOL, G_SHUSER, G_SHUID, G_SHGID, G_SHBOOT, G_SHRO, G_SHMOUNT, G_SHUNMOUNT,
        G_FTPON, G_FTPPORT, G_FTPRO, G_FTPANON, G_FTPDIR, G_FTPPICK, G_FTPPASV, G_FTPINFO, G_FTPNOTE,
-       G_TELON, G_TELPORT,
+       G_TELON, G_TELPORT, G_WEBON, G_WEBPORT, G_WEBDIR, G_WEBPICK,
        G_SAVE, G_USE, G_CANCEL, G_SCROLL, G_COUNT };
 
 /* the tabs: each page holds only its own gadgets */
@@ -1449,9 +1451,16 @@ static BOOL make_gadgets(struct Gui *gui)
                GTCB_Checked, P.tel_on, GTCB_Scaled, TRUE);
             px = x0 + 26 + tlen(gui, "Run the telnet server") + 24 + tlen(gui, "Port") + 8;
             MK(STRING_KIND, G_TELPORT, px, y + 3 * row, 56, gh, "Port", PLACETEXT_LEFT, GTST_MaxChars, 5);
-            MK(TEXT_KIND, G_FTPNOTE, x0, y + 4 * row, x1 - x0, gh, NULL, 0,
-               GTTX_Text, (ULONG)"Logins: the users in Users > Accounts. Telnet gives them a Shell.",
-               GTTX_CopyText, TRUE);
+            MK(TEXT_KIND, G_FTPNOTE, px + 56 + 16, y + 3 * row, x1 - px - 56 - 16, gh, NULL, 0,
+               GTTX_Text, (ULONG)"Logins: Users > Accounts", GTTX_CopyText, TRUE);
+            MK(CHECKBOX_KIND, G_WEBON, x0, y + 4 * row + cy, 26, fh + 3, "Run the web server", PLACETEXT_RIGHT,
+               GTCB_Checked, P.web_on, GTCB_Scaled, TRUE);
+            px = x0 + 26 + tlen(gui, "Run the web server") + 24 + tlen(gui, "Port") + 8;
+            MK(STRING_KIND, G_WEBPORT, px, y + 4 * row, 56, gh, "Port", PLACETEXT_LEFT, GTST_MaxChars, 5);
+            ax = px + 56 + 16 + tlen(gui, "Folder") + 8;
+            MK(STRING_KIND, G_WEBDIR, ax, y + 4 * row, x1 - ax - bw - 6, gh, "Folder", PLACETEXT_LEFT,
+               GTST_MaxChars, 127);
+            MK(BUTTON_KIND, G_WEBPICK, x1 - bw, y + 4 * row, bw, gh, "...", PLACETEXT_IN, GT_Underscore, 0);
         }
         break;
     }
@@ -2326,8 +2335,11 @@ static int run_gui(void)
                 case G_FTPRO:   P.ftp_ro = (gui.g[G_FTPRO]->Flags & GFLG_SELECTED) != 0; break;
                 case G_FTPANON: P.ftp_anon = (gui.g[G_FTPANON]->Flags & GFLG_SELECTED) != 0; break;
                 case G_FTPPICK: pick_anon_dir(&gui); break;
-                case G_FTPPORT: case G_FTPDIR: case G_FTPPASV: case G_TELPORT: store_services(&gui); break;
+                case G_FTPPORT: case G_FTPDIR: case G_FTPPASV: case G_TELPORT:
+                case G_WEBPORT: case G_WEBDIR: store_services(&gui); break;
                 case G_TELON:   P.tel_on = (gui.g[G_TELON]->Flags & GFLG_SELECTED) != 0; break;
+                case G_WEBON:   P.web_on = (gui.g[G_WEBON]->Flags & GFLG_SELECTED) != 0; break;
+                case G_WEBPICK: pick_web_dir(&gui); break;
                 case G_SHMOUNT:   mount_share(&gui, TRUE); break;
                 case G_SHUNMOUNT: mount_share(&gui, FALSE); break;
                 case G_SAVE:   done = commit(&gui, TRUE); break;

@@ -78,11 +78,13 @@ if something asks for the network meanwhile. If you already have
 ExecuteStartup/ExecuteCleanup commands, put the PrismNet ones in the
 scripts they run.
 
-## The FTP or telnet server doesn't answer
+## The FTP, telnet or web server doesn't answer
 
 - Is the server switched on? Prefs, Services tab; `ENV:PrismNet/services`
   must exist and have the line without `#`.
-- `PrismNet NETSTAT` should show a socket listening on port 21 or 23.
+- `PrismNet NETSTAT` should show a socket listening on port 21, 23 or 80.
+- **Web: 404 Not Found** for every page: does the folder in Prefs (the
+  `ROOT=` in `services`) exist?
 - **Login incorrect**: the account needs a password (Prefs, Users,
   *Accounts... > Password...*).
 

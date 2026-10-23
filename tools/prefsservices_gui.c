@@ -19,6 +19,9 @@ static void show_services(struct Gui *gui)
     sets(gui, G_FTPPORT, P.ftp_port);
     sets(gui, G_FTPDIR, P.ftp_anondir);
     sets(gui, G_FTPPASV, P.ftp_pasv);
+    set_check(gui, G_WEBON, P.web_on);
+    sets(gui, G_WEBPORT, P.web_port);
+    sets(gui, G_WEBDIR, P.web_root);
 }
 
 static void store_services(struct Gui *gui)
@@ -27,6 +30,8 @@ static void store_services(struct Gui *gui)
     gcopy(gui, G_FTPDIR, P.ftp_anondir, sizeof(P.ftp_anondir));
     gcopy(gui, G_FTPPASV, P.ftp_pasv, sizeof(P.ftp_pasv));
     gcopy(gui, G_TELPORT, P.tel_port, sizeof(P.tel_port));
+    gcopy(gui, G_WEBPORT, P.web_port, sizeof(P.web_port));
+    gcopy(gui, G_WEBDIR, P.web_root, sizeof(P.web_root));
 }
 
 /* "..." next to the anonymous folder: an ASL drawer requester */
@@ -42,6 +47,24 @@ static void pick_anon_dir(struct Gui *gui)
     if (AslRequestTags(fr, TAG_END) && fr->fr_Drawer[0]) {
         copy(P.ftp_anondir, (const char *)fr->fr_Drawer, sizeof(P.ftp_anondir));
         P.ftp_anon = TRUE;
+        show_services(gui);
+    }
+    FreeAslRequest(fr);
+}
+
+/* "..." next to the web server's folder */
+static void pick_web_dir(struct Gui *gui)
+{
+    struct FileRequester *fr;
+    if (!AslBase) { DisplayBeep(gui->scr); return; }
+    store_services(gui);
+    fr = AllocAslRequestTags(ASL_FileRequest, ASLFR_TitleText, (ULONG)"Folder the web server shows",
+                             ASLFR_DrawersOnly, TRUE, ASLFR_Window, (ULONG)gui->win,
+                             ASLFR_InitialDrawer, (ULONG)(P.web_root[0] ? P.web_root : "SYS:"), TAG_END);
+    if (!fr) return;
+    if (AslRequestTags(fr, TAG_END) && fr->fr_Drawer[0]) {
+        copy(P.web_root, (const char *)fr->fr_Drawer, sizeof(P.web_root));
+        P.web_on = TRUE;
         show_services(gui);
     }
     FreeAslRequest(fr);

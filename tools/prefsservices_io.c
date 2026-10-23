@@ -2,10 +2,10 @@
  * PrismNet Prefs, Services tab: reading and writing ENV:PrismNet/services.
  * Included by prismprefs.c after the file helpers. GPL-3.0-only, see LICENSE.
  *
- * Only the ftp and telnet lines are ours to edit; every other line (comments,
- * other services) is kept as it was. A switched-off server stays in the file
- * as "#ftp ..." / "#telnet ...", so its options are still there when it is
- * switched on again.
+ * Only the ftp, telnet and http lines are ours to edit; every other line
+ * (comments, other services) is kept as it was. A switched-off server stays in
+ * the file as "#ftp ..." / "#telnet ..." / "#http ...", so its options are
+ * still there when it is switched on again.
  */
 
 static void svc_words(char *s, char **w, int *n, int max)
@@ -32,8 +32,8 @@ static BOOL svc_is(const char *line, const char *name, BOOL *off)
 
 static void load_services(struct Prefs *p, const char *dir)
 {
-    char path[160], *t, *line, *nl, *take = NULL, *ttake = NULL;
-    BOOL off, take_off = TRUE, ttake_off = TRUE;
+    char path[160], *t, *line, *nl, *take = NULL, *ttake = NULL, *wtake = NULL;
+    BOOL off, take_off = TRUE, ttake_off = TRUE, wtake_off = TRUE;
 
     p->ftp_on = p->ftp_anon = p->ftp_ro = FALSE;
     strcpy(p->ftp_port, "21");
@@ -44,6 +44,11 @@ static void load_services(struct Prefs *p, const char *dir)
     strcpy(p->tel_port, "23");
     strcpy(p->tel_prog, "C:telnetd");
     p->tel_extra[0] = 0;
+    p->web_on = FALSE;
+    strcpy(p->web_port, "80");
+    strcpy(p->web_prog, "C:httpd");
+    strcpy(p->web_root, "SYS:WWW");
+    p->web_extra[0] = 0;
     p->have_services = FALSE;
     sprintf(path, "%s/services", dir);
     if (!(t = load_file(path)))
@@ -57,6 +62,7 @@ static void load_services(struct Prefs *p, const char *dir)
         save = *nl; *nl = 0;
         if (svc_is(line, "ftp", &off) && (!take || (take_off && !off))) { take = line; take_off = off; }
         if (svc_is(line, "telnet", &off) && (!ttake || (ttake_off && !off))) { ttake = line; ttake_off = off; }
+        if (svc_is(line, "http", &off) && (!wtake || (wtake_off && !off))) { wtake = line; wtake_off = off; }
         *nl = save;
         if (*nl) nl++;
     }
@@ -97,6 +103,23 @@ static void load_services(struct Prefs *p, const char *dir)
                 }
             continue;
         }
+        if (line == wtake) {
+            char *w[24], *s = line;
+            int n, i;
+            while (*s == ' ' || *s == '\t' || *s == '#') s++;
+            svc_words(s, w, &n, 24);
+            p->web_on = !wtake_off;
+            if (n > 1) copy(p->web_port, w[1], sizeof(p->web_port));
+            if (n > 3) copy(p->web_prog, w[3], sizeof(p->web_prog));
+            for (i = 4; i < n; i++) {
+                if (!strncmp(w[i], "ROOT=", 5)) copy(p->web_root, w[i] + 5, sizeof(p->web_root));
+                else if (strlen(p->web_extra) + strlen(w[i]) + 2 < sizeof(p->web_extra)) {
+                    strcat(p->web_extra, " ");          /* INDEX=, NOLIST, IDLE=, LOG=: kept */
+                    strcat(p->web_extra, w[i]);
+                }
+            }
+            continue;
+        }
         if (strlen(p->svc_other) + strlen(line) + 2 < sizeof(p->svc_other)) {
             strcat(p->svc_other, line);
             strcat(p->svc_other, "\n");
@@ -111,9 +134,9 @@ static BOOL save_services(const struct Prefs *p, const char *dir)
     char path[160], *text;
     BOOL ok;
 
-    if (!p->have_services && !p->ftp_on && !p->tel_on)
+    if (!p->have_services && !p->ftp_on && !p->tel_on && !p->web_on)
         return TRUE;                        /* never set up: don't create the file */
-    if (!(text = AllocVec(sizeof(p->svc_other) + 1024, MEMF_CLEAR)))   /* + both lines at their longest */
+    if (!(text = AllocVec(sizeof(p->svc_other) + 1536, MEMF_CLEAR)))   /* + the three lines at their longest */
         return FALSE;
     strcpy(text, p->svc_other);
     sprintf(text + strlen(text), "%sftp %s tcp %s", p->ftp_on ? "" : "#", p->ftp_port, p->ftp_prog);
@@ -124,6 +147,8 @@ static BOOL save_services(const struct Prefs *p, const char *dir)
     strcat(text, "\n");
     sprintf(text + strlen(text), "%stelnet %s tcp %s%s\n", p->tel_on ? "" : "#", p->tel_port, p->tel_prog,
             p->tel_extra);
+    sprintf(text + strlen(text), "%shttp %s tcp %s ROOT=%s%s\n", p->web_on ? "" : "#", p->web_port,
+            p->web_prog, p->web_root, p->web_extra);
     sprintf(path, "%s/services", dir);
     ok = save_file(path, text);
     FreeVec(text);
@@ -134,13 +159,19 @@ static BOOL save_services(const struct Prefs *p, const char *dir)
 static const char *check_services(const struct Prefs *p)
 {
     const char *s;
-    long port = atol(p->ftp_port), tport = atol(p->tel_port);
+    long port = atol(p->ftp_port), tport = atol(p->tel_port), wport = atol(p->web_port);
     if (p->svc_full)
         return "Services: ENV:PrismNet/services is too long to edit here;\nedit it with a text editor.";
     if (p->tel_on && (tport < 1 || tport > 65535))
         return "Services: the telnet port must be 1 to 65535.";
     if (p->tel_on && p->ftp_on && tport == port)
         return "Services: FTP and telnet can't share a port.";
+    if (p->web_on && (wport < 1 || wport > 65535))
+        return "Services: the web server's port must be 1 to 65535.";
+    if (p->web_on && ((p->ftp_on && wport == port) || (p->tel_on && wport == tport)))
+        return "Services: the web server needs a port of its own.";
+    if (p->web_on && (!p->web_root[0] || strchr(p->web_root, ' ')))
+        return "Services: the web server's folder must be set\nand must not contain spaces.";
     if (!p->ftp_on)
         return NULL;
     if (port < 1 || port > 65535)

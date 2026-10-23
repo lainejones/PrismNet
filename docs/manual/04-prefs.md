@@ -126,6 +126,8 @@ The servers that let other computers in (see [Servers](10-servers.md)):
 - **Passive ports**: a range like `50000-50100`, if you need to open them in
   a firewall.
 - **Run the telnet server** and its **Port** (23).
+- **Run the web server**, its **Port** (80) and the **Folder** it shows
+  (`...` picks it).
 
-Logins are the users from *Users > Accounts...*. After Save or Use, PrismNet
+Logins are the users from *Users > Accounts...* (the web server has none). After Save or Use, PrismNet
 restarts its server dispatcher with the new list.

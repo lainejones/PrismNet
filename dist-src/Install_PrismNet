@@ -152,6 +152,8 @@
         (if (= 0 (run "Search >NIL: C:ftpd \"PrismNet\"" (safe))) (delete "C:ftpd")))
     (if (exists "C:telnetd" (noreq))
         (if (= 0 (run "Search >NIL: C:telnetd \"PrismNet\"" (safe))) (delete "C:telnetd")))
+    (if (exists "C:httpd" (noreq))
+        (if (= 0 (run "Search >NIL: C:httpd \"PrismNet\"" (safe))) (delete "C:httpd")))
     (if (exists "C:SMBShares" (noreq))
         (if (= 0 (run "Search >NIL: C:SMBShares \"PrismNet\"" (safe))) (delete "C:SMBShares")))
     (foreach "Storage/DOSDrivers" "P(NFS|SMB)0"
@@ -317,9 +319,13 @@
                       "off; ENVARC:PrismNet/services explains how to turn it on.\n\n"
                       "Telnet server: C:inetd and C:telnetd. A user logs in and gets an "
                       "AmigaDOS Shell in their home directory. Telnet sends the password "
-                      "as plain text, so only use it on your own network.")
+                      "as plain text, so only use it on your own network.\n\n"
+                      "Web server: C:inetd and C:httpd. A browser on another computer sees "
+                      "the files in SYS:WWW (made here, with a first index.html), read-only; "
+                      "no login. Change the folder in PrismNet Prefs, Services tab.")
                 (choices "FTP server (copy files to and from this Amiga)"
-                         "Telnet server (a Shell from another computer)")
+                         "Telnet server (a Shell from another computer)"
+                         "Web server (a folder of this Amiga in a browser)")
                 (default 0)))
 
 ;; WHDLoad: a network card's interrupts hang some games once WHDLoad has taken
@@ -541,6 +547,20 @@
     (run "Protect >NIL: C:inetd +e")
     (run "Protect >NIL: C:telnetd +e")
   ))
+(if (BITAND servers 4)
+  (
+    (copyfiles (prompt "Installing the web server") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "inetd" "httpd") (nogauge))
+    (run "Protect >NIL: C:inetd +e")
+    (run "Protect >NIL: C:httpd +e")
+    (if (not (exists "SYS:WWW" (noreq))) (makedir "SYS:WWW"))
+    (if (not (exists "SYS:WWW/index.html" (noreq)))
+        (textfile (dest "SYS:WWW/index.html")
+                  (append "<!DOCTYPE html>\n<html><head><title>Amiga</title></head><body>\n"
+                          "<h1>Hello from an Amiga</h1>\n"
+                          "<p>This page is SYS:WWW/index.html, served by PrismNet's httpd.</p>\n"
+                          "</body></html>\n")))
+  ))
 (complete 50)
 
 ; ---- settings ---------------------------------------------------------------------
@@ -552,7 +572,8 @@
               (append "# PrismNet services - see examples/services.sample for every option.\n"
                       "# Change them with PrismNet Prefs > Services.\n"
                       (if (BITAND servers 1) "" "#") "ftp  21  tcp  C:ftpd\n"
-                      (if (BITAND servers 2) "" "#") "telnet  23  tcp  C:telnetd\n")))
+                      (if (BITAND servers 2) "" "#") "telnet  23  tcp  C:telnetd\n"
+                      (if (BITAND servers 4) "" "#") "http  80  tcp  C:httpd ROOT=SYS:WWW\n")))
 (if (not (exists (tackon arc "interfaces") (noreq))) (makedir (tackon arc "interfaces")))
 
 ; remember where things went (read back by "Remove PrismNet")

@@ -294,7 +294,7 @@ $(OUT)/PrismNetPrefs: $(OBJ)/gui/prismprefs.o $(OBJ)/gui/tabs.o $(STDIO_OBJ)
 	$(CC) $(LDFLAGS) -s -o $@ $^
 
 # Servers: inetd and the services it starts (plain bsdsocket programs, any stack)
-SERVERS = $(OUT)/inetd $(OUT)/ftpd $(OUT)/telnetd
+SERVERS = $(OUT)/inetd $(OUT)/ftpd $(OUT)/telnetd $(OUT)/httpd
 servers: $(SERVERS)
 $(OBJ)/srv/%.o: tools/srv/%.c
 	@mkdir -p $(dir $@)
@@ -302,6 +302,7 @@ $(OBJ)/srv/%.o: tools/srv/%.c
 $(OUT)/inetd: $(OBJ)/srv/inetd.o $(STDIO_OBJ)
 $(OUT)/ftpd: $(OBJ)/srv/ftpd.o $(STDIO_OBJ)
 $(OUT)/telnetd: $(OBJ)/srv/telnetd.o $(STDIO_OBJ)
+$(OUT)/httpd: $(OBJ)/srv/httpd.o $(STDIO_OBJ)
 $(SERVERS):
 	@mkdir -p $(OUT)
 	$(CC) $(LDFLAGS) -s -o $@ $^

@@ -6,6 +6,8 @@ PrismNet has its own small servers, so other computers can reach the Amiga:
   WinSCP, the `ftp` command).
 - **Telnet**: an AmigaDOS Shell on the Amiga, from a terminal on another
   computer.
+- **Web**: one folder of the Amiga in any web browser, read-only, with no
+  login.
 
 Nothing listens unless you switch a server on. Install them with the
 installer's *Servers* option, then switch them on and off in PrismNet Prefs
@@ -37,11 +39,12 @@ exists, and stops it with `PrismNet STOP`.
 ```
 ftp     21  tcp  C:ftpd
 telnet  23  tcp  C:telnetd
+http    80  tcp  C:httpd ROOT=SYS:WWW
 ```
 
 A line starting with `#` is switched off. Options go after the program
-name. PrismNet Prefs edits the `ftp` and `telnet` lines and leaves any
-other lines alone.
+name. PrismNet Prefs edits the `ftp`, `telnet` and `http` lines and leaves
+any other lines alone.
 
 ## FTP
 
@@ -87,8 +90,38 @@ end-of-file and ends by itself.
 Programs that open their own windows or screens show them on the Amiga,
 not in the telnet session.
 
+## Web
+
+Open `http://amiga/` (the Amiga's name or address) in a browser on another
+computer and you see the files in one folder, `SYS:WWW` unless you choose
+another. A folder's `index.html` is its page; a folder without one is shown
+as a list of its files, which you can click through and download. Nobody
+logs in, and nothing on the Amiga can be changed through the web server,
+so put only what anyone on your network may see in that folder.
+
+Links can't lead out of the folder: `..`, a volume name (`Work:`) and the
+Amiga's "parent" path (`a//b`) are all refused.
+
+The installer's web server option makes `SYS:WWW` with a first
+`index.html`. Downloads can be resumed, and players can seek in sound and
+video files (byte ranges). A browser keeps one connection open for a page
+and its pictures, so the Amiga starts one server process per connection,
+not per file.
+
+| Option | Meaning |
+|---|---|
+| `ROOT=dir` | the folder shown as `/` (default `SYS:WWW`) |
+| `INDEX=name` | a folder's own page (default `index.html`) |
+| `NOLIST` | no lists: a folder without its page is refused |
+| `IDLE=s` | close a connection that is idle for s seconds (default 15) |
+| `LOG=file` | add one line per request to `file`: the caller's address, the request, the answer and the bytes sent |
+
+The content type comes from the file's name (`.html`, `.txt`, `.png`,
+`.jpg`, `.gif`, `.mp3`, `.lha`, ...); other files are sent as plain
+downloads.
+
 ## Port numbers
 
-Ports 21 (FTP) and 23 (telnet) are the standard ones. To use others, change
-the number in Prefs or in `services`, and give it to the client:
-`ftp amiga 2121`, `telnet amiga 2323`.
+Ports 21 (FTP), 23 (telnet) and 80 (web) are the standard ones. To use
+others, change the number in Prefs or in `services`, and give it to the
+client: `ftp amiga 2121`, `telnet amiga 2323`, `http://amiga:8080/`.

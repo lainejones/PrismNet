@@ -306,6 +306,7 @@ static err_t tcp_accept_cb(void *arg, struct tcp_pcb *newpcb, err_t err)
     if (ns->nodelay)   tcp_nagle_disable(newpcb);
     if (ls->sndbuf)    set_sndbuf(ns, newpcb, ls->sndbuf);
     ls->accq[ls->acc_count++] = ns;
+    tcp_backlog_delayed(newpcb);        /* counts against the backlog until accept() */
     return ERR_OK;
 }
 
@@ -670,6 +671,8 @@ static BOOL op_accept(struct PnClient *c, struct PnSock *s, struct PnReq *r)
     for (i = 1; i < s->acc_count; i++)
         s->accq[i - 1] = s->accq[i];
     s->acc_count--;
+    if (ns->pcb.tcp)
+        tcp_backlog_accepted(ns->pcb.tcp);
 
     ns->owner = c;
     fd = core_alloc_fd(c, ns, 0);

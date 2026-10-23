@@ -118,7 +118,7 @@ static BOOL open_listener(struct Service *v)
     sa.sin_family = AF_INET;
     sa.sin_port = v->port;
     sa.sin_addr.s_addr = INADDR_ANY;
-    if (bind(v->fd, (struct sockaddr *)&sa, sizeof(sa)) < 0 || listen(v->fd, 5) < 0) {
+    if (bind(v->fd, (struct sockaddr *)&sa, sizeof(sa)) < 0 || listen(v->fd, 16) < 0) {
         CloseSocket(v->fd);
         v->fd = -1;
         return FALSE;

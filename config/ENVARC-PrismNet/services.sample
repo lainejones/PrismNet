@@ -24,3 +24,14 @@ ftp  21  tcp  C:ftpd
 #   NOLOGIN=user      no login prompt, everyone is that user (trusted LAN only)
 #
 #telnet  23  tcp  C:telnetd
+#
+# http: a small web server - the files of one folder, read-only, no login.
+# A folder's index.html is its page; without one the folder is listed.
+# Options:
+#   ROOT=dir          the folder served as "/" (default SYS:WWW)
+#   INDEX=name        a folder's own page (default index.html)
+#   NOLIST            no listings: a folder without its page is refused
+#   IDLE=seconds      close an idle connection (default 15)
+#   LOG=file          append one line per request (address, request, status, bytes)
+#
+#http  80  tcp  C:httpd ROOT=SYS:WWW

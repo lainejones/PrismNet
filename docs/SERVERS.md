@@ -1,4 +1,4 @@
-# PrismNet servers: inetd, ftpd and telnetd
+# PrismNet servers: inetd, ftpd, telnetd and httpd
 
 PrismNet ships its own small servers so other computers can reach the Amiga.
 Nothing listens unless `ENV:PrismNet/services` exists.
@@ -22,10 +22,11 @@ By hand: `inetd [FROM=file] [QUIET]`, CTRL-C stops it.
 name  port  tcp  program  [arguments...]
 ftp     21  tcp  C:ftpd     ANONYMOUS=Work:Public
 telnet  23  tcp  C:telnetd
+http    80  tcp  C:httpd    ROOT=SYS:WWW
 ```
 
-The installer's *Servers* options install `C:inetd` with `C:ftpd` and/or
-`C:telnetd`, and write an `ENVARC:PrismNet/services` with the chosen servers
+The installer's *Servers* options install `C:inetd` with any of `C:ftpd`,
+`C:telnetd` and `C:httpd`, and write an `ENVARC:PrismNet/services` with the chosen servers
 switched on (the full commented sample is `ENVARC:PrismNet/examples/services.sample`).
 
 ## PrismNet Prefs: the Services tab
@@ -89,6 +90,52 @@ An AmigaDOS Shell over telnet (RFC 854), started by inetd per connection.
 |---|---|
 | `IDLE=s` | drop a session idle for s seconds (default 1800) |
 | `NOLOGIN=user` | no login prompt, everyone is that user (a trusted LAN only) |
+
+## httpd
+
+A small web server (HTTP/1.1, RFC 9110/9112), started by inetd per
+connection: the files of one folder, read-only, no login.
+
+- **Requests:** GET and HEAD; anything else is 405. Persistent connections
+  (HTTP/1.1 by default, 1.0 with `Connection: keep-alive`) and pipelined
+  requests, up to 200 on one connection; one process per connection.
+- **Paths:** the URL is %-decoded and split at `/`; an empty part (AmigaDOS
+  "parent" in `a//b`), `.`, `..`, `:` and `\` are refused (403), so nothing
+  outside `ROOT` can be reached. `dir` redirects to `dir/` (301).
+- **Folders:** `INDEX` (default `index.html`) is sent if it exists, else a
+  sorted HTML list (folders first, names escaped and %-encoded in the links,
+  sizes, dates); `NOLIST` refuses instead.
+- **Files:** `Content-Type` by extension, `Content-Length`, single byte
+  ranges (`bytes=a-b`, `a-`, `-n` -> 206, past the end -> 416).
+- **Limits:** 8 KB of request headers (431 beyond), `IDLE` seconds between
+  requests (default 15). No `Date`/`Last-Modified` headers: an Amiga's clock
+  has no time zone.
+
+| Option | Meaning |
+|---|---|
+| `ROOT=dir` | the folder served as `/` (default `SYS:WWW`) |
+| `INDEX=name` | a folder's own page (default `index.html`) |
+| `NOLIST` | no listings |
+| `IDLE=s` | close a connection idle for s seconds (default 15) |
+| `LOG=file` | append `address "METHOD target" status bytes` per request |
+
+Size: `httpd` 19 KB.
+
+## Accept queue
+
+A listening socket queues up to 16 connections (`listen()`'s backlog,
+inetd asks for 16). Past that a new connection's SYN is dropped, as on BSD,
+and the client sends it again; until 1.0.6 it was reset, and a browser
+opening 8 connections at once got "connection reset" for some of them.
+
+## Tested (2026-10-23)
+
+`test/host/httptest.py <amiga> [port] [bigfile]` (27 checks: the index page,
+the redirect, a listing with escaped names, a name with a space and `&`,
+300 KB byte-identical at ~960 KB/s, HEAD, three kinds of range and 416, 404,
+eight ways out of `ROOT` refused, POST 405, HTTP/2.0 505, six requests on
+one connection, pipelining, HTTP/1.0 closing, 431) passes against the A4000
+(ZZ9000Net); an idle connection closes after 15 s.
 
 ## Tested (2026-10-18)
 

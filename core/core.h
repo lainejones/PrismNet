@@ -17,7 +17,7 @@
 #define PN_DEFAULT_DTABLESIZE  64
 #define PN_MAX_DTABLESIZE      256
 #define PN_MAX_DGRAMS          16      /* queued datagrams per socket */
-#define PN_MAX_BACKLOG         8
+#define PN_MAX_BACKLOG         16
 
 /* AmiTCP / BSD constants used by the core (wire values) */
 #define PN_AF_INET        2

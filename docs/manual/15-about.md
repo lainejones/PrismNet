@@ -19,6 +19,13 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.7** (2026-10-23): a web server, `C:httpd`: one folder of the Amiga
+  in any browser, read-only (see [Servers](10-servers.md)); the installer
+  and PrismNet Prefs set it up beside FTP and telnet. Fixed: a server that
+  got more connections at once than its listen queue held reset the extra
+  ones (a browser opening 8 connections got "connection reset" for some);
+  they now wait and are answered, as on other systems, and the queue holds
+  16.
 - **1.0.6** (2026-10-22): `STALL=` in an interface file sets how long a
   packet may sit with the driver before PrismNet resets the card (the
   default stays 2 seconds). A DaynaPORT on a SCSI bus it shares with a

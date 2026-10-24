@@ -24,7 +24,7 @@ Double-click "Install_PrismNet". It installs the libraries, the PrismNet
 command, PrismNet Prefs, the PrismMon monitor and this manual, and asks
 for your network driver and DHCP or a fixed address. Another stack's
 libraries are saved in C:Backup. Optional: network-share clients (NFS,
-SMB) and servers (FTP, telnet).
+SMB) and servers (FTP, telnet, web).
 
 Run it again to update (your settings are kept) or to remove PrismNet.
 It asks every question first; an update takes the network away for only

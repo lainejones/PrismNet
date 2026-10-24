@@ -26,7 +26,7 @@ you already have run unchanged. The networking core is
 | **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `httpbench`, `SMBShares`, `ShareUnmount`, `PrismNetUpdate` |
 | **GUIs** | PrismNet Prefs (6 tabs, Roadshow import), PrismMon (live status, traffic, connections, memory, log) |
 | **Shares** | own NFS v3 and SMB 2/3 clients: a NAS, Windows, macOS or Samba folder as an Amiga volume |
-| **Servers** | FTP server, telnet server (AmigaDOS Shell), inetd to start them on demand; user accounts with passwords |
+| **Servers** | FTP server, telnet server (AmigaDOS Shell), web server (one folder, read-only), inetd to start them on demand; user accounts with passwords |
 | **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
 | **Install** | Amiga Installer: install, update (keeps settings; all questions first, a few seconds offline), remove (puts the old stack's files back) |
 | **Updates** | checks GitHub or a mirror for a newer release and installs it (68020+, AmiSSL 5) |
@@ -107,7 +107,10 @@ you already have run unchanged. The networking core is
   settings for passive ports.
 - **Telnet server**: log in from any terminal and get an AmigaDOS Shell
   in your home drawer, with line editing and CTRL-C.
-- Both are started on demand by PrismNet's own **inetd**, which PrismNet
+- **Web server**: one folder of the Amiga in any browser, read-only, no
+  login; a folder's `index.html` or a list of its files, resumable
+  downloads.
+- All three are started on demand by PrismNet's own **inetd**, which PrismNet
   starts and stops with itself. Nothing listens unless you switch a server
   on. Account passwords are set in Prefs.
 
@@ -164,7 +167,7 @@ Roadshow, AmiTCP or Miami.
 | [DESIGN.md](docs/DESIGN.md) | architecture and design decisions |
 | [PERFORMANCE.md](docs/PERFORMANCE.md), [CONFORMANCE.md](docs/CONFORMANCE.md) | speed against Roadshow; protocol conformance |
 | [NFSCLIENT.md](docs/NFSCLIENT.md), [SMBCLIENT.md](docs/SMBCLIENT.md), [SHARES.md](docs/SHARES.md) | the share clients' design and test results |
-| [SERVERS.md](docs/SERVERS.md) | inetd, ftpd and telnetd internals and tests |
+| [SERVERS.md](docs/SERVERS.md) | inetd, ftpd, telnetd and httpd internals and tests |
 | [AUDIT.md](docs/AUDIT.md) | API audit against AmiTCP, Roadshow and real programs |
 
 ## Not there yet

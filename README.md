@@ -180,6 +180,14 @@ followed by `START` can leave the stack stuck opening the driver until a
 reboot. PrismNet's built-in SLIP doesn't have the problem and is as fast; see
 [Serial links](docs/manual/11-serial.md) for moving over.
 
+**Known issue (ZZ9000 drivers 2.8.1):** `ZZ9000Net.device` 2.4 runs its
+`ZZ9000NetFramer` task at priority 0. While a busy program also runs at
+priority 0, receive can stop for good after 10-15 minutes, until a reset.
+This happens with any stack. The fix is in the drivers'
+[next release](https://github.com/BlitterStudio/zz9000-drivers/issues/157).
+Until then, raise `ZZ9000NetFramer` to priority 5 after PrismNet starts; see
+[Known problems](docs/manual/13-troubleshooting.md#known-problems).
+
 ## Licence
 
 PrismNet: GNU GPL version 3 (GPL-3.0-only), see [LICENSE](LICENSE). lwIP:

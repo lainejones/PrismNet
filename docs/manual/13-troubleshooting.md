@@ -101,6 +101,20 @@ scripts they run.
   DaynaPORT driver from 1.7 on (scsidayna.device, with `MULTICAST=1`), the
   ZZ9000 and [xsurfnet.device](https://github.com/lainejones/XSurfNet) accept it. Windows still finds the Amiga
   by its NetBIOS name (`ping A2000`).
+- **ZZ9000 with drivers 2.8.1: receive stops until a reset.**
+  `ZZ9000Net.device` 2.4 runs its helper task `ZZ9000NetFramer` at
+  priority 0. When a busy program (a benchmark, a game, a long compile)
+  also runs at priority 0 while data keeps coming in, the helper gets no
+  time, and after 10-15 minutes the card stops receiving: the incoming
+  traffic in `PrismNet STATUS` stands still, while sending still works.
+  Stopping the program or restarting PrismNet doesn't bring it back; a
+  reset does. Any stack is affected. The drivers after 2.8.1 fix it
+  ([report](https://github.com/BlitterStudio/zz9000-drivers/issues/157)).
+  Until you can update, raise `ZZ9000NetFramer` above PrismNet's own task
+  (priority 3), for example to 5, with a task tool such as Scout, once
+  PrismNet has started (for example right after `PrismNet START` in
+  `S:User-Startup`). Don't lower it if a newer driver already runs it
+  higher.
 - **IPv6** isn't supported yet.
 
 ## Reporting a problem

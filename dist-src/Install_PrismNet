@@ -316,7 +316,7 @@
                            "SYS:Storage/DOSDrivers/PSMB0).")
                      (choices "Move to C:Backup" "Keep it")
                      (default 0)))))
-; the install floppy leaves the servers out (no room): no question then
+; a package without the servers (the 1.0.8 floppy had no room for them): no question then
 (set servers 0)
 (if (exists "C/inetd" (noreq))
   (set servers
@@ -517,8 +517,8 @@
 (copyfiles (prompt "Installing PrismMon") (help @copyfiles-help)
            (source "Tools") (dest mondir) (choices "PrismMon" "PrismMon.info") (nogauge))
 (run (cat "Protect >NIL: \"" (tackon mondir "PrismMon") "\" +e"))
-; the manual, next to the monitor (not on the floppy, which has no room for
-; it: it is in the .lha and on GitHub)
+; the manual, next to the monitor (a package without it, like the 1.0.8
+; floppy, skips it: it is in the .lha and on GitHub)
 (if (exists "PrismNet.guide" (noreq))
     (copyfiles (prompt "Installing the PrismNet manual") (help @copyfiles-help)
                (source "") (dest mondir) (choices "PrismNet.guide" "PrismNet.guide.info") (nogauge)))

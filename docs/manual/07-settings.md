@@ -35,7 +35,7 @@ GATEWAY=192.168.1.1
 | `ADDRESS=`, `NETMASK=`, `GATEWAY=` | the fixed address, for `STATIC` |
 | `MTU=` | the largest packet, if the driver's own value is wrong |
 | `STALL=` | milliseconds a packet may sit with the driver before PrismNet resets the card (500 to 60000, default 2000). Raise it for a card that is legitimately slow at times: a DaynaPORT on a SCSI bus shared with a ZuluSCSI's disks wants 10000 |
-| `SLIP=YES`, `BAUD=`, `RTSCTS=YES` | SLIP straight over a serial port; see [Serial links](11-serial.md) |
+| `SLIP=YES`, `BAUD=`, `RTSCTS=YES` | SLIP straight over a serial port; see [Serial links](12-serial.md) |
 
 ## routes
 
@@ -82,7 +82,7 @@ INETD=C:inetd
 |---|---|
 | `AUTOSTART=` | `YES`: a program opening `bsdsocket.library` starts PrismNet |
 | `COMMAND=` | where the PrismNet command is, for that start |
-| `MEMORY=` | the memory budget in KB; see [Small machines](12-memory.md) |
+| `MEMORY=` | the memory budget in KB; see [Small machines](13-memory.md) |
 | `INETD=` | where the server dispatcher is (default `C:inetd`) |
 | `UPDATES=` | where `PrismNetUpdate` looks: `OFF` (default), `GITHUB`, `MIRROR` or `BOTH` (GitHub, then the mirror); see [Checking for updates](02-installing.md#checking-for-updates) |
 | `MIRROR=` | the mirror: a Forgejo/Gitea repository's address, or an HTTPS directory with `latest.txt` |
@@ -126,3 +126,9 @@ The servers to run: see [Servers](10-servers.md).
 
 Passwords the SMB client saved for shares (one file per server and user).
 Delete a file there to be asked again.
+
+## printer, printer1 ... printer3
+
+The network printer port's settings, one file per unit: `HOST=`, `PORT=`,
+`PROTOCOL=` (`RAW` or `LPD`), `QUEUE=`, `IDLE=`, `TIMEOUT=`. `PrismPrint`
+writes them; see [Printing](11-printing.md).

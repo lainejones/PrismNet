@@ -39,7 +39,7 @@ PORT_OBJ = $(patsubst port/%.S,$(OBJ)/port/%.o,$(patsubst port/%.c,$(OBJ)/port/%
 CORE_SRC = core/core.c core/csock.c core/resolv.c core/config.c core/netstats.c
 CORE_OBJ = $(patsubst core/%.c,$(OBJ)/core/%.o,$(CORE_SRC))
 
-all: nettools servers nfs smb update $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag
+all: nettools servers nfs smb update printer $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag
 
 # The update check (C:PrismNetUpdate): the shared update tool, 68020+ like
 # AmiSSL itself. Needs the AmiSSL SDK (https://github.com/jens-maus/amissl,
@@ -52,6 +52,36 @@ $(OUT)/PrismNetUpdate: $(UPD_SRC)
 	@mkdir -p $(OUT)
 	$(CC) -m68020 -O2 -noixemul -Wall -Wno-pointer-sign -fomit-frame-pointer -I"$(AMISSL_INC)" -s -o $@ tools/update/update.c tools/update/upd_prismnet.c
 
+# The network printer port (printer/): prismprint.device for printer.device
+# (OS 3.2: Prefs/Printer names it), the same device as parallel.device for
+# OS 3.1 (out/netpar/), and the PrismPrint settings/test tool.
+PP_DEV = printer/start.S printer/prismprint.c lib/support.S
+printer: $(OUT)/prismprint.device $(OUT)/netpar/parallel.device $(OUT)/PrismPrint
+$(OUT)/prismprint.device: $(PP_DEV)
+	@mkdir -p $(OUT)
+	$(CC) $(CFLAGS) -ffreestanding -fno-builtin -nostartfiles -nostdlib -s -o $@ $(PP_DEV)
+$(OUT)/netpar/parallel.device: $(PP_DEV)
+	@mkdir -p $(OUT)/netpar
+	$(CC) $(CFLAGS) -DPP_PARALLEL -ffreestanding -fno-builtin -nostartfiles -nostdlib -s -o $@ $(PP_DEV)
+$(OUT)/PrismPrint: printer/prismprint_cli.c $(STDIO_OBJ)
+	@mkdir -p $(OUT)
+	$(CC) $(CFLAGS) $(LDFLAGS) -s -o $@ $^
+# Printer port test helpers (not packaged): prtopen opens printer.device (or
+# a port device) and writes a line; pptrace prints the trace a PP_DEBUG
+# device keeps after its base (out/diag/prismprint.device, .../parallel.device).
+printer-test: $(OUT)/diag/prtopen $(OUT)/diag/pptrace $(OUT)/diag/prismprint.device $(OUT)/diag/netpar/parallel.device
+$(OUT)/diag/prtopen: printer/prtopen.c
+	@mkdir -p $(OUT)/diag
+	$(CC) $(CFLAGS) $(LDFLAGS) -s -o $@ $<
+$(OUT)/diag/pptrace: printer/pptrace.c
+	@mkdir -p $(OUT)/diag
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wno-format -s -o $@ $<
+$(OUT)/diag/prismprint.device: $(PP_DEV)
+	@mkdir -p $(OUT)/diag
+	$(CC) $(CFLAGS) -DPP_DEBUG -ffreestanding -fno-builtin -nostartfiles -nostdlib -s -o $@ $(PP_DEV)
+$(OUT)/diag/netpar/parallel.device: $(PP_DEV)
+	@mkdir -p $(OUT)/diag/netpar
+	$(CC) $(CFLAGS) -DPP_DEBUG -DPP_PARALLEL -ffreestanding -fno-builtin -nostartfiles -nostdlib -s -o $@ $(PP_DEV)
 $(OBJ)/liblwip.a: $(LWIP_OBJ)
 	$(AR) rcs $@ $^
 

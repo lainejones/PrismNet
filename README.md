@@ -27,6 +27,7 @@ you already have run unchanged. The networking core is
 | **GUIs** | PrismNet Prefs (6 tabs, Roadshow import), PrismMon (live status, traffic, connections, memory, log) |
 | **Shares** | own NFS v3 and SMB 2/3 clients: a NAS, Windows, macOS or Samba folder as an Amiga volume |
 | **Servers** | FTP server, telnet server (AmigaDOS Shell), web server (one folder, read-only), inetd to start them on demand; user accounts with passwords |
+| **Printing** | a network printer port for printer.device: PostScript or PCL printers over TCP port 9100 or LPD (`prismprint.device`, `PrismPrint`) |
 | **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
 | **Install** | Amiga Installer: install, update (keeps settings; all questions first, a few seconds offline), remove (puts the old stack's files back) |
 | **Updates** | checks GitHub or a mirror for a newer release and installs it (68020+, AmiSSL 5) |
@@ -98,6 +99,15 @@ you already have run unchanged. The networking core is
   used and reconnect by themselves.
 - The SMB password is asked once, in a masked window, and remembered.
 - `SMBShares` lists a server's shares from the Shell.
+
+### Printing
+
+- **A network printer port** (`DEVS:prismprint.device`, optional): printer.device
+  sends each job to a printer on the network instead of the parallel port -
+  over TCP port 9100 or LPD - so every program prints to it, with the
+  Amiga's own PostScript or HP LaserJet (PCL) drivers.
+- `PrismPrint` sets it up from the Shell, prints a test page, and points
+  Printer prefs at it. OS 3.1 has the same port as a `parallel.device`.
 
 ### Servers
 
@@ -178,7 +188,7 @@ address messages (they exist and return 0).
 **Known issue:** on the CD32's `slip.device` 37.4 (1993), `PrismNet STOP`
 followed by `START` can leave the stack stuck opening the driver until a
 reboot. PrismNet's built-in SLIP doesn't have the problem and is as fast; see
-[Serial links](docs/manual/11-serial.md) for moving over.
+[Serial links](docs/manual/12-serial.md) for moving over.
 
 **Known issue (ZZ9000 drivers 2.8.1):** `ZZ9000Net.device` 2.4 runs its
 `ZZ9000NetFramer` task at priority 0. While a busy program also runs at
@@ -186,7 +196,7 @@ priority 0, receive can stop for good after 10-15 minutes, until a reset.
 This happens with any stack. The fix is in the drivers'
 [next release](https://github.com/BlitterStudio/zz9000-drivers/issues/157).
 Until then, raise `ZZ9000NetFramer` to priority 5 after PrismNet starts; see
-[Known problems](docs/manual/13-troubleshooting.md#known-problems).
+[Known problems](docs/manual/14-troubleshooting.md#known-problems).
 
 ## Licence
 

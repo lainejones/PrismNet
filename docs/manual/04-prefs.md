@@ -82,7 +82,7 @@ password can't log in to the FTP or telnet server; the list shows it as
 - **Start at boot**: adds `PrismNet START` to `S:User-Startup` (in a marked
   block that Prefs and the installer manage).
 - **Memory budget (KB)**: the most memory PrismNet may use for packets and
-  connections. Empty means the default. See [Small machines](12-memory.md).
+  connections. Empty means the default. See [Small machines](13-memory.md).
 - **Updates**: where **Check now** looks for a newer PrismNet: Off, GitHub,
   Mirror, or GitHub, then mirror. **Check now** checks and, when there is a
   newer release, offers to download and install it.

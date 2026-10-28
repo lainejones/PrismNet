@@ -9,12 +9,12 @@ in a Shell with one of these keywords.
 |---|---|
 | `PrismNet START` | starts the stack in the background with the settings in `ENV:PrismNet`, waits for the addresses and shows the status. `PrismNet` alone does the same |
 | `PrismNet STOP` | stops it: every connection is closed and the network card is let go. It returns once PrismNet has really ended |
-| `PrismNet STOP HOLD` | stops it and keeps it stopped: no program can start it again (*Start when needed*) until `PrismNet START` or a reboot. For WHDLoad games, see [Troubleshooting](13-troubleshooting.md). `QUIET` prints nothing |
+| `PrismNet STOP HOLD` | stops it and keeps it stopped: no program can start it again (*Start when needed*) until `PrismNet START` or a reboot. For WHDLoad games, see [Troubleshooting](14-troubleshooting.md). `QUIET` prints nothing |
 | `PrismNet RUN` | runs the stack in the foreground, in this Shell (what START starts in the background); CTRL-C stops it |
 
 START also takes `TRACE=file`, which logs every request programs make to
 that file: useful when a program misbehaves (see
-[Troubleshooting](13-troubleshooting.md)).
+[Troubleshooting](14-troubleshooting.md)).
 
 ## Looking at it
 

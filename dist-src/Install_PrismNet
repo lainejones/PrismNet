@@ -154,6 +154,10 @@
         (if (= 0 (run "Search >NIL: C:telnetd \"PrismNet\"" (safe))) (delete "C:telnetd")))
     (if (exists "C:httpd" (noreq))
         (if (= 0 (run "Search >NIL: C:httpd \"PrismNet\"" (safe))) (delete "C:httpd")))
+    (if (exists "DEVS:prismprint.device" (noreq))
+        (if (= 0 (run "Search >NIL: DEVS:prismprint.device \"PrismNet\"" (safe))) (delete "DEVS:prismprint.device")))
+    (if (exists "C:PrismPrint" (noreq))
+        (if (= 0 (run "Search >NIL: C:PrismPrint \"PrismNet\"" (safe))) (delete "C:PrismPrint")))
     (if (exists "C:SMBShares" (noreq))
         (if (= 0 (run "Search >NIL: C:SMBShares \"PrismNet\"" (safe))) (delete "C:SMBShares")))
     (foreach "Storage/DOSDrivers" "P(NFS|SMB)0"
@@ -328,8 +332,25 @@
                          "Web server (a folder of this Amiga in a browser)")
                 (default 0)))
 
-;; WHDLoad: a network card's interrupts hang some games once WHDLoad has taken
-;; the machine over; WHDLoad's ExecuteStartup/ExecuteCleanup stop PrismNet for
+(set printer
+    (askbool (prompt "Install the network printer port?\n\n"
+                     "Programs then print to a printer on the network - one that "
+                     "understands PostScript or PCL, as most office laser printers do.")
+             (help "DEVS:prismprint.device and C:PrismPrint. printer.device hands each "
+                   "print job to the port instead of the parallel port, and the port "
+                   "sends it to the printer over TCP (port 9100, or LPD).\n\n"
+                   "Afterwards, in a Shell:\n"
+                   "  PrismPrint HOST=<the printer's name or address> SAVE\n"
+                   "  PrismPrint TEST   (a test page)\n"
+                   "  PrismPrint PREFS SAVE   (OS 3.2: printer.device prints through it)\n"
+                   "Then pick a printer driver the printer understands in Prefs/Printer: "
+                   "PostScript, or HP LaserJet for PCL.\n\n"
+                   "OS 3.1's printer.device only prints to parallel.device: the manual "
+                   "explains how to use SYS:Storage/Printer-OS3.1/parallel.device there.")
+             (choices "Install" "Skip")
+             (default 0)))
+
+;; WHDLoad: a network card's interrupts hang some games once WHDLoad has taken;; the machine over; WHDLoad's ExecuteStartup/ExecuteCleanup stop PrismNet for
 ;; the game and start it after
 (set whd_add 0)
 (set whd_note "")
@@ -533,6 +554,18 @@
                (source "C") (dest "C:") (choices "ShareUnmount") (nogauge))
     (run "Protect >NIL: C:ShareUnmount +e")
   ))
+(if printer
+  (
+    (copyfiles (prompt "Installing the network printer port") (help @copyfiles-help)
+               (source "Devs") (dest "DEVS:") (choices "prismprint.device") (nogauge))
+    (copyfiles (prompt "Installing PrismPrint") (help @copyfiles-help)
+               (source "C") (dest "C:") (choices "PrismPrint") (nogauge))
+    (run "Protect >NIL: C:PrismPrint +e")
+    (if (not (exists "SYS:Storage/Printer-OS3.1" (noreq)))
+        (if (< (/ (getversion "exec.library" (resident)) 65536) 44)
+            (copyfiles (source "Storage/Printer-OS3.1") (dest "SYS:Storage/Printer-OS3.1")
+                       (all) (nogauge))))
+  ))
 (if (BITAND servers 1)
   (
     (copyfiles (prompt "Installing the FTP server") (help @copyfiles-help)
@@ -640,6 +673,7 @@
              "The manual is in the PrismNet .lha and on GitHub (lainejones/PrismNet).\n")
          (if shares "Network shares: set them up in Prefs > Shares\n" "")
          (if servers "Servers: give users a password in Prefs > Users\n" "")
+         (if printer "Printer: PrismPrint HOST=<printer> SAVE, then PrismPrint TEST\n" "")
          (if (<> kept " ") (cat "Kept your own" kept "in C:; PrismNet's are in the C drawer of the archive.\n") "")
          mounts_kept
          (if whd_add "WHDLoad games: the network is off while one runs.\n" "")

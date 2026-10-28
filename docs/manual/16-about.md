@@ -84,7 +84,7 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 - **0.6.4** (2026-10-19): serial links queue a burst of packets instead of
   dropping it: no more lost sends on SLIP, sending at full line speed, and the
   built-in SLIP is now as fast as `slip.device`. A rewritten
-  [Serial links](11-serial.md) chapter with every option.
+  [Serial links](12-serial.md) chapter with every option.
 - **0.6.3** (2026-10-19): offers network drivers SANA-II's direct buffers
   (`S2_DMACopyToBuff32`/`S2_DMACopyFromBuff32`), so a driver that supports them
   skips a copy of every packet: faster uploads on the A1200's A314, the

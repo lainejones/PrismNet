@@ -51,9 +51,9 @@ widely used TCP/IP implementation, running as an Amiga task.
 - A network interface with a SANA-II driver in `DEVS:Networks`: a PCMCIA
   card (`cnet.device` and similar), a Zorro card (X-Surf, ZZ9000), a SCSI
   network adapter (DaynaPORT), an A314, or a serial link (SLIP or PPP; see
-  [Serial links](11-serial.md)).
+  [Serial links](12-serial.md)).
 - Memory: about 290 KB when idle with the standard core, about 175 KB with
-  the small core for 1 to 2 MB machines (see [Small machines](12-memory.md)).
+  the small core for 1 to 2 MB machines (see [Small machines](13-memory.md)).
 
 ## Tested on
 

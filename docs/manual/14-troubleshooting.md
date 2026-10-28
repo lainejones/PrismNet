@@ -13,7 +13,7 @@ there.
 - **Another stack has the card**: Roadshow, AmiTCP or Miami still running.
   Take it out of the startup files and reboot.
 - **Not enough memory**: it shows the free memory and the largest block.
-  See [Small machines](12-memory.md).
+  See [Small machines](13-memory.md).
 - **No settings**: run PrismNet Prefs or the installer.
 
 ## No address from DHCP
@@ -94,7 +94,7 @@ scripts they run.
   `PrismNet START` can hang while opening the driver; the machine gets
   sluggish and the network stays down until a reboot. A reboot starts
   cleanly. Use PrismNet's built-in SLIP instead (`DEVICE=serial.device`,
-  see [Serial links](11-serial.md)): it restarts fine and is as fast.
+  see [Serial links](12-serial.md)): it restarts fine and is as fast.
 - **`amiga.local` does not resolve** on some cards: the network driver
   refuses the mDNS group address. `PrismNet LOG` then says "refused
   multicast". `x-surf.device` 1.16 and the A314's `a314eth.device` refuse it; the

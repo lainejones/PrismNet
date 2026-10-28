@@ -30,6 +30,8 @@ What you get
   macOS, a NAS, Samba) as an ordinary Amiga volume, signing and encryption
   included.
 - Servers (optional): FTP, telnet and web, started on demand by inetd.
+- A network printer port (optional): printer.device prints to a PostScript
+  or PCL printer on the network, over TCP port 9100 or LPD.
 - Serial links: built-in SLIP over serial.device, or any SANA-II
   point-to-point driver.
 - An update check (68020+ with AmiSSL 5): PrismNet Prefs tells you when a

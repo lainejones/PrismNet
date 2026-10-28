@@ -16,7 +16,7 @@ for pair in "out/PrismNet:core port lwip/src" "out/small/PrismNet:core port lwip
             "out/PrismMon:tools/prismmon.c" "out/ping:tools/net" "out/nslookup:tools/net" \
             "out/prismnfs-handler:tools/nfs tools/netfs" "out/ShareUnmount:tools/netfs/shareunmount.c" \
             "out/prismsmb-handler:tools/smb/smb_start.S tools/netfs/core.c tools/netfs/names.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/smb/backend.c tools/smb/smb2.c tools/smb/crypto.c tools/smb/passreq.c tools/netfs/*.h tools/smb/*.h" \
-            "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" "out/httpd:tools/srv/httpd.c"\
+            "out/prismprint.device:printer/prismprint.c printer/start.S" "out/netpar/parallel.device:printer/prismprint.c printer/start.S" "out/PrismPrint:printer/prismprint_cli.c" "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" "out/httpd:tools/srv/httpd.c"\
             "out/PrismNetUpdate:tools/update" \
             "out/SMBShares:tools/smb/smbshares.c tools/smb/smb2.c tools/smb/crypto.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/netfs/*.h tools/smb/*.h"; do
     bin=${pair%%:*}; srcs=${pair#*:}
@@ -32,7 +32,7 @@ fi
 # everything but dist/aminet: the upload pair there may have been edited by
 # hand (the uploader's address) and must survive a rebuild
 rm -rf dist/PrismNet dist/PrismNet.info dist/PrismNet.readme
-mkdir -p $D/C $D/L $D/Libs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Docs
+mkdir -p $D/C $D/L $D/Libs $D/Devs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Storage/Printer-OS3.1 $D/Docs
 
 # the installer says which version it installs
 sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
@@ -50,6 +50,9 @@ cp out/prismsmb-handler                  $D/L/            # optional SMB client
 cp out/ShareUnmount out/SMBShares        $D/C/
 cp out/inetd out/ftpd out/telnetd out/httpd $D/C/            # optional servers
 cp out/PrismNetUpdate                    $D/C/            # the update check (68020+)
+cp out/prismprint.device                 $D/Devs/         # optional network printer port
+cp out/PrismPrint                        $D/C/
+cp out/netpar/parallel.device           $D/Storage/Printer-OS3.1/   # the same, for OS 3.1's printer.device
 cp dist-src/PNFS0 dist-src/PSMB0         $D/Storage/DOSDrivers/
 PN_GUIDEVER="$VER ($(date +%d.%m.%Y))" python tools/mkguide.py docs/manual $D/PrismNet.guide >/dev/null   # the manual
 cp out/PrismNetPrefs                     $D/Prefs/PrismNet
@@ -68,10 +71,10 @@ cp $I/Install_PrismNet.info $I/README.info $I/PrismNet.guide.info $D/
 cp $I/PNFS0.info $I/PSMB0.info           $D/Storage/DOSDrivers/
 cp $I/PrismNet.info                      dist/PrismNet.info      # the archive's own drawer
 # the top-level drawers: one icon each, each with its place in the window
-for dr in C L Libs Prefs Tools Storage Docs; do
+for dr in C L Libs Devs Prefs Tools Storage Docs; do
     cp $I/$dr.info $D/$dr.info
 done
-for dr in Storage/PrismNet Storage/DOSDrivers Tools/Net Tools/Small; do
+for dr in Storage/PrismNet Storage/DOSDrivers Storage/Printer-OS3.1 Tools/Net Tools/Small; do
     cp $I/drawer.info $D/$dr.info
 done
 

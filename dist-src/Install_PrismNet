@@ -118,7 +118,7 @@
     (if (exists "C:NetCtl" (noreq))
         (if (= 0 (run "Search >NIL: C:NetCtl \"PrismNet\"" (safe))) (delete "C:NetCtl")))
     (if (exists "SYS:Storage/OpenVPN" (noreq))
-        (run "Delete >NIL: SYS:Storage/OpenVPN ALL QUIET"))
+        (run "Delete >NIL: SYS:Storage/OpenVPN SYS:Storage/OpenVPN.info ALL QUIET"))
     ; network tools: delete only PrismNet's, then put back another stack's
     ; copy the installer saved in C:Backup
     (foreach "C" "(ping|traceroute|nslookup)"
@@ -316,7 +316,10 @@
                            "SYS:Storage/DOSDrivers/PSMB0).")
                      (choices "Move to C:Backup" "Keep it")
                      (default 0)))))
-(set servers
+; the install floppy leaves the servers out (no room): no question then
+(set servers 0)
+(if (exists "C/inetd" (noreq))
+  (set servers
     (askoptions (prompt "Install servers?\n\n"
                         "They let other computers reach this Amiga. Nothing listens "
                         "unless you choose one here.")
@@ -334,7 +337,7 @@
                 (choices "FTP server (copy files to and from this Amiga)"
                          "Telnet server (a Shell from another computer)"
                          "Web server (a folder of this Amiga in a browser)")
-                (default 0)))
+                (default 0))))
 
 (set printer
     (askbool (prompt "Install the network printer port?\n\n"
@@ -490,6 +493,7 @@
 (run "Protect >NIL: C:NetCtl +e")
 ; the AmiOpenVPN scripts (manual, chapter VPN): the user copies them to OPENVPN:
 (copyfiles (source "Storage/OpenVPN") (dest "SYS:Storage/OpenVPN") (all) (nogauge))
+(copyfiles (source "Storage/OpenVPN.info") (dest "SYS:Storage") (nogauge))
 (foreach "C" "(ping|traceroute|nslookup)"
     (set nm @each-name)
     (set tool (tackon "C:" nm))
@@ -572,8 +576,11 @@
     (run "Protect >NIL: C:PrismPrint +e")
     (if (not (exists "SYS:Storage/Printer-OS3.1" (noreq)))
         (if (< (/ (getversion "exec.library" (resident)) 65536) 44)
-            (copyfiles (source "Storage/Printer-OS3.1") (dest "SYS:Storage/Printer-OS3.1")
-                       (all) (nogauge))))
+            (
+              (copyfiles (source "Storage/Printer-OS3.1") (dest "SYS:Storage/Printer-OS3.1")
+                         (all) (nogauge))
+              (copyfiles (source "Storage/Printer-OS3.1.info") (dest "SYS:Storage") (nogauge))
+            )))
   ))
 (if (BITAND servers 1)
   (

@@ -4,11 +4,13 @@
 # double-click Install_PrismNet). Run in WSL after dist.sh; needs amitools'
 # xdftool (~/amitools-venv).
 #
-# The whole drawer is 972 KB, so the floppy leaves out what installing does
+# The whole drawer is over 1 MB, so the floppy leaves out what installing does
 # not need: the manual (it is in the .lha and on GitHub - the installer skips
 # it when it is missing), Tools/Net (the same ping/traceroute/nslookup are in
-# C, plus httpbench and its PC-side scripts) and the bsdtest/ugtest test
-# programs. Everything the installer installs is on it, the small core for
+# C, plus httpbench and its PC-side scripts), the bsdtest/ugtest test
+# programs and, since 1.0.8, the servers (inetd, ftpd, telnetd, httpd - the
+# installer does not ask about them when C/inetd is missing; the .lha has
+# them). Everything else the installer installs is on it, the small core for
 # 1-2 MB machines included.
 #
 # GPL-3.0-only, see LICENSE.
@@ -23,7 +25,8 @@ ADF=$(pwd)/dist/PrismNet-$VER.adf
 S=$(mktemp -d)
 cp -r "$D/." "$S/"
 rm -rf "$S/Tools/Net" "$S/Tools/Net.info" "$S/Tools/bsdtest" "$S/Tools/ugtest" \
-       "$S/PrismNet.guide" "$S/PrismNet.guide.info"
+       "$S/PrismNet.guide" "$S/PrismNet.guide.info" \
+       "$S/C/inetd" "$S/C/ftpd" "$S/C/telnetd" "$S/C/httpd"
 cp dist-src/icons/Disk.info "$S/Disk.info"
 
 rm -f "$ADF"

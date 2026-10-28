@@ -19,6 +19,18 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.8** (2026-10-28): printing over the network: `DEVS:prismprint.device`
+  is a printer port for printer.device that sends each job to a PostScript or
+  PCL printer over TCP port 9100 or LPD, and `C:PrismPrint` sets it up (see
+  [Printing](11-printing.md); OS 3.1 gets the same port as a
+  `parallel.device`). OpenVPN with AmiOpenVPN and its `vpn.device`: the
+  scripts in `SYS:Storage/OpenVPN` set the tunnel's address, routes and name
+  servers and undo them when it closes (see [VPN](13-vpn.md)). `C:NetCtl`
+  adds interfaces, routes and name servers to the running stack from any
+  script. Fixed: a point-to-point driver that brings no netmask no longer
+  takes every destination for its own network, and a route through a
+  point-to-point link's far end now finds that link. `SETCLOCK` follows a
+  time zone changed in Prefs/Locale without a restart.
 - **1.0.7** (2026-10-23): a web server, `C:httpd`: one folder of the Amiga
   in any browser, read-only (see [Servers](10-servers.md)); the installer
   and PrismNet Prefs set it up beside FTP and telnet. Fixed: a server that

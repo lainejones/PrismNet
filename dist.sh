@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=1.0.7
+VER=1.0.8
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -35,7 +35,11 @@ rm -rf dist/PrismNet dist/PrismNet.info dist/PrismNet.readme
 mkdir -p $D/C $D/L $D/Libs $D/Devs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Storage/Printer-OS3.1 $D/Storage/OpenVPN $D/Docs
 
 # the installer says which version it installs
-sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
+# the shipped installer without the comment lines (the floppy is nearly full);
+# the header block at the top stays, and the source in dist-src keeps them all
+sed "s/@VER@/$VER/" dist-src/Install_PrismNet |
+    awk 'NR == 1 { head = 1 } head && /^;/ { print; next } { head = 0 } /^[ \t]*(;|$)/ { next } { print }' \
+    > $D/Install_PrismNet
 # the Aminet readme goes next to the archive (dist/PrismNet.readme), not in it
 sed "s/@VER@/$VER/" dist-src/aminet.readme > dist/PrismNet.readme
 cp dist-src/README $D/
@@ -75,7 +79,7 @@ cp $I/PrismNet.info                      dist/PrismNet.info      # the archive's
 for dr in C L Libs Devs Prefs Tools Storage Docs; do
     cp $I/$dr.info $D/$dr.info
 done
-for dr in Storage/PrismNet Storage/DOSDrivers Storage/Printer-OS3.1 Tools/Net Tools/Small; do
+for dr in Storage/PrismNet Storage/DOSDrivers Storage/Printer-OS3.1 Storage/OpenVPN Tools/Net Tools/Small; do
     cp $I/drawer.info $D/$dr.info
 done
 

@@ -62,7 +62,7 @@
 #include "prismnet/pnmsg.h"
 #include "tabs.h"
 
-static const char verstag[] __attribute__((used)) = "$VER: PrismNetPrefs 1.0.7 (23.10.2026) PrismNet";
+static const char verstag[] __attribute__((used)) = "$VER: PrismNetPrefs 1.0.8 (28.10.2026) PrismNet";
 
 struct IntuitionBase *IntuitionBase;
 struct GfxBase       *GfxBase;

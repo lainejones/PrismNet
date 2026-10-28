@@ -2056,6 +2056,19 @@ int main(void)
     sock_init();
     SetTaskPri(FindTask(NULL), CORE_PRI);
 
+    /* Our own current directory, like "CD SYS:": a process keeps its parent's
+     * one locked, and the core runs until STOP. Started from an install
+     * floppy or an installer's temporary drawer it pinned that drawer (found
+     * with PrismPack's floppy, 2026-10-28). inetd inherits it from us. */
+    {
+        BPTR sys = Lock((CONST_STRPTR)"SYS:", SHARED_LOCK);
+        if (sys) {
+            BPTR old = CurrentDir(sys);
+            if (old)
+                UnLock(old);
+        }
+    }
+
     /* Load bsdsocket.library now and keep it resident, so many programs
      * opening it at once never race ramlib's first load. The library
      * recognises the core's task and registers no client for it. */

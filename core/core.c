@@ -32,6 +32,8 @@
 #include "lwip/apps/sntp.h"
 #include <libraries/locale.h>
 #include <proto/locale.h>
+#include <prefs/locale.h>
+#include <stddef.h>
 
 #include "prismnet/pnsys.h"
 #include "prismnet/sanaif.h"
@@ -1345,21 +1347,49 @@ static void setup_static_routes(void)
 
 struct LocaleBase *LocaleBase;
 
+/* lp_GMTOffset from the LCLE chunk of a Locale prefs file. */
+static BOOL prefs_gmtoffset(BPTR fh, LONG *west)
+{
+    UBYTE b[1024];
+    LONG n = Read(fh, b, sizeof(b)), i = 12;
+
+    if (n < 20 || memcmp(b, "FORM", 4) || memcmp(b + 8, "PREF", 4))
+        return FALSE;
+    while (i + 8 <= n) {
+        LONG len = (LONG)((b[i + 4] << 24) | (b[i + 5] << 16) | (b[i + 6] << 8) | b[i + 7]);
+        if (!memcmp(b + i, "LCLE", 4)) {
+            LONG o = i + 8 + offsetof(struct LocalePrefs, lp_GMTOffset);
+            if (len < (LONG)offsetof(struct LocalePrefs, lp_GMTOffset) + 4 || o + 4 > n)
+                return FALSE;
+            *west = (LONG)((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]);
+            return TRUE;
+        }
+        i += 8 + len + (len & 1);
+    }
+    return FALSE;
+}
+
 /* Seconds east of UTC from the Workbench locale (the Amiga clock is local).
  * Returns FALSE when no Locale prefs were ever saved: locale.library then
- * answers with a built-in default (UTC+5 on 3.x), which must not be used. */
+ * answers with a built-in default (UTC+5 on 3.x), which must not be used.
+ * Read at every time server answer (rare), and from ENV:Sys/locale.prefs
+ * itself: the default locale only follows a change once IPrefs has applied
+ * it, so SETCLOCK right after Prefs/Locale would still use the old zone. */
 static BOOL locale_offset(LONG *out)
 {
-    static LONG east;
-    static int known;                   /* 0 not asked, 1 from prefs, -1 no prefs */
+    LONG east = 0, west;
+    BOOL known = FALSE;
     struct Locale *loc;
-    BPTR lk;
+    BPTR fh;
 
-    if (known) { *out = east; return known > 0; }
-    known = -1;
-    if ((lk = Lock((CONST_STRPTR)"ENV:Sys/locale.prefs", SHARED_LOCK)) != 0) {
-        UnLock(lk);
-        known = 1;
+    if ((fh = Open((CONST_STRPTR)"ENV:Sys/locale.prefs", MODE_OLDFILE)) != 0) {
+        known = TRUE;
+        if (prefs_gmtoffset(fh, &west)) {
+            Close(fh);
+            *out = -west * 60L;         /* minutes west -> seconds east */
+            return TRUE;
+        }
+        Close(fh);
     }
     if ((LocaleBase = (struct LocaleBase *)OpenLibrary((CONST_STRPTR)"locale.library", 38)) != NULL) {
         if ((loc = OpenLocale(NULL)) != NULL) {
@@ -1370,7 +1400,7 @@ static BOOL locale_offset(LONG *out)
         LocaleBase = NULL;
     }
     *out = east;
-    return known > 0;
+    return known;
 }
 
 /* lwIP's SNTP got an answer: sec is UTC since 1970 */

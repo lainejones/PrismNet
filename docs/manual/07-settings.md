@@ -96,7 +96,8 @@ SERVER=DHCP
 Sets the Amiga's clock from the network when PrismNet starts. `SERVER=DHCP`
 uses the time server DHCP offers, else `pool.ntp.org`; or name a server.
 `SETCLOCK=NO` only measures the difference (shown by `PrismNet STATUS`).
-The time zone comes from the Locale prefs. Delete the file to switch it off.
+The time zone comes from the Locale prefs, read each time the clock is set.
+Delete the file to switch it off.
 
 ## realname, workgroup
 

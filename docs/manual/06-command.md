@@ -29,7 +29,8 @@ that file: useful when a program misbehaves (see
 ## The clock
 
 `PrismNet SETCLOCK` asks the time server now and sets the Amiga's clock
-(see the `time` file in [Settings files](07-settings.md)).
+(see the `time` file in [Settings files](07-settings.md)). After changing the
+time zone in Prefs/Locale, `SETCLOCK` puts the clock right at once.
 
 ## One interface from the command line
 

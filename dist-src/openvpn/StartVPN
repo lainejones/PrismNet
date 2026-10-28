@@ -1,0 +1,7 @@
+.KEY CONFIG/A
+; Start AmiOpenVPN over PrismNet, for example:  Execute StartVPN OPENVPN:client.ovpn
+; vpn.device must be loaded (as interface vpn0) before OpenVPN opens it.
+FailAt 21
+NetCtl IFUP vpn0 DEVICE=vpn.device UNIT=0 QUIET
+Stack 262144
+OPENVPN:openvpn --config <CONFIG>

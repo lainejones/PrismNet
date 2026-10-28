@@ -13,7 +13,7 @@ there.
 - **Another stack has the card**: Roadshow, AmiTCP or Miami still running.
   Take it out of the startup files and reboot.
 - **Not enough memory**: it shows the free memory and the largest block.
-  See [Small machines](13-memory.md).
+  See [Small machines](14-memory.md).
 - **No settings**: run PrismNet Prefs or the installer.
 
 ## No address from DHCP

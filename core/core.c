@@ -1265,7 +1265,8 @@ static int route_lookup(const ip4_addr_t *dest, struct netif *netif, struct neti
             if (netif && n != netif)
                 continue;
             if (netif_is_up(n) && netif_is_link_up(n) && !ip4_addr_isany_val(*netif_ip4_addr(n)) &&
-                ip4_addr_net_eq(&route_gw[i], netif_ip4_addr(n), netif_ip4_netmask(n))) {
+                (ip4_addr_net_eq(&route_gw[i], netif_ip4_addr(n), netif_ip4_netmask(n)) ||
+                 (ifs[k].s.p2p && ip4_addr_eq(&route_gw[i], netif_ip4_gw(n))))) {   /* the peer */
                 best = i;
                 if (via) *via = n;
                 break;

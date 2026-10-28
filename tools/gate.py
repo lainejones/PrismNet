@@ -95,6 +95,8 @@ TESTS = [
          markers=["PrismNet stopped.", "route 192.168.77.0 added via",
                   "10.0.2.0/24        -                eth0       local subnet",
                   "default            10.0.2.2         eth0       default", "10.0.2.2         52:54:00:12:35:02  eth0"]),
+    # NetCtl (1.0.8): routes, default gateway, name servers from the Shell
+    Test("t-netctl", ["netctl.log"], 180, 7, need_stack=True, markers=["PrismNet stopped."]),
     # A, B and C each run bsdtest; D (AUTOSTART=NO) must NOT get the library.
     Test("t-config", [], 300, 3, network=True,
          markers=["=== D:"], no_lib=1),
@@ -110,6 +112,7 @@ DEPLOY = [
     ("bsdstress", "PrismNet"),
     ("rsquery", "PrismNet"),
     ("rscfg", "PrismNet"),
+    ("NetCtl", "PrismNet"),
     ("ping", "PrismNet/net"),
 ]
 

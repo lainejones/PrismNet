@@ -1,0 +1,7 @@
+; OpenVPN "route-pre-down" for PrismNet: undo PrismNetRouteUp and PrismNetUp.
+FailAt 21
+NetCtl DELROUTE 0.0.0.0/1
+NetCtl DELROUTE 128.0.0.0/1
+NetCtl DELROUTE ${trusted_ip}
+NetCtl DNSRESTORE
+NetCtl IFDOWN vpn0

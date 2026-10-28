@@ -1,0 +1,7 @@
+.KEY dev,mtu,link_mtu,local,remote,context
+; OpenVPN "up" for PrismNet: vpn.device unit 0 becomes interface vpn0.
+; OpenVPN gives the addresses in local variables (ifconfig_local ...).
+FailAt 21
+; (a variable OpenVPN didn't set, such as ifconfig_netmask with topology
+; net30, reaches NetCtl as "${...}" and is left out)
+NetCtl IFUP vpn0 DEVICE=vpn.device UNIT=0 ADDRESS=${ifconfig_local} NETMASK=${ifconfig_netmask} PEER=${route_vpn_gateway} MTU=<mtu>

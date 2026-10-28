@@ -1,0 +1,11 @@
+; OpenVPN "route-up" for PrismNet: everything through the tunnel
+; (redirect-gateway def1), except the way to the VPN server itself.
+FailAt 21
+; the way to the server stays on the real default gateway (an unset
+; route_net_gateway would stay as literal text, so ask PrismNet for it)
+Set pn_gateway `NetCtl GATEWAY`
+NetCtl ADDROUTE ${trusted_ip} ${pn_gateway}
+NetCtl ADDROUTE 0.0.0.0/1 ${route_vpn_gateway}
+NetCtl ADDROUTE 128.0.0.0/1 ${route_vpn_gateway}
+; the name servers the VPN server pushed, if any
+NetCtl DNS PUSHED

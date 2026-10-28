@@ -23,11 +23,12 @@ you already have run unchanged. The networking core is
 | **Clock** | sets the Amiga's time from the network (SNTP) at start-up, or on demand with `PrismNet SETCLOCK` |
 | **Starting** | on demand (the first program that needs it), at boot, or by hand; `PrismNet STOP` and `START` |
 | **Commands** | `PrismNet STATUS`, `NETSTAT`, `ROUTE`, `ARP`, `LOG`, `SETCLOCK`, `START`/`STOP`, `TRACE=` request log |
-| **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `httpbench`, `SMBShares`, `ShareUnmount`, `PrismNetUpdate` |
+| **Tools** | `ping`, `traceroute`, `nslookup` (all record types, mDNS), `NetCtl` (interfaces, routes, name servers from scripts), `httpbench`, `SMBShares`, `ShareUnmount`, `PrismNetUpdate` |
 | **GUIs** | PrismNet Prefs (6 tabs, Roadshow import), PrismMon (live status, traffic, connections, memory, log) |
 | **Shares** | own NFS v3 and SMB 2/3 clients: a NAS, Windows, macOS or Samba folder as an Amiga volume |
 | **Servers** | FTP server, telnet server (AmigaDOS Shell), web server (one folder, read-only), inetd to start them on demand; user accounts with passwords |
 | **Printing** | a network printer port for printer.device: PostScript or PCL printers over TCP port 9100 or LPD (`prismprint.device`, `PrismPrint`) |
+| **VPN** | OpenVPN through [AmiOpenVPN](https://github.com/Telefonorosso/openvpn) and its `vpn.device`: the scripts that set up the tunnel's interface, routes and name servers |
 | **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
 | **Install** | Amiga Installer: install, update (keeps settings; all questions first, a few seconds offline), remove (puts the old stack's files back) |
 | **Updates** | checks GitHub or a mirror for a newer release and installs it (68020+, AmiSSL 5) |
@@ -108,6 +109,15 @@ you already have run unchanged. The networking core is
   Amiga's own PostScript or HP LaserJet (PCL) drivers.
 - `PrismPrint` sets it up from the Shell, prints a test page, and points
   Printer prefs at it. OS 3.1 has the same port as a `parallel.device`.
+
+### VPN
+
+- **OpenVPN** with [AmiOpenVPN](https://github.com/Telefonorosso/openvpn), an
+  OpenVPN 2.6 client for AmigaOS: PrismNet takes its `vpn.device` as interface
+  `vpn0`, and the scripts in `SYS:Storage/OpenVPN` set the tunnel's address,
+  routes and name servers and undo them when it closes.
+- `NetCtl` adds interfaces, routes and name servers to the running stack from
+  any script.
 
 ### Servers
 
@@ -196,7 +206,7 @@ priority 0, receive can stop for good after 10-15 minutes, until a reset.
 This happens with any stack. The fix is in the drivers'
 [next release](https://github.com/BlitterStudio/zz9000-drivers/issues/157).
 Until then, raise `ZZ9000NetFramer` to priority 5 after PrismNet starts; see
-[Known problems](docs/manual/14-troubleshooting.md#known-problems).
+[Known problems](docs/manual/15-troubleshooting.md#known-problems).
 
 ## Licence
 

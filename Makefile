@@ -338,7 +338,7 @@ $(SERVERS):
 	$(CC) $(LDFLAGS) -s -o $@ $^
 
 # Network tools (plain bsdsocket clients, any stack)
-NETTOOLS = $(OUT)/ping $(OUT)/traceroute $(OUT)/nslookup $(OUT)/httpbench
+NETTOOLS = $(OUT)/ping $(OUT)/traceroute $(OUT)/nslookup $(OUT)/httpbench $(OUT)/NetCtl
 nettools: $(NETTOOLS)
 $(OBJ)/net/%.o: tools/net/%.c tools/net/nettools.h $(wildcard port/include/prismnet/*.h)
 	@mkdir -p $(dir $@)
@@ -346,6 +346,7 @@ $(OBJ)/net/%.o: tools/net/%.c tools/net/nettools.h $(wildcard port/include/prism
 $(OUT)/ping: $(OBJ)/net/ping.o $(STDIO_OBJ)
 $(OUT)/traceroute: $(OBJ)/net/traceroute.o $(STDIO_OBJ)
 $(OUT)/httpbench: $(OBJ)/net/httpbench.o $(STDIO_OBJ)
+$(OUT)/NetCtl: $(OBJ)/net/netctl.o $(STDIO_OBJ)
 $(OUT)/nslookup: $(OBJ)/net/nslookup.o $(OBJ)/port/pnclient.o $(STDIO_OBJ)
 $(NETTOOLS):
 	@mkdir -p $(OUT)

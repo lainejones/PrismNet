@@ -547,6 +547,13 @@ LONG sanaif_open(struct sanaif *s, const char *devname, ULONG unit,
         IP4_ADDR(&drv_ip, s->mac[0], s->mac[1], s->mac[2], s->mac[3]);
         ip = &drv_ip;
     }
+    if (s->p2p && (!netmask || ip4_addr_isany(netmask))) {
+        /* a link to one peer: without a netmask its "subnet" 0.0.0.0/0
+         * would claim every destination (vpn.device, 2026-10-28) */
+        static ip4_addr_t host_mask;
+        IP4_ADDR(&host_mask, 255, 255, 255, 255);
+        netmask = &host_mask;
+    }
 
     for (i = 0; i < SANAIF_NUM_RX; i++)
         CopyMem(s->ctl, &s->rx[i].io, sizeof(struct IOSana2Req));

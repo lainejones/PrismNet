@@ -25,7 +25,7 @@ static struct timerequest nt_treq;
 static ULONG nt_freq;
 
 /* E-clock based microsecond clock (needs timer.device). */
-static BOOL nt_clock_init(void)
+static __attribute__((unused)) BOOL nt_clock_init(void)
 {
     if (OpenDevice((CONST_STRPTR)TIMERNAME, UNIT_VBLANK, (struct IORequest *)&nt_treq, 0) != 0)
         return FALSE;
@@ -37,14 +37,14 @@ static BOOL nt_clock_init(void)
     return TRUE;
 }
 
-static void nt_clock_exit(void)
+static __attribute__((unused)) void nt_clock_exit(void)
 {
     if (TimerBase)
         CloseDevice((struct IORequest *)&nt_treq);
     TimerBase = NULL;
 }
 
-static unsigned long long nt_now_us(void)
+static __attribute__((unused)) unsigned long long nt_now_us(void)
 {
     struct EClockVal ev;
     ReadEClock(&ev);
@@ -52,7 +52,7 @@ static unsigned long long nt_now_us(void)
 }
 
 /* "12.3" style milliseconds from microseconds into buf. */
-static char *nt_ms(unsigned long long us, char *buf)
+static __attribute__((unused)) char *nt_ms(unsigned long long us, char *buf)
 {
     unsigned long ms = (unsigned long)(us / 1000), tenth = (unsigned long)((us % 1000) / 100);
     sprintf(buf, "%lu.%lu", ms, tenth);

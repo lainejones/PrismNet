@@ -115,6 +115,10 @@
     (if (exists "C:PrismNet" (noreq)) (delete "C:PrismNet"))
     ; the update check (installed since 0.6.5; Remove left it behind until 1.0.5)
     (if (exists "C:PrismNetUpdate" (noreq)) (delete "C:PrismNetUpdate"))
+    (if (exists "C:NetCtl" (noreq))
+        (if (= 0 (run "Search >NIL: C:NetCtl \"PrismNet\"" (safe))) (delete "C:NetCtl")))
+    (if (exists "SYS:Storage/OpenVPN" (noreq))
+        (run "Delete >NIL: SYS:Storage/OpenVPN ALL QUIET"))
     ; network tools: delete only PrismNet's, then put back another stack's
     ; copy the installer saved in C:Backup
     (foreach "C" "(ping|traceroute|nslookup)"
@@ -481,6 +485,11 @@
 (copyfiles (prompt "Installing the PrismNet command in C:") (help @copyfiles-help)
            (source (if smallcore "Tools/Small/PrismNet" "C/PrismNet")) (dest "C:") (nogauge))
 (run "Protect >NIL: C:PrismNet +e")
+; NetCtl: interfaces, routes and name servers from scripts (the OpenVPN hooks use it)
+(copyfiles (source "C") (dest "C:") (choices "NetCtl") (nogauge))
+(run "Protect >NIL: C:NetCtl +e")
+; the AmiOpenVPN scripts (manual, chapter VPN): the user copies them to OPENVPN:
+(copyfiles (source "Storage/OpenVPN") (dest "SYS:Storage/OpenVPN") (all) (nogauge))
 (foreach "C" "(ping|traceroute|nslookup)"
     (set nm @each-name)
     (set tool (tackon "C:" nm))

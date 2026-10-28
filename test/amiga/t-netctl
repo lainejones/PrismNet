@@ -1,0 +1,63 @@
+; NetCtl: default gateway, routes, name servers, a bad interface; each
+; check prints "-> PASS" or "-> FAIL". Needs the slirp gateway 10.0.2.2.
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >DH0:PrismNet/netctl.log
+DH0:PrismNet/net/ping 10.0.2.2 COUNT=1 QUIET >NIL:
+DH0:PrismNet/NetCtl GATEWAY >T:nc
+Search >NIL: T:nc "10.0.2.2"
+If WARN
+  Echo "netctl gateway -> FAIL" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl gateway -> PASS" >>DH0:PrismNet/netctl.log
+EndIf
+DH0:PrismNet/NetCtl ADDROUTE 192.168.78.0/24 10.0.2.2 >>DH0:PrismNet/netctl.log
+DH0:PrismNet/NetCtl ADDROUTE 192.168.79.9 10.0.2.2 >>DH0:PrismNet/netctl.log
+DH0:PrismNet/NetCtl ROUTES >T:nc
+Type T:nc >>DH0:PrismNet/netctl.log
+Search >NIL: T:nc "192.168.78.0/24    via 10.0.2.2"
+If WARN
+  Echo "netctl net route -> FAIL" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl net route -> PASS" >>DH0:PrismNet/netctl.log
+EndIf
+Search >NIL: T:nc "192.168.79.9/32    via 10.0.2.2"
+If WARN
+  Echo "netctl host route -> FAIL" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl host route -> PASS" >>DH0:PrismNet/netctl.log
+EndIf
+DH0:PrismNet/NetCtl DELROUTE 192.168.78.0/24 >>DH0:PrismNet/netctl.log
+DH0:PrismNet/NetCtl DELROUTE 192.168.79.9 >>DH0:PrismNet/netctl.log
+DH0:PrismNet/NetCtl ROUTES >T:nc
+Search >NIL: T:nc "192.168.7"
+If WARN
+  Echo "netctl routes removed -> PASS" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl routes removed -> FAIL" >>DH0:PrismNet/netctl.log
+EndIf
+DH0:PrismNet/NetCtl DNS 9.9.9.9 >>DH0:PrismNet/netctl.log
+C:PrismNet STATUS >T:nc
+Search >NIL: T:nc "dns      9.9.9.9"
+If WARN
+  Echo "netctl dns -> FAIL" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl dns -> PASS" >>DH0:PrismNet/netctl.log
+EndIf
+DH0:PrismNet/NetCtl DNSRESTORE >>DH0:PrismNet/netctl.log
+C:PrismNet STATUS >T:nc
+Search >NIL: T:nc "dns      10.0.2.3"
+If WARN
+  Echo "netctl dnsrestore -> FAIL" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl dnsrestore -> PASS" >>DH0:PrismNet/netctl.log
+EndIf
+DH0:PrismNet/NetCtl IFUP test1 DEVICE=nosuch.device >>DH0:PrismNet/netctl.log
+If ERROR
+  Echo "netctl bad driver -> PASS" >>DH0:PrismNet/netctl.log
+Else
+  Echo "netctl bad driver -> FAIL" >>DH0:PrismNet/netctl.log
+EndIf
+Delete T:nc QUIET
+C:PrismNet STATUS >>DH0:PrismNet/netctl.log
+C:PrismNet LOG >>DH0:PrismNet/netctl.log
+C:PrismNet STOP >>DH0:PrismNet/netctl.log

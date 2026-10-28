@@ -1,0 +1,28 @@
+OpenVPN over PrismNet
+=====================
+
+These are the scripts for AmiOpenVPN (https://github.com/Telefonorosso/openvpn),
+an OpenVPN client for AmigaOS, to run over PrismNet. AmiOpenVPN and its
+vpn.device come from that project; they aren't part of PrismNet.
+
+  StartVPN                  starts a connection:
+                              Execute OPENVPN:StartVPN OPENVPN:client.ovpn
+  PrismNetUp.script         OpenVPN "up": gives interface vpn0 its address
+  PrismNetRouteUp.script    OpenVPN "route-up": routes everything through the
+                            tunnel (except the way to the server) and uses
+                            the name servers the server pushed
+  PrismNetDown.script       OpenVPN "route-pre-down": undoes both
+
+Put vpn.device in DEVS:Networks, assign OPENVPN: to the drawer with openvpn,
+your keys and these scripts, and add to your .ovpn file:
+
+  ifconfig-noexec
+  route-noexec
+  tun-mtu 1400
+  script-security 2
+  up OPENVPN:PrismNetUp.script
+  route-up OPENVPN:PrismNetRouteUp.script
+  route-pre-down OPENVPN:PrismNetDown.script
+
+The manual (PrismNet.guide, chapter "VPN") has the details. The scripts use
+C:NetCtl, which the PrismNet installer puts in C:.

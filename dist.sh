@@ -13,7 +13,7 @@ for pair in "out/PrismNet:core port lwip/src" "out/small/PrismNet:core port lwip
             "out/bsdsocket.library:lib/bsdsocket.c lib/lib_start.S lib/support.S port/include/prismnet/pnmsg.h" \
             "out/usergroup.library:lib/usergroup.c lib/ug_start.S lib/support.S" \
             "out/PrismNetPrefs:tools/prismprefs.c tools/prefsshares_io.c tools/prefsshares_gui.c tools/prefsservices_io.c tools/prefsservices_gui.c tools/tabs.c" \
-            "out/PrismMon:tools/prismmon.c" "out/ping:tools/net" "out/nslookup:tools/net" \
+            "out/PrismMon:tools/prismmon.c" "out/ping:tools/net" "out/NetCtl:tools/net/netctl.c" "out/nslookup:tools/net" \
             "out/prismnfs-handler:tools/nfs tools/netfs" "out/ShareUnmount:tools/netfs/shareunmount.c" \
             "out/prismsmb-handler:tools/smb/smb_start.S tools/netfs/core.c tools/netfs/names.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/smb/backend.c tools/smb/smb2.c tools/smb/crypto.c tools/smb/passreq.c tools/netfs/*.h tools/smb/*.h" \
             "out/prismprint.device:printer/prismprint.c printer/start.S" "out/netpar/parallel.device:printer/prismprint.c printer/start.S" "out/PrismPrint:printer/prismprint_cli.c" "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" "out/httpd:tools/srv/httpd.c"\
@@ -32,7 +32,7 @@ fi
 # everything but dist/aminet: the upload pair there may have been edited by
 # hand (the uploader's address) and must survive a rebuild
 rm -rf dist/PrismNet dist/PrismNet.info dist/PrismNet.readme
-mkdir -p $D/C $D/L $D/Libs $D/Devs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Storage/Printer-OS3.1 $D/Docs
+mkdir -p $D/C $D/L $D/Libs $D/Devs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Storage/Printer-OS3.1 $D/Storage/OpenVPN $D/Docs
 
 # the installer says which version it installs
 sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
@@ -43,7 +43,7 @@ cp dist-src/README $D/
 grep -q "PrismNetUpdate $VER " out/PrismNetUpdate || { echo "dist.sh: out/PrismNetUpdate is not $VER" >&2; exit 1; }
 cp LICENSE                               $D/Docs/
 cp lwip/COPYING                          $D/Docs/lwIP-COPYING
-cp out/PrismNet out/ping out/traceroute out/nslookup $D/C/
+cp out/PrismNet out/ping out/traceroute out/nslookup out/NetCtl $D/C/
 cp out/bsdsocket.library out/usergroup.library $D/Libs/
 cp out/prismnfs-handler                  $D/L/            # optional NFS client
 cp out/prismsmb-handler                  $D/L/            # optional SMB client
@@ -64,6 +64,7 @@ cp out/small/PrismNet                    $D/Tools/Small/  # the core for 1-2 MB 
 cp out/ping out/traceroute out/nslookup out/httpbench $D/Tools/Net/
 cp tools/bench/benchserver.py tools/bench/namequery.py $D/Tools/Net/
 cp -r config/ENVARC-PrismNet/.           $D/Storage/PrismNet/
+cp dist-src/openvpn/*.script dist-src/openvpn/StartVPN dist-src/openvpn/ReadMe $D/Storage/OpenVPN/   # AmiOpenVPN hooks
 
 # Icons: the committed .info files in dist-src/icons and icons/, copied as they are
 I=dist-src/icons

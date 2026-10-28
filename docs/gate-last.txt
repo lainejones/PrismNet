@@ -1,5 +1,5 @@
 PrismNet pre-deploy gate: PASSED
-date 2026-10-27 23:49, commit d6fe37b (+ uncommitted changes), fresh build, machine "PrismNet test"
+date 2026-10-28 09:20, commit e3a673f (+ uncommitted changes), fresh build, machine "PrismNet test"
 
 test        result  notes
 ----------  ------  -----
@@ -7,6 +7,7 @@ t-pingstop  PASS    1 pass/0 fail
 t-stack     PASS    2 pass/0 fail, stack peak 5520/16384
 t-rsq       PASS    2 pass/0 fail, stack peak 5520/16384
 t-rscfg     PASS    1 pass/0 fail, stack peak 5520/16384
+t-netctl    PASS    7 pass/0 fail, stack peak 5520/16384
 t-config    PASS    3 pass/0 fail, stack peak 5520/16384
 t-stress    PASS    2 pass/0 fail, stack peak 5520/16384
 

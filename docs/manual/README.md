@@ -24,7 +24,8 @@ pages are on GitHub.
 10. [Servers](10-servers.md): FTP and telnet into the Amiga
 11. [Printing](11-printing.md): a network printer as the Amiga's printer
 12. [Serial links](12-serial.md): SLIP and PPP over the serial port
-13. [Small machines](13-memory.md): memory use, and PrismNet on a 68000 with 1 MB
-14. [Troubleshooting](14-troubleshooting.md): when something doesn't work
-15. [For programmers](15-programmers.md): the API PrismNet provides
-16. [About](16-about.md): licence, credits and history
+13. [VPN](13-vpn.md): OpenVPN over PrismNet with AmiOpenVPN
+14. [Small machines](14-memory.md): memory use, and PrismNet on a 68000 with 1 MB
+15. [Troubleshooting](15-troubleshooting.md): when something doesn't work
+16. [For programmers](16-programmers.md): the API PrismNet provides
+17. [About](17-about.md): licence, credits and history

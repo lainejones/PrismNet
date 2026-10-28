@@ -34,6 +34,39 @@ Asks a DNS server directly and shows the full answer. The server is
 `SERVER=`, else PrismNet's first name server. An address as `NAME` does a
 reverse lookup; a name ending in `.local` is asked by mDNS.
 
+## NetCtl
+
+```
+NetCtl IFUP name DEVICE=driver [UNIT=n] [ADDRESS=a] [NETMASK=m] [PEER=p] [MTU=n]
+NetCtl IFDOWN name
+NetCtl ADDROUTE destination[/bits]|DEFAULT gateway
+NetCtl DELROUTE destination[/bits]|DEFAULT [gateway]
+NetCtl GATEWAY
+NetCtl ROUTES
+NetCtl DNS address [address] [address]
+NetCtl DNS PUSHED
+NetCtl DNSRESTORE
+```
+
+Changes the running network, for scripts such as the [VPN](13-vpn.md) ones.
+The changes last until PrismNet stops; the settings files aren't touched.
+`QUIET` leaves out the confirmation line.
+
+| Action | Does |
+|---|---|
+| `IFUP` | adds an interface for a SANA-II driver (with `DEVICE=`), or changes one that is there, and switches it on. `PEER=` is the far end of a point-to-point link |
+| `IFDOWN` | removes an interface; only the one added last can go |
+| `ADDROUTE` | a route to a network (`10.8.0.0/24`) or to one address, through `gateway`. `DEFAULT` sets the default gateway |
+| `DELROUTE` | removes a route |
+| `GATEWAY` | prints the default gateway, for a script: ``Set gw `NetCtl GATEWAY` ``. Returns WARN when there is none |
+| `ROUTES` | lists the routes |
+| `DNS` | uses these name servers instead of the current ones. The first `DNS` notes the old ones for `DNSRESTORE`. `DNS PUSHED` takes the ones an OpenVPN server pushed, from the variables OpenVPN gives its scripts |
+| `DNSRESTORE` | puts back the name servers `DNS` replaced |
+
+NetCtl uses Roadshow's configuration calls, so it should also work with
+Roadshow (not yet tried there). In a script, a value that is still an unset
+`${variable}` counts as not given.
+
 ## SMBShares
 
 ```

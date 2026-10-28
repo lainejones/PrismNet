@@ -59,7 +59,7 @@ ping 1.1.1.1              the internet: the gateway works
 ping aminet.net           DNS works
 ```
 
-If the first one fails, see [Troubleshooting](14-troubleshooting.md). If
+If the first one fails, see [Troubleshooting](15-troubleshooting.md). If
 all three answer, every network program should work.
 
 ## Stopping it
@@ -83,6 +83,6 @@ works three ways:
   FTP server runs. NetBIOS uses the first 15 characters, before any dot.
 - **macOS, Linux and Windows 10/11** find it by mDNS: `ping amiga.local`,
   if the network driver accepts multicast (see
-  [Known problems](14-troubleshooting.md#known-problems)).
+  [Known problems](15-troubleshooting.md#known-problems)).
 - **Your router** often learns the name from DHCP and answers it in its own
   DNS.

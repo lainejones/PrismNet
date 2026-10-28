@@ -53,7 +53,7 @@ widely used TCP/IP implementation, running as an Amiga task.
   network adapter (DaynaPORT), an A314, or a serial link (SLIP or PPP; see
   [Serial links](12-serial.md)).
 - Memory: about 290 KB when idle with the standard core, about 175 KB with
-  the small core for 1 to 2 MB machines (see [Small machines](13-memory.md)).
+  the small core for 1 to 2 MB machines (see [Small machines](14-memory.md)).
 
 ## Tested on
 

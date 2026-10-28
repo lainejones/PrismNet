@@ -11,7 +11,8 @@
 # programs and, since 1.0.8, the servers (inetd, ftpd, telnetd, httpd - the
 # installer does not ask about them when C/inetd is missing; the .lha has
 # them). Everything else the installer installs is on it, the small core for
-# 1-2 MB machines included.
+# 1-2 MB machines included. The floppy's installer has no comment lines (the
+# header block stays); the .lha has the full one.
 #
 # GPL-3.0-only, see LICENSE.
 set -e
@@ -27,6 +28,8 @@ cp -r "$D/." "$S/"
 rm -rf "$S/Tools/Net" "$S/Tools/Net.info" "$S/Tools/bsdtest" "$S/Tools/ugtest" \
        "$S/PrismNet.guide" "$S/PrismNet.guide.info" \
        "$S/C/inetd" "$S/C/ftpd" "$S/C/telnetd" "$S/C/httpd"
+awk 'NR == 1 { head = 1 } head && /^;/ { print; next } { head = 0 } /^[ \t]*(;|$)/ { next } { print }' \
+    "$D/Install_PrismNet" > "$S/Install_PrismNet"
 cp dist-src/icons/Disk.info "$S/Disk.info"
 
 rm -f "$ADF"

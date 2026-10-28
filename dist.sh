@@ -35,11 +35,7 @@ rm -rf dist/PrismNet dist/PrismNet.info dist/PrismNet.readme
 mkdir -p $D/C $D/L $D/Libs $D/Devs $D/Prefs $D/Tools/Net $D/Tools/Small $D/Storage/PrismNet $D/Storage/DOSDrivers $D/Storage/Printer-OS3.1 $D/Storage/OpenVPN $D/Docs
 
 # the installer says which version it installs
-# the shipped installer without the comment lines (the floppy is nearly full);
-# the header block at the top stays, and the source in dist-src keeps them all
-sed "s/@VER@/$VER/" dist-src/Install_PrismNet |
-    awk 'NR == 1 { head = 1 } head && /^;/ { print; next } { head = 0 } /^[ \t]*(;|$)/ { next } { print }' \
-    > $D/Install_PrismNet
+sed "s/@VER@/$VER/" dist-src/Install_PrismNet > $D/Install_PrismNet
 # the Aminet readme goes next to the archive (dist/PrismNet.readme), not in it
 sed "s/@VER@/$VER/" dist-src/aminet.readme > dist/PrismNet.readme
 cp dist-src/README $D/

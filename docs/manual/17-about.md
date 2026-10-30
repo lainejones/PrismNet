@@ -19,6 +19,11 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.10** (2026-10-30): PrismNet Prefs' menus are complete: Project has
+  Check for updates and About, Edit has Restore (the settings as they were
+  when the window opened). Cancel now also undoes changes made with
+  `Edit hosts...`: the hosts list is edited as a copy and only Use or Save
+  put it in place.
 - **1.0.9** (2026-10-30): the install floppy carries everything the `.lha`
   does again, servers and manual included, packed with PrismPack: double-click
   `Install_PrismNet` on it. Fixed: the stack no longer keeps the drawer it was

@@ -12,9 +12,11 @@ If PrismNet is running when you Save or Use, it offers to restart it so the
 new settings take effect. Connections that are open at that moment are
 closed.
 
-The **Project** menu has *Import Roadshow settings...* and *Quit*; the
-**Edit** menu has *Reset to defaults* and *Last saved* (reload what is in
-`ENVARC:`).
+The **Project** menu has *Import Roadshow settings...*, *Check for
+updates...* (the same as **Check now** on the Updates page), *About...* and
+*Quit*; the **Edit** menu has *Reset to defaults*, *Last saved* (reload what
+is in `ENVARC:`) and *Restore* (the settings as they were when the window
+opened).
 
 ## Interfaces
 
@@ -49,8 +51,11 @@ the one that leads to the internet).
 or one address) and the gateway that leads there. You only need these on a
 network with more than one router.
 
-**Edit hosts...** opens `ENV:PrismNet/hosts` in your editor (the `EDITOR`
-variable, else `C:Ed`): names for addresses, checked before DNS.
+**Edit hosts...** opens the hosts list in your editor (the `EDITOR`
+variable, else `C:Ed`): names for addresses, checked before DNS. You edit a
+copy (`T:PrismNetPrefs.hosts`): **Use** or **Save** puts it in
+`ENV:PrismNet/hosts`, and Cancel, closing the window or *Restore* leave the
+hosts list as it was.
 
 ## Users
 

@@ -146,6 +146,7 @@ struct Prefs {
 };
 
 static struct Prefs P;
+static struct Prefs P_opened;           /* as the window opened: Edit > Restore */
 
 /* ---------------------------------------------------------------------- */
 /* small text helpers                                                       */
@@ -958,6 +959,9 @@ static const char *page_labels[PG_COUNT] = { "Interfaces", "Network", "Users", "
 #define M_LASTSAVED 2
 #define M_DEFAULTS 3
 #define M_QUIT 4
+#define M_ABOUT 5
+#define M_UPDATE 6
+#define M_RESTORE 7
 
 struct Gui {
     struct Tabs    tabs;
@@ -1180,6 +1184,22 @@ static void check_update(struct Gui *gui)
                    SYS_Output, (ULONG)Open((STRPTR)"CON:0/40/640/200/PrismNet update/CLOSE/WAIT", MODE_NEWFILE),
                    NP_StackSize, 65536, TAG_DONE);
     }
+}
+
+/* ---- Project > About: name and version straight from the $VER string */
+
+static void about(struct Gui *gui)
+{
+    char text[200], ver[48];
+    const char *v = verstag + 6;        /* past "$VER: " */
+    int n = 0;
+
+    while (v[n] && v[n] != '(' && n < (int)sizeof(ver) - 1) { ver[n] = v[n]; n++; }
+    while (n > 0 && ver[n - 1] == ' ') n--;
+    ver[n] = 0;
+    sprintf(text, "%s\n\nSettings editor for the PrismNet TCP/IP stack:\n"
+                  "interfaces, names, shares, services, updates.\n\nLicence: GPL-3.0-only", ver);
+    ask(gui, "About PrismNet Prefs", text, "OK");
 }
 
 #include "prefsshares_gui.c"
@@ -1505,11 +1525,15 @@ static BOOL make_base(struct Gui *gui)
 static struct NewMenu newmenu[] = {
     { NM_TITLE, (STRPTR)"Project", NULL, 0, 0, NULL },
     { NM_ITEM,  (STRPTR)"Import Roadshow settings...", (STRPTR)"I", 0, 0, (APTR)M_IMPORT },
+    { NM_ITEM,  (STRPTR)"Check for updates...", (STRPTR)"U", 0, 0, (APTR)M_UPDATE },
+    { NM_ITEM,  NM_BARLABEL, NULL, 0, 0, NULL },
+    { NM_ITEM,  (STRPTR)"About...", (STRPTR)"?", 0, 0, (APTR)M_ABOUT },
     { NM_ITEM,  NM_BARLABEL, NULL, 0, 0, NULL },
     { NM_ITEM,  (STRPTR)"Quit", (STRPTR)"Q", 0, 0, (APTR)M_QUIT },
     { NM_TITLE, (STRPTR)"Edit", NULL, 0, 0, NULL },
     { NM_ITEM,  (STRPTR)"Reset to defaults", (STRPTR)"D", 0, 0, (APTR)M_DEFAULTS },
     { NM_ITEM,  (STRPTR)"Last saved", (STRPTR)"L", 0, 0, (APTR)M_LASTSAVED },
+    { NM_ITEM,  (STRPTR)"Restore", (STRPTR)"R", 0, 0, (APTR)M_RESTORE },
     { NM_END,   NULL, NULL, 0, 0, NULL }
 };
 
@@ -2110,6 +2134,7 @@ static int run_gui(void)
     WORD fh, w, h;
 
     memset(&gui, 0, sizeof(gui));
+    P_opened = P;
     gui.sel = P.nifs ? 0 : -1;
     gui.shsel = P.nshares ? 0 : -1;
     gui.shlist.lh_Head = (struct Node *)&gui.shlist.lh_Tail;
@@ -2356,6 +2381,9 @@ static int run_gui(void)
                     if (id == M_QUIT) done = TRUE;
                     else if (id == M_DEFAULTS) { defaults(&P); P.atboot = boot_entry_present(); gui.sel = -1; show_all(&gui); }
                     else if (id == M_LASTSAVED) { load_prefs(&P, ARC_DIR); gui.sel = -1; show_all(&gui); }
+                    else if (id == M_RESTORE) { P = P_opened; gui.sel = -1; show_all(&gui); }
+                    else if (id == M_UPDATE) { store_globals(&gui); check_update(&gui); }
+                    else if (id == M_ABOUT) about(&gui);
                     else if (id == M_IMPORT) {
                         char summary[160];
                         store_if(&gui);

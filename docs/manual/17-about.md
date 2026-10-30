@@ -19,6 +19,11 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.9** (2026-10-30): the install floppy carries everything the `.lha`
+  does again, servers and manual included, packed with PrismPack: double-click
+  `Install_PrismNet` on it. Fixed: the stack no longer keeps the drawer it was
+  started from in use (an install floppy could not be ejected cleanly, or an
+  installer's temporary drawer not removed, until PrismNet stopped).
 - **1.0.8** (2026-10-28): printing over the network: `DEVS:prismprint.device`
   is a printer port for printer.device that sends each job to a PostScript or
   PCL printer over TCP port 9100 or LPD, and `C:PrismPrint` sets it up (see

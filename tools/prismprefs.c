@@ -1559,17 +1559,21 @@ static void pick_device(struct Gui *gui)
     FreeAslRequest(fr);
 }
 
+/* The hosts file is edited as a copy in T:, like every other setting in the
+ * window: Use / Save put it into ENV: (Save also ENVARC:), Cancel, closing
+ * the window and Edit > Restore throw it away. */
+#define HOSTS_EDIT "T:PrismNetPrefs.hosts"
+
 static void edit_hosts(struct Gui *gui)
 {
     char editor[100], cmd[200];
     BPTR in, out;
 
-    make_dir(ENV_DIR);
-    if (!exists(ENV_DIR "/hosts"))
-        save_file(ENV_DIR "/hosts", "# PrismNet hosts: address name [aliases...]\n# 192.168.1.10  nas  nas.home.lan\n");
+    if (!exists(HOSTS_EDIT) && !copy_file(ENV_DIR "/hosts", HOSTS_EDIT))
+        save_file(HOSTS_EDIT, "# PrismNet hosts: address name [aliases...]\n# 192.168.1.10  nas  nas.home.lan\n");
     if (GetVar((CONST_STRPTR)"EDITOR", (STRPTR)editor, sizeof(editor), 0) <= 0)
         strcpy(editor, "C:Ed");
-    sprintf(cmd, "%s " ENV_DIR "/hosts", editor);
+    sprintf(cmd, "%s " HOSTS_EDIT, editor);
     in = Open((CONST_STRPTR)"NIL:", MODE_OLDFILE);
     out = Open((CONST_STRPTR)"NIL:", MODE_NEWFILE);
     if (SystemTags((CONST_STRPTR)cmd, SYS_Input, in, SYS_Output, out, SYS_Asynch, TRUE, TAG_DONE) == -1) {
@@ -2105,6 +2109,15 @@ static BOOL commit(struct Gui *gui, BOOL arc)
         ask(gui, "PrismNet Prefs", m, "OK");
         return FALSE;
     }
+    /* the hosts file edited in this window (Edit hosts...) */
+    if (exists(HOSTS_EDIT)) {
+        make_dir(ENV_DIR);
+        if (!copy_file(HOSTS_EDIT, ENV_DIR "/hosts")) {
+            ask(gui, "PrismNet Prefs", "Could not write " ENV_DIR "/hosts.", "OK");
+            return FALSE;
+        }
+        DeleteFile((CONST_STRPTR)HOSTS_EDIT);
+    }
     /* the shares are DOSDriver files (no ENV: copy): written by Use and Save alike */
     if (!save_shares(&P)) {
         ask(gui, "PrismNet Prefs", "Could not write a share's mountlist file\nin DEVS:DOSDrivers or SYS:Storage/DOSDrivers.", "OK");
@@ -2135,6 +2148,7 @@ static int run_gui(void)
 
     memset(&gui, 0, sizeof(gui));
     P_opened = P;
+    DeleteFile((CONST_STRPTR)HOSTS_EDIT);   /* a copy left by a Prefs that crashed */
     gui.sel = P.nifs ? 0 : -1;
     gui.shsel = P.nshares ? 0 : -1;
     gui.shlist.lh_Head = (struct Node *)&gui.shlist.lh_Tail;
@@ -2381,7 +2395,12 @@ static int run_gui(void)
                     if (id == M_QUIT) done = TRUE;
                     else if (id == M_DEFAULTS) { defaults(&P); P.atboot = boot_entry_present(); gui.sel = -1; show_all(&gui); }
                     else if (id == M_LASTSAVED) { load_prefs(&P, ARC_DIR); gui.sel = -1; show_all(&gui); }
-                    else if (id == M_RESTORE) { P = P_opened; gui.sel = -1; show_all(&gui); }
+                    else if (id == M_RESTORE) {
+                        P = P_opened;
+                        DeleteFile((CONST_STRPTR)HOSTS_EDIT);   /* hosts edits too */
+                        gui.sel = -1;
+                        show_all(&gui);
+                    }
                     else if (id == M_UPDATE) { store_globals(&gui); check_update(&gui); }
                     else if (id == M_ABOUT) about(&gui);
                     else if (id == M_IMPORT) {
@@ -2415,6 +2434,8 @@ static int run_gui(void)
     }
 
 out:
+    /* hosts edits not taken by Use / Save (Cancel, close, Quit) are dropped */
+    DeleteFile((CONST_STRPTR)HOSTS_EDIT);
     if (gui.win) {
         if (gui.menu) { ClearMenuStrip(gui.win); FreeMenus(gui.menu); }
         /* AddGList chained glist onto the end of bglist: take both off the

@@ -46,6 +46,10 @@ does:
 Commented examples of every settings file are copied to
 `ENVARC:PrismNet/examples`.
 
+The PrismNet drawer comes with a plain drawer icon; the installer gives it,
+and any drawer it makes (such as `SYS:Storage/OpenVPN` or `SYS:WWW`), your
+Workbench's own drawer icon.
+
 ## Coming from another stack
 
 PrismNet replaces AmiTCP, Miami, Genesis or Roadshow; only one stack can own

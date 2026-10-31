@@ -492,8 +492,9 @@
 (copyfiles (source "C") (dest "C:") (choices "NetCtl") (nogauge))
 (run "Protect >NIL: C:NetCtl +e")
 ; the AmiOpenVPN scripts (manual, chapter VPN): the user copies them to OPENVPN:
+; a drawer made here gets this Workbench's own drawer icon (ENV:Sys/def_drawer.info)
+(if (not (exists "SYS:Storage/OpenVPN" (noreq))) (makedir "SYS:Storage/OpenVPN" (infos)))
 (copyfiles (source "Storage/OpenVPN") (dest "SYS:Storage/OpenVPN") (all) (nogauge))
-(copyfiles (source "Storage/OpenVPN.info") (dest "SYS:Storage") (nogauge))
 (foreach "C" "(ping|traceroute|nslookup)"
     (set nm @each-name)
     (set tool (tackon "C:" nm))
@@ -529,7 +530,7 @@
   (
     (copyfiles (prompt "Installing the NFS client") (help @copyfiles-help)
                (source "L") (dest "L:") (choices "prismnfs-handler") (nogauge))
-    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers"))
+    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers" (infos)))
     (if (exists "SYS:Storage/DOSDrivers/PNFS0" (noreq))
         (set mounts_kept (cat mounts_kept "SYS:Storage/DOSDrivers/PNFS0 is already there and was kept.\n"))
         (copyfiles (source "Storage/DOSDrivers") (dest "SYS:Storage/DOSDrivers")
@@ -555,7 +556,7 @@
     (copyfiles (prompt "Installing SMBShares") (help @copyfiles-help)
                (source "C") (dest "C:") (choices "SMBShares") (nogauge))
     (run "Protect >NIL: C:SMBShares +e")
-    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers"))
+    (if (not (exists "SYS:Storage/DOSDrivers" (noreq))) (makedir "SYS:Storage/DOSDrivers" (infos)))
     (if (exists "SYS:Storage/DOSDrivers/PSMB0" (noreq))
         (set mounts_kept (cat mounts_kept "SYS:Storage/DOSDrivers/PSMB0 is already there and was kept.\n"))
         (copyfiles (source "Storage/DOSDrivers") (dest "SYS:Storage/DOSDrivers")
@@ -577,9 +578,9 @@
     (if (not (exists "SYS:Storage/Printer-OS3.1" (noreq)))
         (if (< (/ (getversion "exec.library" (resident)) 65536) 44)
             (
+              (makedir "SYS:Storage/Printer-OS3.1" (infos))
               (copyfiles (source "Storage/Printer-OS3.1") (dest "SYS:Storage/Printer-OS3.1")
                          (all) (nogauge))
-              (copyfiles (source "Storage/Printer-OS3.1.info") (dest "SYS:Storage") (nogauge))
             )))
   ))
 (if (BITAND servers 1)
@@ -602,7 +603,7 @@
                (source "C") (dest "C:") (choices "inetd" "httpd") (nogauge))
     (run "Protect >NIL: C:inetd +e")
     (run "Protect >NIL: C:httpd +e")
-    (if (not (exists "SYS:WWW" (noreq))) (makedir "SYS:WWW"))
+    (if (not (exists "SYS:WWW" (noreq))) (makedir "SYS:WWW" (infos)))
     (if (not (exists "SYS:WWW/index.html" (noreq)))
         (textfile (dest "SYS:WWW/index.html")
                   (append "<!DOCTYPE html>\n<html><head><title>Amiga</title></head><body>\n"
@@ -680,6 +681,15 @@
 
 (if startnow
     (run "C:PrismNet START >NIL:"))
+
+; the package drawer came with a plain drawer icon so it shows when unpacked;
+; from now on it has this Workbench's own (ENV:Sys/def_drawer.info). Not on
+; the install floppy: a disk root has no drawer icon, and it may be locked.
+(set pkgdir (expandpath ""))
+(if (and (exists "ENV:Sys/def_drawer.info" (noreq))
+         (<> (substr pkgdir (- (strlen pkgdir) 1) 1) ":"))
+    (if (exists (cat pkgdir ".info") (noreq))
+        (run (cat "Copy >NIL: ENV:Sys/def_drawer.info \"" pkgdir ".info\""))))
 
 (complete 100)
 (message "PrismNet is installed.\n\n"

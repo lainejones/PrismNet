@@ -4,7 +4,7 @@
 # on an Amiga from this drawer (real protection bits).
 set -e
 cd "$(dirname "$0")"
-VER=1.0.10
+VER=1.0.11
 D=dist/PrismNet
 
 # Refuse to package binaries older than their sources (a forgotten "make").
@@ -70,14 +70,9 @@ cp dist-src/openvpn/*.script dist-src/openvpn/StartVPN dist-src/openvpn/ReadMe $
 I=dist-src/icons
 cp $I/Install_PrismNet.info $I/README.info $I/PrismNet.guide.info $D/
 cp $I/PNFS0.info $I/PSMB0.info           $D/Storage/DOSDrivers/
-cp $I/PrismNet.info                      dist/PrismNet.info      # the archive's own drawer
-# the top-level drawers: one icon each, each with its place in the window
-for dr in C L Libs Devs Prefs Tools Storage Docs; do
-    cp $I/$dr.info $D/$dr.info
-done
-for dr in Storage/PrismNet Storage/DOSDrivers Storage/Printer-OS3.1 Storage/OpenVPN Tools/Net Tools/Small; do
-    cp $I/drawer.info $D/$dr.info
-done
+# the archive's own drawer: a plain drawer icon (C:\projects\tools\makeicon_drawer32.py),
+# which the installer swaps for the Workbench's own. No icons for the drawers inside.
+cp $I/PrismNet.info                      dist/PrismNet.info
 
 rm -f dist/PrismNet-*.zip                 # (no zip: it cannot keep the protection bits)
 find dist -type f | sort

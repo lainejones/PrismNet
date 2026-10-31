@@ -19,6 +19,9 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.11** (2026-10-30): packaging. The installer gives the PrismNet
+  drawer, and the drawers it makes, your Workbench's own drawer icon; the
+  drawers inside the package no longer have icons of their own.
 - **1.0.10** (2026-10-30): PrismNet Prefs' menus are complete: Project has
   Check for updates and About, Edit has Restore (the settings as they were
   when the window opened). Cancel now also undoes changes made with

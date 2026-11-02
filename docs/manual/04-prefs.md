@@ -49,7 +49,9 @@ the one that leads to the internet).
 
 **Routes...** opens the list of static routes: a destination (`192.168.2.0/24`,
 or one address) and the gateway that leads there. You only need these on a
-network with more than one router.
+network with more than one router. The most specific route wins, as on any
+other system: a route to one address on your own network (say a single PC
+reached through another gateway) is used ahead of the network itself.
 
 **Edit hosts...** opens the hosts list in your editor (the `EDITOR`
 variable, else `C:Ed`): names for addresses, checked before DNS. You edit a

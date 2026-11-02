@@ -1292,6 +1292,60 @@ const ip4_addr_t *pn_route_gw(struct netif *netif, const ip4_addr_t *dest)
     return i >= 0 ? &route_gw[i] : NULL;
 }
 
+/* The prefix length of the longest interface subnet that holds dest (a
+ * point-to-point peer counts as /32); -1 = on no interface's subnet. */
+static int connected_bits(const ip4_addr_t *dest)
+{
+    int k, best = -1;
+
+    for (k = 0; k < nifs; k++) {
+        struct netif *n = &ifs[k].s.netif;
+        int bits = 0;
+        ULONG m;
+        if (!netif_is_up(n) || !netif_is_link_up(n) || ip4_addr_isany_val(*netif_ip4_addr(n)))
+            continue;
+        if (ifs[k].s.p2p && ip4_addr_eq(dest, netif_ip4_gw(n))) {
+            bits = 32;
+        } else if (ip4_addr_net_eq(dest, netif_ip4_addr(n), netif_ip4_netmask(n))) {
+            for (m = PP_NTOHL(ip4_addr_get_u32(netif_ip4_netmask(n))); m & 0x80000000UL; m <<= 1)
+                bits++;
+        } else {
+            continue;
+        }
+        if (bits > best)
+            best = bits;
+    }
+    return best;
+}
+
+/* A static route that beats the interface subnets for dest: one with a
+ * longer prefix than every subnet dest is on (a host route to a machine on
+ * the LAN through another gateway). -1 = none, the subnet decides. */
+static int route_over_subnet(const ip4_addr_t *dest, struct netif *netif, struct netif **via)
+{
+    int c = connected_bits(dest), i;
+
+    if (c < 0 || !nroutes)           /* on no subnet: the ordinary lookup */
+        return -1;
+    i = route_lookup(dest, netif, via);
+    return i >= 0 && routes[i].bits > c ? i : -1;
+}
+
+/* PN_HOOK_IP4_ROUTE_FIRST: lwIP asks before it looks at the subnets. */
+struct netif *pn_route_netif_first(const ip4_addr_t *dest)
+{
+    struct netif *via = NULL;
+    return route_over_subnet(dest, NULL, &via) >= 0 ? via : NULL;
+}
+
+/* PN_HOOK_ETHARP_GW_ONLINK: the next hop for a destination on netif's own
+ * subnet that such a route sends elsewhere. */
+const ip4_addr_t *pn_route_gw_onlink(struct netif *netif, const ip4_addr_t *dest)
+{
+    int i = route_over_subnet(dest, netif, NULL);
+    return i >= 0 ? &route_gw[i] : NULL;
+}
+
 /* Is there any way to reach dest (network order)? On an interface's own
  * subnet, a static route, or a default gateway. Without one, connect() and
  * sendto() fail with EHOSTUNREACH at once instead of timing out. */

@@ -15,5 +15,10 @@ u32_t prismnet_tcp_isn(const ip_addr_t *local_ip, u16_t local_port,
 struct netif;
 struct netif *pn_route_netif(const ip4_addr_t *dest);
 const ip4_addr_t *pn_route_gw(struct netif *netif, const ip4_addr_t *dest);
+/* The same for a destination that IS on an interface's subnet: only a static
+ * route with a longer prefix than that subnet (a host route, say) wins over
+ * it, as on any other stack. NULL = the subnet itself. */
+struct netif *pn_route_netif_first(const ip4_addr_t *dest);
+const ip4_addr_t *pn_route_gw_onlink(struct netif *netif, const ip4_addr_t *dest);
 
 #endif

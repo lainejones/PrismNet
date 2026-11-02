@@ -170,6 +170,9 @@ void pn_sntp_set(unsigned long sec, unsigned long us);   /* core/core.c */
 /* Static routes from ENV:PrismNet/routes (ROUTE lines). */
 #define LWIP_HOOK_IP4_ROUTE(dest)               pn_route_netif(dest)
 #define LWIP_HOOK_ETHARP_GET_GW(netif, dest)    pn_route_gw(netif, dest)
+/* PrismNet's own: a static route more specific than an interface's subnet */
+#define PN_HOOK_IP4_ROUTE_FIRST(dest)           pn_route_netif_first(dest)
+#define PN_HOOK_ETHARP_GW_ONLINK(netif, dest)   pn_route_gw_onlink(netif, dest)
 
 /* bsdsocket code uses the NDK's htons/htonl; keep lwIP's names prefixed */
 #define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS 1

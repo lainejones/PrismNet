@@ -528,3 +528,9 @@ const ip4_addr_t *pn_route_gw(struct netif *netif, const ip4_addr_t *dest)
     (void)netif; (void)dest;
     return NULL;
 }
+struct netif *pn_route_netif_first(const ip4_addr_t *dest) { (void)dest; return NULL; }
+const ip4_addr_t *pn_route_gw_onlink(struct netif *netif, const ip4_addr_t *dest)
+{
+    (void)netif; (void)dest;
+    return NULL;
+}

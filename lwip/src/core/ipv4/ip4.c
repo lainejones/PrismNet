@@ -166,6 +166,15 @@ ip4_route(const ip4_addr_t *dest)
   /* bug #54569: in case LWIP_SINGLE_NETIF=1 and LWIP_DEBUGF() disabled, the following loop is optimized away */
   LWIP_UNUSED_ARG(dest);
 
+#ifdef PN_HOOK_IP4_ROUTE_FIRST
+  /* PrismNet: a static route with a longer prefix than the subnet that holds
+     dest (a host route inside the LAN) goes first, as on any other stack */
+  netif = PN_HOOK_IP4_ROUTE_FIRST(dest);
+  if (netif != NULL) {
+    return netif;
+  }
+#endif
+
   /* iterate through netifs */
   NETIF_FOREACH(netif) {
     /* is the netif up, does it have a link and a valid address? */

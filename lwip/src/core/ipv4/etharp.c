@@ -853,6 +853,16 @@ etharp_output(struct netif *netif, struct pbuf *q, const ip4_addr_t *ipaddr)
         }
       }
     }
+#ifdef PN_HOOK_ETHARP_GW_ONLINK
+    else {
+      /* PrismNet: on our subnet, but a more specific static route sends it to
+         a gateway instead */
+      const ip4_addr_t *gw = PN_HOOK_ETHARP_GW_ONLINK(netif, ipaddr);
+      if (gw != NULL) {
+        dst_addr = gw;
+      }
+    }
+#endif
 #if LWIP_NETIF_HWADDRHINT
     if (netif->hints != NULL) {
       /* per-pcb cached entry was given */

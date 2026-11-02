@@ -19,6 +19,10 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.12** (2026-11-02): routes. The most specific route now wins: a
+  static route to a single address (or a small network) inside a network
+  you are on is used ahead of that network, so one PC on your LAN can be
+  reached through another gateway. Before, such a route was ignored.
 - **1.0.11** (2026-10-30): packaging. The installer gives the PrismNet
   drawer, and the drawers it makes, your Workbench's own drawer icon; the
   drawers inside the package no longer have icons of their own.

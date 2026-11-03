@@ -1470,9 +1470,14 @@ void pn_sntp_set(unsigned long sec, unsigned long us)
         return;
     if (!from_prefs) {
         /* no time zone set in Prefs/Locale: keep the zone the clock is in
-         * (whole quarter hours) and only take out the drift */
+         * (whole quarter hours) and only take out the drift - unless the
+         * clock is nowhere near the real time (a dead battery boots at
+         * 1-Jan-78: the "zone" would be years), when UTC is the only
+         * sensible guess */
         LONG diff = (LONG)(now_s + 252460800UL - (ULONG)sec);
         east = (diff + (diff < 0 ? -450 : 450)) / 900 * 900;
+        if (east < -14L * 3600 || east > 14L * 3600)
+            east = 0;
     }
     want = (ULONG)((long)sec - 252460800L + east);   /* 1970 -> 1978, UTC -> local */
     ntp.delta = (LONG)(want - now_s);
@@ -1491,7 +1496,8 @@ void pn_sntp_set(unsigned long sec, unsigned long us)
     core_log("clock set from %s, was off by %ld s (UTC%c%ld:%02ld %s)", ntp.server,
              (long)ntp.delta, east < 0 ? '-' : '+', (long)((east < 0 ? -east : east) / 3600),
              (long)((east < 0 ? -east : east) / 60 % 60),
-             from_prefs ? "from Locale" : "kept: no time zone in Prefs/Locale");
+             from_prefs ? "from Locale" : east ? "kept: no time zone in Prefs/Locale"
+                                              : "assumed: no time zone in Prefs/Locale");
 }
 
 static void start_time_service(void)

@@ -1,0 +1,17 @@
+Echo "=== clock with NO Locale prefs and a dead-battery date"
+If EXISTS ENV:Sys/locale.prefs
+  Delete ENV:Sys/locale.prefs QUIET
+EndIf
+Date 01-Jan-78 00:05:00
+Date
+MakeDir ENV:PrismNet
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+Echo "SERVER=pool.ntp.org" >ENV:PrismNet/time
+Echo "SETCLOCK=YES" >>ENV:PrismNet/time
+Version C:PrismNet
+C:PrismNet START
+Wait 30
+C:PrismNet STATUS
+Date
+C:PrismNet LOG
+C:PrismNet STOP

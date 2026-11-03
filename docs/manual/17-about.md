@@ -19,6 +19,12 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.13** (2026-11-03): the clock on a machine without a saved Locale.
+  Network time kept the zone the clock was already in and only took out the
+  drift; on an Amiga whose battery is dead the clock starts at 1-Jan-78, that
+  "zone" was decades, and the clock was never set. A clock nowhere near the
+  real time is now set to UTC (the log says "assumed"); save a time zone in
+  Prefs/Locale to get local time.
 - **1.0.12** (2026-11-02): routes. The most specific route now wins: a
   static route to a single address (or a small network) inside a network
   you are on is used ahead of that network, so one PC on your LAN can be

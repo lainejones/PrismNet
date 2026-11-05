@@ -19,6 +19,12 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.15** (2026-11-04): a share whose server is off, mounted at boot.
+  Workbench keeps trying such a volume's icon, and each try held the share
+  client for the whole connection timeout (15 s), so `Info` and the like
+  waited behind it. Until a share has connected once, a connection attempt
+  now gives up after 5 seconds, and for 30 seconds after a failed one the
+  share answers "no disk" at once. The SMB and NFS clients are 0.5.
 - **1.0.14** (2026-11-04): network shares. A mounted share's volume (`NAS:`)
   appeared only after the share's first connection, so a path through the
   volume name failed ("not mounted") until something had used the device

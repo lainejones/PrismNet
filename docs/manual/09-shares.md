@@ -98,6 +98,16 @@ not held up. Without `Activate`, the client starts only when the device name
 PrismNet 1.0.14, `NAS:` appeared only after the first connection, through the
 device name, whatever the mount file said.)
 
+If the server is off, a share that has not connected yet tries for at most
+5 seconds, then answers "no disk" at once for 30 seconds, so Workbench
+trying its icon does not hold other programs up. Once a share has
+connected, losing the server is retried for `RETRY=` seconds as before.
+
+A network share has one write bit per file, so `Protect -w` and `-d` go
+together: `-w` makes the file read-only on the server; `-d` alone changes
+nothing. Whether a read-only file can still be deleted is the server's rule
+(an NFS server allows it; SMB servers normally refuse).
+
 ## NFS options
 
 After `server:/export`:

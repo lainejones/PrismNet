@@ -23,6 +23,9 @@ void  net_down(void);
 u32   net_resolve(const char *host);
 /* TCP connect; resvport: bind a source port below 1024 first. >= 0 = handle */
 long  net_connect(u32 ip, unsigned port, int resvport, unsigned timeout_s);
+/* when not 0, net_connect waits at most this many seconds whatever it is
+ * asked (the handler sets it while a share has never connected) */
+extern unsigned net_connect_cap;
 /* send all of buf; 0 or a negative error */
 long  net_send(long s, const u8 *buf, u32 len);
 /* receive exactly len bytes within timeout_s; 0 or a negative error */

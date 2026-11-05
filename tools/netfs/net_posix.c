@@ -65,6 +65,8 @@ u32 net_resolve(const char *host)
     return ntohl(a.s_addr);
 }
 
+unsigned net_connect_cap;
+
 long net_connect(u32 ip, unsigned port, int resvport, unsigned timeout_s)
 {
     struct sockaddr_in sa;

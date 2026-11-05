@@ -121,11 +121,15 @@ static u32 nb_resolve(const char *name)
     return ip;                       /* m68k: host order is network order */
 }
 
+unsigned net_connect_cap;
+
 long net_connect(u32 ip, unsigned port, int resvport, unsigned timeout_s)
 {
     struct sockaddr_in sa;
     long s, one = 1, zero = 0, n;
 
+    if (net_connect_cap && timeout_s > net_connect_cap)
+        timeout_s = net_connect_cap;
     if (net_up())
         return NET_EDOWN;
     DBG("connect: socket");

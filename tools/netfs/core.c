@@ -51,7 +51,8 @@ extern struct Library *UtilityBase;
 #define DIR_BATCH   32
 #define PATHMAX     512
 #define EPOCH_DIFF  252460800L          /* 1970-01-01 .. 1978-01-01 in seconds */
-#define FIRST_COOLOFF 15                /* s after a failed first connection: fail at once */
+#define FIRST_COOLOFF 30                /* s after a failed first connection: fail at once */
+#define FIRST_CONNECT 5                 /* s a first connection may take */
 #define ID_NFS_DISK ID_DOS_DISK
 
 /* ---------------------------------------------------------------------- */
@@ -287,7 +288,12 @@ static long ensure(void)
         return NET_ETIMEDOUT;
     if (net_up())
         return NET_EDOWN;
-    if ((e = B->connect())) {
+    /* a server that is on answers a connection at once, even with its disks
+     * asleep: before the first connection, don't wait the whole TIMEOUT= */
+    net_connect_cap = M.mounted ? 0 : FIRST_CONNECT;
+    e = B->connect();
+    net_connect_cap = 0;
+    if (e) {
         if (!M.mounted)
             M.fail_secs = now_secs();
         return e;

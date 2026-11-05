@@ -6,8 +6,8 @@
  *    PrismNet Prefs (Shares tab) can write this file for you, with
  *    Browse... to pick the share from the server's list.
  * 2. Double-click this icon, or type:  Mount SYS:Storage/DOSDrivers/PSMB0
- *    Drag it into DEVS:DOSDrivers to mount it at every boot (it connects
- *    only when the volume is first used).
+ *    Drag it into DEVS:DOSDrivers to mount it at every boot. The volume is
+ *    there at once; it connects only when it is first used.
  * 3. Unmount with:  ShareUnmount PSMB0:
  *
  * The first time a share with USER= is used, a small window asks for the
@@ -34,4 +34,5 @@ Handler   = L:prismsmb-handler
 StackSize = 8192
 Priority  = 5
 GlobVec   = -1
+Activate  = 1
 Startup   = "192.168.1.10/public VOLUME=NAS GUEST"

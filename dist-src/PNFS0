@@ -3,8 +3,8 @@
  * 1. Change the Startup line below: the server (name or address), a colon,
  *    then the export path, e.g. "nas.lan:/volume1/amiga VOLUME=NAS".
  * 2. Double-click this icon, or type:  Mount SYS:Storage/DOSDrivers/PNFS0
- *    Drag it into DEVS:DOSDrivers to mount it at every boot (it connects
- *    only when the volume is first used).
+ *    Drag it into DEVS:DOSDrivers to mount it at every boot. The volume is
+ *    there at once; it connects only when it is first used.
  * 3. Unmount with:  ShareUnmount PNFS0:
  *
  * Options after the export path:
@@ -25,4 +25,5 @@ Handler   = L:prismnfs-handler
 StackSize = 8192
 Priority  = 5
 GlobVec   = -1
+Activate  = 1
 Startup   = "192.168.1.10:/volume1/share VOLUME=NAS"

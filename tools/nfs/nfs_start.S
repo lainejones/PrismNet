@@ -9,6 +9,6 @@ _start:
 
     .globl  _pnfs_version
 _pnfs_version:
-    .ascii  "$VER: prismnfs-handler 0.3 (17.10.2026) PrismNet NFSv3 client"
+    .ascii  "$VER: prismnfs-handler 0.4 (04.11.2026) PrismNet NFSv3 client"
     .byte   0
     .even

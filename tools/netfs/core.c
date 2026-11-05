@@ -51,6 +51,7 @@ extern struct Library *UtilityBase;
 #define DIR_BATCH   32
 #define PATHMAX     512
 #define EPOCH_DIFF  252460800L          /* 1970-01-01 .. 1978-01-01 in seconds */
+#define FIRST_COOLOFF 15                /* s after a failed first connection: fail at once */
 #define ID_NFS_DISK ID_DOS_DISK
 
 /* ---------------------------------------------------------------------- */
@@ -212,6 +213,12 @@ static const char *last_part(const char *path)
 /* connection                                                             */
 /* ---------------------------------------------------------------------- */
 
+/* The volume (NAS:) is there from the moment the handler starts, before any
+ * connection: a path through the volume name then reaches this handler,
+ * which connects on demand (ensure), and Workbench shows the icon at once.
+ * Made only after the first connection, NAS: was "not mounted" until
+ * something had used the device name (SMB:) first. Its date is the mount
+ * time: a volume's date is part of its identity, so it never changes. */
 static void add_volume(void)
 {
     struct DosList *v;
@@ -221,7 +228,7 @@ static void add_volume(void)
         return;
     DBG("vol: made %lx", (ULONG)v);
     v->dol_Task = M.port;
-    to_datestamp(M.rootattr.mtime, &v->dol_misc.dol_volume.dol_VolumeDate);
+    DateStamp(&v->dol_misc.dol_volume.dol_VolumeDate);
     v->dol_misc.dol_volume.dol_DiskType = ID_NFS_DISK;
     DBG("vol: lock list");
     LockDosList(LDF_VOLUMES | LDF_WRITE);
@@ -273,10 +280,19 @@ static long ensure(void)
 
     if (B->connected() && M.mounted)
         return 0;
+    /* never connected and the last try failed a moment ago: say so at once.
+     * The volume is up from the start, so with the server off a burst of
+     * accesses (Workbench reading every icon) would each wait for a timeout. */
+    if (!M.mounted && M.fail_secs && now_secs() - M.fail_secs < FIRST_COOLOFF)
+        return NET_ETIMEDOUT;
     if (net_up())
         return NET_EDOWN;
-    if ((e = B->connect()))
+    if ((e = B->connect())) {
+        if (!M.mounted)
+            M.fail_secs = now_secs();
         return e;
+    }
+    M.fail_secs = 0;
     if (!M.mounted) {                   /* first time on this mount */
         time_zone();
         if ((e = B->getattr(&M.root, &M.rootattr))) {
@@ -284,7 +300,7 @@ static long ensure(void)
             return e;
         }
         M.mounted = 1;
-        add_volume();
+        add_volume();                   /* normally there since the start */
     }
     return 0;
 }
@@ -312,7 +328,9 @@ static int retry_wait(ULONG start, int attempt)
 }
 
 /* run expr with the connection up; on a broken connection reconnect and
- * retry, for up to RETRY= seconds. NFS and RPC-level refusals are final. */
+ * retry, for up to RETRY= seconds. NFS and RPC-level refusals are final.
+ * A share that has never connected gets one try: retrying is for a server
+ * lost in use, not for one that is off. */
 #define CALL(expr) ({                                                   \
     long _e = 0; int _t; ULONG _st = now_secs();                        \
     for (_t = 0; ; _t++) {                                              \
@@ -324,7 +342,7 @@ static int retry_wait(ULONG start, int attempt)
             break;              /* MOUNT refused: retrying won't help */\
         }                                                               \
         lost(_e);                                                       \
-        if (!retry_wait(_st, _t)) break;                                \
+        if (!M.mounted || !retry_wait(_st, _t)) break;                  \
     }                                                                   \
     _e; })
 
@@ -672,8 +690,9 @@ static void fill_info(struct InfoData *id)
     memset(id, 0, sizeof(*id));
     id->id_DiskState = M.readonly ? ID_WRITE_PROTECTED : ID_VALIDATED;
     id->id_BytesPerBlock = 512;
-    if (!M.mounted) {
-        id->id_DiskType = ID_NO_DISK_PRESENT;
+    if (!M.mounted) {                   /* not connected yet: the volume, empty */
+        id->id_DiskType = M.vol ? ID_NFS_DISK : ID_NO_DISK_PRESENT;
+        id->id_VolumeNode = MKBADDR(M.vol);
         return;
     }
     /* Workbench asks for this every few seconds: refresh only over a live
@@ -1236,6 +1255,7 @@ void handler_main(void)
     }
     M.dn->dn_Task = M.port;             /* later accesses come to this process */
     reply(dp, DOSTRUE, 0);
+    add_volume();                       /* NAS: usable now; connects when first used */
 
     while (running) {
         while ((msg = GetMsg(M.port)) != NULL) {
@@ -1609,8 +1629,8 @@ void handler_main(void)
                 fill_info(BADDR(dp->dp_Arg1));
                 r1 = DOSTRUE;
                 break;
-            case ACTION_INFO:
-                if ((e = CALL(0L))) { r2 = ioerr(e); break; }
+            case ACTION_INFO:           /* never connects for it (see fill_info) */
+                if (M.mounted && (e = CALL(0L))) { r2 = ioerr(e); break; }
                 fill_info(BADDR(dp->dp_Arg2));
                 r1 = DOSTRUE;
                 break;

@@ -9,7 +9,7 @@ _start:
 
     .globl  _psmb_version
 _psmb_version:
-    .ascii  "$VER: prismsmb-handler 0.3 (18.10.2026) PrismNet SMB client"
+    .ascii  "$VER: prismsmb-handler 0.4 (04.11.2026) PrismNet SMB client"
     .byte   0
     .even
 

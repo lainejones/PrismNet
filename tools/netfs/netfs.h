@@ -34,6 +34,7 @@ struct NetState {
     struct Fattr rootattr;
     long   nlocks, nfiles;
     ULONG  last_act;                    /* when the network was last used */
+    ULONG  fail_secs;                   /* a first connection failed then (0 = none) */
     struct MsgPort *tport;              /* IDLE= timer */
     struct timerequest *treq;
     int    tpending;

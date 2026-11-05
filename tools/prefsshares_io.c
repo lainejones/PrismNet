@@ -230,9 +230,12 @@ static BOOL save_shares(const struct Prefs *p)
     for (i = 0; i < p->nshares; i++) {
         const struct PrefShare *s = &p->shares[i];
         sh_startup(s, startup, sizeof(startup));
+        /* Activate: the handler starts when the share is mounted and puts
+         * the volume up at once (it connects only when first used), so the
+         * volume name works from the start, not only after the device name */
         sprintf(text, "/* PrismNet share: %s %s (PrismNet Prefs) */\n"
                       "Handler    = %s\nStackSize  = %s\nPriority   = %s\nGlobVec    = -1\n"
-                      "Startup    = \"%s\"\n",
+                      "Activate   = 1\nStartup    = \"%s\"\n",
                 s->smb ? "SMB" : "NFS", s->host, sh_handlers[s->handler], s->stack, s->pri, startup);
         make_dir(sh_dir(s));
         sprintf(path, "%s/%s", sh_dir(s), s->name);

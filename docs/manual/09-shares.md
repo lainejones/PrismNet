@@ -10,9 +10,10 @@ which ones you want:
 - **SMB** (`L:prismsmb-handler`): for Windows, macOS, a NAS or Samba. SMB
   2.0.2 up to 3.1.1, with signing and encryption when the server wants them.
 
-A share connects only when it is first used, and lets go of the connection
-after a quiet minute (it reconnects by itself). Mounting at boot therefore
-costs nothing until you open the volume.
+A mounted share's volume (`NAS:`) is there at once, but the share connects
+only when it is first used, and lets go of the connection after a quiet
+minute (it reconnects by itself). Mounting at boot therefore costs no
+network traffic until you open the volume.
 
 ## Setting one up in Prefs
 
@@ -61,10 +62,10 @@ Startup   = "nas.lan/public VOLUME=NAS USER=amiga"
 ### A complete example: a NAS folder on the desktop
 
 This is a whole SMB mount file, ready to copy. Save it as `SYS:NAS`, put a
-project icon next to it (`SYS:NAS.info`) with `C:Mount` as its default tool
-and the tool type `ACTIVATE=1`, and drag that icon onto the Workbench
-desktop (or use *Icons > Leave Out*). Double-clicking it then mounts the share
-as `NAS:` and connects straight away:
+project icon next to it (`SYS:NAS.info`) with `C:Mount` as its default tool,
+and drag that icon onto the Workbench desktop (or use *Icons > Leave Out*).
+Double-clicking it then mounts the share: `NAS:` appears at once, and the
+share connects the first time it is used:
 
 ```
 /* The NAS's "share" folder as NAS: (PrismNet SMB client) */
@@ -89,8 +90,13 @@ ask again. `ShareUnmount NAS:` takes the volume away; double-click the icon
 to have it back.
 
 To have it mounted at every boot instead, put the file (and its icon) in
-`DEVS:DOSDrivers` and leave out the `Activate` line, so it connects only when
-`NAS:` is first used rather than while the Amiga boots.
+`DEVS:DOSDrivers`. Keep the `Activate` line: it starts the client while the
+Amiga boots, so `NAS:` is there from the start - the client does not connect
+until `NAS:` is first used, so a boot without the server (or the network) is
+not held up. Without `Activate`, the client starts only when the device name
+(`SMB:` here) is used, and `NAS:` does not exist until then. (Before
+PrismNet 1.0.14, `NAS:` appeared only after the first connection, through the
+device name, whatever the mount file said.)
 
 ## NFS options
 

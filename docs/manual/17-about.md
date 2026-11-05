@@ -19,6 +19,15 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.14** (2026-11-04): network shares. A mounted share's volume (`NAS:`)
+  appeared only after the share's first connection, so a path through the
+  volume name failed ("not mounted") until something had used the device
+  name first, and `Activate = 1` made no difference. The volume is now there
+  as soon as the share is mounted; the share still connects only when first
+  used. Prefs and the sample mount files write `Activate = 1`. With the server
+  off, a share that has not connected yet no longer holds things up: `Info`
+  does not wait for it, and after one failed try the next accesses fail at
+  once for 15 seconds.
 - **1.0.13** (2026-11-03): the clock on a machine without a saved Locale.
   Network time kept the zone the clock was already in and only took out the
   drift; on an Amiga whose battery is dead the clock starts at 1-Jan-78, that

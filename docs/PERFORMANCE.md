@@ -204,6 +204,37 @@ waits on the driver for the rest, so the ZZ9000Net path (frames copied over
 Zorro III from the card's ARM side) looks like the ceiling, not the stack.
 Roadshow on the same machine would settle it; not measured yet.
 
+## Receive queue: O(1) append (2026-11-05, 1.0.15 + perf/rxq-tail)
+
+A socket's unread TCP data is a pbuf chain; each delivered segment used to be
+added with `pbuf_cat()`, which walks the whole chain to keep every node's
+`tot_len` cumulative - 4 % of a download in the A2000 sample above, more the
+deeper the queue. Now only the head carries the queue total, a tail pointer
+appends in O(1) and the recv path restores the new head's `tot_len` after
+`pbuf_free_header()` (`rxq_append` / `rxq_consumed` in `core/csock.c`; lwIP's
+copy and free helpers go by each node's `len`, so they never see the interior
+values).
+
+Measured on the **A4000** (68060, ZZ9000Net) with the profiling core, 4 x 4 MB
+from `benchserver.py` per pass, base and new cores alternated in one Shell
+script (A/B/A/B twice), the production core restored after. E-clock ticks of
+the lwIP input section per received frame, with the checksum's ticks (the same
+work in both) taken out:
+
+| pair | base | new |
+|---|---:|---:|
+| 1 | 119.2 | 111.1 |
+| 2 | 111.9 | 106.1 |
+| 3 | 118.2 | 106.2 |
+| 4 | 113.3 | 105.4 |
+
+Every new pass is below every base pass: -7 % of the non-checksum input time,
+-5 % of input including the checksum (172 -> 164 ticks, about 12 us a frame on
+the 060). Download speed 1613 -> 1636 KB/s median, inside the run-to-run noise
+on a machine where the driver path is the ceiling. On the emulator (not CPU
+bound) throughput was unchanged (607 / 606 KB/s, A/B/A/B in one boot); the gate
+passed 7/7.
+
 ## Where an A2000's download time goes (2026-10-20, 0.6.5 + xsurfnet 1.2)
 
 A2000, TF536 68030 at 50 MHz, X-Surf with xsurfnet.device 1.2, `httpbench` 4 x 4 MB:

@@ -52,7 +52,7 @@ widely used TCP/IP implementation, running as an Amiga task.
   card (`cnet.device` and similar), a Zorro card (X-Surf, ZZ9000), a SCSI
   network adapter (DaynaPORT), an A314, or a serial link (SLIP or PPP; see
   [Serial links](12-serial.md)).
-- Memory: about 290 KB when idle with the standard core, about 175 KB with
+- Memory: about 340 KB when idle with the standard core, about 243 KB with
   the small core for 1 to 2 MB machines (see [Small machines](14-memory.md)).
 
 ## Tested on

@@ -29,7 +29,7 @@ you already have run unchanged. The networking core is
 | **Servers** | FTP server, telnet server (AmigaDOS Shell), web server (one folder, read-only), inetd to start them on demand; user accounts with passwords |
 | **Printing** | a network printer port for printer.device: PostScript or PCL printers over TCP port 9100 or LPD (`prismprint.device`, `PrismPrint`) |
 | **VPN** | OpenVPN through [AmiOpenVPN](https://github.com/Telefonorosso/openvpn) and its `vpn.device`: the scripts that set up the tunnel's interface, routes and name servers |
-| **Memory** | allocated as needed within a budget; ~290 KB idle, or ~175 KB with the small core for 1-2 MB machines |
+| **Memory** | allocated as needed within a budget; about 340 KB idle (203 KB on disk), or 243 KB (156 KB on disk) with the small core for 1-2 MB machines; Roadshow 1.14 on the same machine: 273 KB on disk, 452 KB idle |
 | **Install** | Amiga Installer: install, update (keeps settings; all questions first, a few seconds offline), remove (puts the old stack's files back) |
 | **Updates** | checks GitHub or a mirror for a newer release and installs it (68020+, AmiSSL 5) |
 | **Docs** | AmigaGuide manual on the Amiga, the same manual here |
@@ -137,8 +137,8 @@ you already have run unchanged. The networking core is
 ### Small machines
 
 - Memory is taken as traffic needs it and given back, within a budget you
-  can set. About 290 KB when idle.
-- A **small core** for 68000 machines with 1 to 2 MB uses about 175 KB; the
+  can set. About 340 KB when idle (203 KB on disk).
+- A **small core** for 68000 machines with 1 to 2 MB uses about 243 KB; the
   installer offers it when memory is short.
 
 ### Tools

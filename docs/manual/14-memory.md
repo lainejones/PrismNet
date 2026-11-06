@@ -8,8 +8,11 @@ to a **budget**: 384 KB by default. When the budget is reached, further
 allocations are refused (PrismMon counts them) instead of taking the
 machine's last memory, and TCP slows down until buffers are free again.
 
-When idle, the standard core uses about 290 KB in all (the program, its
-stack and the stack's own state).
+When idle, the standard core takes about 340 KB of memory in all (the
+program, its process, the library and the stack's own state; the small core
+about 243 KB); on disk the core and the library are about 203 KB together, the
+small core 156 KB. For comparison, Roadshow 1.14 on the same machine is 273 KB
+on disk and takes about 452 KB when idle.
 
 `PrismNet STATUS` and PrismMon's *Memory* tab show what is in use, the
 peak, the budget and how much the machine has left. If PrismNet can't
@@ -29,7 +32,7 @@ For a 68000 with 1 to 2 MB (an A500, an A2000, or an A1200 without fast
 RAM) there is a second build of the PrismNet command: `Tools/Small/PrismNet`
 in the archive. The installer offers it when the machine has less than 3 MB in all;
 or copy it over `C:PrismNet` yourself. It has a smaller receive window,
-buffer limits and stack, is built for size, and uses about 175 KB when
+buffer limits and stack, is built for size, and uses about 243 KB when
 idle, with a 96 KB budget. Everything else (the libraries, Prefs, the
 tools) is the same.
 

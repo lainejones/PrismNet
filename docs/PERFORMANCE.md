@@ -1,5 +1,28 @@
 # PrismNet performance
 
+## Size (1.0.15, 2026-11-05)
+
+Two figures get mixed up: what the stack takes on disk, and what it takes in
+memory while it runs (its code plus the packet buffers it allocates at start).
+
+| | On disk | Running, idle |
+|---|---:|---:|
+| PrismNet, standard core + `bsdsocket.library` | 184 224 + 18 876 = **203 KB** | **340 KB** |
+| PrismNet, small core + `bsdsocket.library` | 136 948 + 18 876 = **156 KB** | **243 KB** |
+| Roadshow 1.14 (`bsdsocket.library` holds the whole stack) | **273 KB** | **452 KB** |
+
+Running = fast RAM by `Avail FLUSH` before and after the stack comes up (DHCP on
+slirp), all three in one boot of the `PrismNet test` machine on 2026-11-05
+(`t-mem`): the program, its process, the library and the buffers allocated at
+start. `PrismNet STATUS` reports less (178 KB for the small core) because it
+counts the core alone. Roadshow keeps 34 KB after `NetShutdown`. Both stacks ship ping, traceroute and the like as separate programs,
+so the rows compare like with like. Of the standard core's 167 KB of code, lwIP
+2.2.1 (unmodified) is 95 KB - TCP alone 28 KB, mDNS 14 KB, DHCP 9 KB, IP
+fragmentation 4 KB, plus SNTP, IGMP and ACD - our own code 60 KB (core.c 26 KB,
+csock.c 12 KB, config 6 KB, sanaif 5 KB, resolver, SLIP, NetBIOS-NS) and the
+libnix runtime 11 KB (mostly `vfprintf`). The core is built `-O2` for speed (+17 KB,
+see below); the small core leaves the optional services out.
+
 Measured 2026-10-16 on the WinUAE config `PrismNet test` (68030, `cpu_speed=real`,
 NE2000 PCMCIA on slirp via `cnet.device`), against `tools/bench/benchserver.py` on the
 host (10.0.2.2:8080/8081). Same machine, same driver, same server for all three stacks.

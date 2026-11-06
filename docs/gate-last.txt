@@ -1,5 +1,5 @@
 PrismNet pre-deploy gate: PASSED
-date 2026-11-04 23:47, commit 4f3580f (+ uncommitted changes), existing out/, machine "PrismNet test"
+date 2026-11-05 18:25, commit 8065baa (+ uncommitted changes), fresh build, machine "PrismNet test"
 
 test        result  notes
 ----------  ------  -----

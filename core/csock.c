@@ -173,6 +173,37 @@ static struct pbuf *keep_rx(struct pbuf *p)
     return q;
 }
 
+/*
+ * The receive queue is a pbuf chain, but only its HEAD carries the queue's
+ * total length. pbuf_cat() would walk the whole chain to keep every node's
+ * tot_len cumulative (4 % of a download on the A2000, growing with the
+ * window); nothing here needs that: pbuf_copy_partial and pbuf_free_header
+ * go by each node's len, and the recv path restores the new head's tot_len
+ * after consuming (rxq_consumed). Interior nodes' tot_len is not meaningful.
+ */
+static void rxq_append(struct PnSock *s, struct pbuf *p)
+{
+    struct pbuf *t = p;
+
+    while (t->next)                      /* a segment is one pbuf, usually */
+        t = t->next;
+    if (s->rxq) {
+        s->rxq_tail->next = p;
+        s->rxq->tot_len   = (u16_t)(s->rxq->tot_len + p->tot_len);
+    } else
+        s->rxq = p;
+    s->rxq_tail = t;
+}
+
+/* n bytes were taken off the head of rxq (pbuf_free_header already ran) */
+static void rxq_consumed(struct PnSock *s, u16_t total_before, u16_t n)
+{
+    if (s->rxq)
+        s->rxq->tot_len = (u16_t)(total_before - n);
+    else
+        s->rxq_tail = NULL;
+}
+
 static err_t tcp_recv_cb(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 {
     struct PnSock *s = (struct PnSock *)arg;
@@ -201,10 +232,7 @@ static err_t tcp_recv_cb(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t e
         pbuf_free(p);
         return ERR_OK;
     }
-    if (s->rxq)
-        pbuf_cat(s->rxq, keep_rx(p));
-    else
-        s->rxq = keep_rx(p);
+    rxq_append(s, keep_rx(p));
     return ERR_OK;
 }
 
@@ -826,7 +854,11 @@ static BOOL op_recv(struct PnSock *s, struct PnReq *r)
             break;
         }
         pbuf_copy_partial(s->rxq, buf + r->progress, n, 0);
-        s->rxq = pbuf_free_header(s->rxq, n);
+        {
+            u16_t total = s->rxq->tot_len;
+            s->rxq = pbuf_free_header(s->rxq, n);
+            rxq_consumed(s, total, n);
+        }
         if (s->pcb.tcp)
             tcp_recved(s->pcb.tcp, n);
         r->progress += n;
@@ -875,6 +907,7 @@ static BOOL op_shutdown(struct PnSock *s, struct PnReq *r)
             if (s->pcb.tcp) tcp_recved(s->pcb.tcp, s->rxq->tot_len);
             pbuf_free(s->rxq);
             s->rxq = NULL;
+            s->rxq_tail = NULL;
         }
     }
     if (wr)

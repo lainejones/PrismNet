@@ -19,6 +19,13 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.16** (2026-11-05): a little less work per received packet. Each
+  TCP segment was appended to a socket's unread data by walking the whole
+  queue; it is now added at the end directly. Measured on an A4000 as 5 %
+  less stack time per received frame; it shows most on machines where the
+  processor, not the network card, sets the download speed. The manual's
+  size figures are now measured: the standard core and the library take about
+  340 KB when idle (203 KB on disk), the small core 243 KB (156 KB on disk).
 - **1.0.15** (2026-11-04): a share whose server is off, mounted at boot.
   Workbench keeps trying such a volume's icon, and each try held the share
   client for the whole connection timeout (15 s), so `Info` and the like

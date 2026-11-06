@@ -1,6 +1,6 @@
 # PrismNet performance
 
-## Size (1.0.15, 2026-11-05)
+## Size (1.0.16, 2026-11-05)
 
 Two figures get mixed up: what the stack takes on disk, and what it takes in
 memory while it runs (its code plus the packet buffers it allocates at start).
@@ -204,7 +204,7 @@ waits on the driver for the rest, so the ZZ9000Net path (frames copied over
 Zorro III from the card's ARM side) looks like the ceiling, not the stack.
 Roadshow on the same machine would settle it; not measured yet.
 
-## Receive queue: O(1) append (2026-11-05, 1.0.15 + perf/rxq-tail)
+## Receive queue: O(1) append (2026-11-05, in 1.0.16)
 
 A socket's unread TCP data is a pbuf chain; each delivered segment used to be
 added with `pbuf_cat()`, which walks the whole chain to keep every node's

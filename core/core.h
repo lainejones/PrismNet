@@ -68,7 +68,8 @@ struct PnSock {
         struct raw_pcb *raw;
         void           *any;
     } pcb;
-    struct pbuf       *rxq;         /* TCP: unread stream data */
+    struct pbuf       *rxq;         /* TCP: unread stream data; rxq->tot_len = whole queue */
+    struct pbuf       *rxq_tail;    /* last pbuf of rxq (see rxq_append) */
     struct PnDgram    *dg_head, *dg_tail;
     int                dg_count;
     struct PnSock     *accq[PN_MAX_BACKLOG];

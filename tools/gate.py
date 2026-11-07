@@ -81,6 +81,7 @@ class Test:
     need_stack: bool = False    # must report "stack used at most"
     markers: list = field(default_factory=list)   # strings that must all appear
     no_lib: int = 0             # expected "cannot open bsdsocket.library" lines
+    config: str = ""            # another WinUAE machine with the same DH0 (empty: CONFIG)
 
 
 TESTS = [
@@ -101,6 +102,9 @@ TESTS = [
     Test("t-config", [], 300, 3, network=True,
          markers=["=== D:"], no_lib=1),
     Test("t-stress", [], 300, 2, network=True, need_stack=True),
+    # the update check on a stock A1200's CPU (68020, 14 MHz): GitHub closed the connection
+    # after an 18.6 s TLS handshake there - RSA signatures first since 2026-11-06 (7.8 s)
+    Test("t-update", ["update.log"], 420, 1, network=True, config="PrismNet a1200 14"),
 ]
 
 # What goes on DH0: (relative to C:\Amiga\PrismNet-test).
@@ -114,6 +118,7 @@ DEPLOY = [
     ("rscfg", "PrismNet"),
     ("NetCtl", "PrismNet"),
     ("ping", "PrismNet/net"),
+    ("PrismNetUpdate", "PrismNet"),
 ]
 
 RE_VERDICT = re.compile(r"->\s*(PASS|FAIL)\b")
@@ -191,7 +196,7 @@ def run_boot(uae, test, host):
     pdir = host / "PrismNet"
     for name in test.logs:
         (pdir / name).unlink(missing_ok=True)       # never judge a stale log
-    report = uae.run_cli_test(CONFIG, f"Execute DH0:PrismNet/{test.name}",
+    report = uae.run_cli_test(test.config or CONFIG, f"Execute DH0:PrismNet/{test.name}",
                               timeout_sec=test.timeout)
     finished = report.startswith("command finished")
     out = report.split("--- output ---", 1)[1] if "--- output ---" in report else ""
@@ -350,6 +355,8 @@ def main():
                     log(f"     - {d}")
         finally:
             uae.stop_emulator(CONFIG)     # always: kill ours, restore Startup-Sequence
+            for c in {t.config for t in tests if t.config}:
+                uae.stop_emulator(c)
 
     ok = not fatal and all(v != "FAIL" for _, v, _, _ in results)
     lines = [

@@ -1,0 +1,15 @@
+; t-update: the update check against GitHub through PrismNet, on a stock A1200
+; CPU (the gate runs it on "PrismNet a1200 14", a 68020 at 14 MHz): GitHub closed
+; the connection after an 18.6 s TLS handshake there (2026-11-06). AmiSSL is
+; assigned from DH0:PrismNet/amissl for this boot only.
+FailAt 21
+Copy DH0:PrismNet/cfg/dhcp ENV:PrismNet ALL QUIET
+C:PrismNet START >NIL:
+Assign LIBS: DH0:PrismNet/amissl ADD
+DH0:PrismNet/PrismNetUpdate SOURCE=GITHUB >DH0:PrismNet/update.log
+If ERROR
+  Echo "update check -> FAIL" >>DH0:PrismNet/update.log
+Else
+  Echo "update check -> PASS" >>DH0:PrismNet/update.log
+EndIf
+C:PrismNet STOP >>DH0:PrismNet/update.log

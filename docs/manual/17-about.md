@@ -19,6 +19,13 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.17** (2026-11-06): Check for updates works on a stock A1200
+  (68020 at 14 MHz). The secure connection to GitHub took so long there
+  (19 seconds) that GitHub gave up on it; it now asks for the kind of
+  certificate that is quick to check and is ready in about 8 seconds.
+  When it starts the Installer, the update window now says that the
+  Installer's questions come in a window of its own on the Workbench
+  screen.
 - **1.0.16** (2026-11-05): a little less work per received packet. Each
   TCP segment was appended to a socket's unread data by walking the whole
   queue; it is now added at the end directly. Measured on an A4000 as 5 %

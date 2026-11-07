@@ -40,7 +40,7 @@
 #include "prismnet/pnclient.h"
 #include "tabs.h"
 
-static const char verstag[] __attribute__((used)) = "$VER: PrismMon 1.0.16 (5.11.2026) PrismNet";
+static const char verstag[] __attribute__((used)) = "$VER: PrismMon 1.0.17 (6.11.2026) PrismNet";
 
 struct IntuitionBase *IntuitionBase;
 struct GfxBase       *GfxBase;

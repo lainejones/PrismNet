@@ -19,6 +19,11 @@ lwIP, the networking core inside PrismNet, is under the BSD licence: see
 
 ## History
 
+- **1.0.18** (2026-11-13): The installer works on a fresh AmigaOS. A new
+  install has no DEVS:Networks and no network driver, and the installer
+  stopped there; it now creates DEVS:Networks and, when no driver is in
+  it, offers to copy one in from wherever you saved it. A driver picked
+  outside DEVS:Networks is copied there.
 - **1.0.17** (2026-11-06): Check for updates works on a stock A1200
   (68020 at 14 MHz). The secure connection to GitHub took so long there
   (19 seconds) that GitHub gave up on it; it now asks for the kind of

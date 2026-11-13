@@ -403,20 +403,44 @@
 
 (if configure
   (
+    ; network drivers live in DEVS:Networks; a fresh AmigaOS has no such drawer: make it first
+    (if (not (exists "DEVS:Networks" (noreq))) (makedir "DEVS:Networks"))
     ; default: the first driver in DEVS:Networks (also what Novice mode takes)
     (set firstdev "")
-    (if (exists "DEVS:Networks" (noreq))
-        (foreach "DEVS:Networks" "#?.device"
-            (if (= firstdev "") (set firstdev @each-name))))
-    (set dev (askfile (prompt "Choose the SANA-II driver of your network card\n"
-                              "(normally in DEVS:Networks).")
+    (foreach "DEVS:Networks" "#?.device"
+        (if (= firstdev "") (set firstdev @each-name)))
+    ; no driver there yet (AmigaOS comes without network drivers): offer to copy one in
+    (if (= firstdev "")
+        (if (= 1 (askchoice (prompt "DEVS:Networks has no network driver yet.\n\n"
+                                    "PrismNet reaches the network through your card's SANA-II "
+                                    "driver. AmigaOS comes without network drivers; the driver "
+                                    "comes with the card or from Aminet.\n\n"
+                                    "Copy it to DEVS:Networks now from wherever you saved it "
+                                    "(a floppy, a CF card, a drawer)?")
+                            (help "For example cnet.device for many PCMCIA cards, x-surf.device for "
+                                  "the X-Surf, scsidayna.device for the DaynaPORT.")
+                            (choices "Copy a driver" "Stop here") (default 0)))
+            (exit "PrismNet is not set up yet: it needs your network card's SANA-II driver.\n\n"
+                  "Copy the driver to DEVS:Networks and run the installer again."
+                  (quiet))))
+    (set dev (askfile (prompt (if (= firstdev "")
+                                  "Choose your network card's SANA-II driver to copy to DEVS:Networks."
+                                  "Choose the SANA-II driver of your network card\n(normally in DEVS:Networks)."))
                       (help "For example cnet.device for many PCMCIA cards, x-surf.device for "
                             "the X-Surf, scsidayna.device for the DaynaPORT.")
-                      (default (if (= firstdev "") "DEVS:Networks/" (tackon "DEVS:Networks" firstdev)))))
+                      (default (if (= firstdev "") "SYS:" (tackon "DEVS:Networks" firstdev)))))
     (if (patmatch "DEVS:Networks/#?" dev) (set dev (fileonly dev)))
     (if (or (= dev "") (not (patmatch "#?.device" dev)))
         (abort "No network driver was chosen.\n\n"
                "Copy your card's SANA-II driver to DEVS:Networks and run the installer again."))
+    ; a driver picked outside DEVS:Networks is copied there, so PrismNet finds it by name
+    (if (<> dev (fileonly dev))
+      (
+        (if (not (exists (tackon "DEVS:Networks" (fileonly dev)) (noreq)))
+            (copyfiles (prompt (cat "Copying " (fileonly dev) " to DEVS:Networks"))
+                       (help @copyfiles-help)
+                       (source dev) (dest "DEVS:Networks") (nogauge)))
+        (set dev (fileonly dev))))
     (set unit (asknumber (prompt (cat "Which unit of " dev "?"))
                          (help "0 unless you have several cards on one driver.")
                          (range 0 15) (default 0)))

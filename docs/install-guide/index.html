@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PrismNet Fresh Install</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column of numbered stages; each stage = short steps + the screen it produces. Workbench-blue accent, warm Amiga-orange for warnings. */
+:root {
+  --bg: #f3f4f7;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5b6577;
+  --line: #d9dde6;
+  --accent: #3b5f9c;
+  --accent-soft: #e3eaf6;
+  --warn: #b35a14;
+  --warn-soft: #fbeedf;
+  --code-bg: #eceff5;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161e; --surface: #1a202b; --fg: #e4e8f0; --muted: #9aa4b6; --line: #2c3442;
+    --accent: #8fb0e6; --accent-soft: #1f2c42; --warn: #f0a865; --warn-soft: #33261a; --code-bg: #232a37;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161e; --surface: #1a202b; --fg: #e4e8f0; --muted: #9aa4b6; --line: #2c3442;
+  --accent: #8fb0e6; --accent-soft: #1f2c42; --warn: #f0a865; --warn-soft: #33261a; --code-bg: #232a37;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg);
+  font: 16px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 860px; margin: 0 auto; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 500; }
+p, ol, ul { margin: 0; }
+.lede { color: var(--muted); max-width: 65ch; }
+header { display: grid; gap: 12px; }
+.eyebrow { font: 500 0.78rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+code, kbd { font-family: var(--f-mono); font-size: 0.88em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+pre { font-family: var(--f-mono); font-size: 0.88rem; background: var(--code-bg); padding: 12px 14px; border-radius: 6px; overflow-x: auto; margin: 0; }
+.kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.kit > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.kit ul { padding-left: 1.1em; display: grid; gap: 2px; font-size: 0.95rem; }
+nav ol { padding-left: 1.4em; display: grid; gap: 4px; columns: 2; }
+nav a { color: var(--accent); text-decoration: none; }
+nav a:hover, nav a:focus-visible { text-decoration: underline; }
+section.stage { display: grid; gap: 18px; padding-top: 28px; border-top: 1px solid var(--line); }
+.stage-head { display: flex; gap: 14px; align-items: baseline; }
+.num { font: 700 1.5rem/1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; min-width: 1.6em; }
+.steps { display: grid; gap: 22px; }
+.step { display: grid; gap: 10px; }
+.step > p, .step > ol, .step > ul { max-width: 65ch; }
+.step ol, .step ul { padding-left: 1.3em; display: grid; gap: 4px; }
+figure { margin: 0; display: grid; gap: 6px; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: #000; display: block; }
+figcaption { font-size: 0.85rem; color: var(--muted); }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 6px 6px 0; max-width: 65ch; font-size: 0.95rem; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.note b { font-weight: 600; }
+footer { color: var(--muted); font-size: 0.9rem; display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 20px; }
+footer ul { padding-left: 1.2em; display: grid; gap: 4px; }
+@media (max-width: 560px) { nav ol { columns: 1; } }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="eyebrow">PrismNet 1.0.18 · AmigaOS 3.2.3</span>
+  <h1>Networking a fresh A1200 with PrismNet</h1>
+  <p class="lede">Installing PrismNet from its release ADF on a clean AmigaOS 3.2.3, recorded in WinUAE on 13 November 2026. The machine had just been installed from floppies (that part is in the PrismRTG repo's guide), so it starts with no network driver at all.</p>
+</header>
+<div class="kit">
+  <div>
+    <h3>The machine</h3>
+    <ul>
+      <li>A1200, Kickstart 3.2.3, AmigaOS 3.2.3 on the hard drive</li>
+      <li>68030 + 68882, 4 MB + 64 MB fast</li>
+      <li>NE2000 PCMCIA network card (WinUAE slirp, DHCP)</li>
+    </ul>
+  </div>
+  <div>
+    <h3>You need</h3>
+    <ul>
+      <li><code>PrismNet-1.0.18.adf</code> (or the .lha) from the GitHub release</li>
+      <li>The SANA-II driver for your network card, from the card's disk or Aminet: <code>cnet.device</code> for PCMCIA NE2000 cards, <code>x-surf.device</code> for the X-Surf, <code>scsidayna.device</code> for the DaynaPORT</li>
+    </ul>
+  </div>
+</div>
+<!-- 7 -->
+<section class="stage" id="prismnet">
+  <div class="stage-head"><span class="num">1</span><h2>Install PrismNet</h2></div>
+  <div class="steps">
+    <div class="step">
+      <p>Insert <code>PrismNet-1.0.18.adf</code> and double-click <b>Install_PrismNet</b>. It unpacks its files (the list stays in a window behind) and opens the Installer in <i>Intermediate User</i>. Click <b>Proceed With Install</b>, <b>Proceed</b>, and keep <i>Install or update PrismNet</i>.</p>
+      <div class="pair">
+        <figure><img src="shots/41-prismnet-window.png" alt="PrismNet disk window with Install_PrismNet and README" loading="lazy"><figcaption>The PrismNet disk.</figcaption></figure>
+        <figure><img src="shots/43-prismnet-welcome.png" alt="PrismNet 1.0.17 open-source TCP/IP stack: Install or update PrismNet selected" loading="lazy"><figcaption>Install or update.</figcaption></figure>
+      </div>
+    </div>
+    <div class="step">
+      <p>Then, page by page:</p>
+      <ul>
+        <li>PrismMon goes to <code>SYS:Tools</code>: <b>Proceed</b>.</li>
+        <li>Network-share clients (NFS, SMB) and servers (FTP, Telnet, web) are optional: leave them unticked and <b>Proceed</b>. You can add them later by running the installer again.</li>
+        <li>Network printer port: <b>Skip</b> unless you print over the network.</li>
+        <li>Driver: a fresh AmigaOS has no <code>DEVS:Networks</code>. The installer creates it and, finding no driver there, offers <b>Copy a driver</b>. Pick the driver file wherever you saved it (here <code>Transfer:cnet.device</code>) and it is copied into DEVS:Networks. Then unit <b>0</b>.</li>
+        <li>Address: <b>Automatically (DHCP)</b>. Name: keep <code>amiga</code> or type your own.</li>
+        <li><b>Yes</b> to starting when a program needs the network, <b>Yes</b> to setting the clock (SNTP), <b>Yes</b> to starting at every boot, and <b>Start</b> to bring it up now.</li>
+      </ul>
+      <div class="pair">
+        <figure><img src="shots/50-prismnet-no-driver.png" alt="DEVS:Networks has no network driver yet. Copy a driver or Stop here" loading="lazy"><figcaption>No driver yet: the installer offers to copy one.</figcaption></figure>
+        <figure><img src="shots/51-prismnet-pick-driver.png" alt="Choose your network card's SANA-II driver to copy to DEVS:Networks: Transfer:, cnet.device" loading="lazy"><figcaption>Pick the driver file.</figcaption></figure>
+      </div>
+      <div class="pair">
+        <figure><img src="shots/52-prismnet-driver-copied.png" alt="Shell: list devs:networks shows cnet.device 8412 bytes" loading="lazy"><figcaption>The driver, copied into DEVS:Networks.</figcaption></figure>
+        <figure><img src="shots/46-prismnet-dhcp.png" alt="How does this Amiga get its network address: Automatically (DHCP) or Fixed address" loading="lazy"><figcaption>DHCP.</figcaption></figure>
+      </div>
+    </div>
+    <div class="step">
+      <p>Done: PrismNet's settings are in <code>SYS:Prefs/PrismNet</code>, PrismMon and the manual in <code>SYS:Tools</code>, and in a Shell <code>PrismNet STATUS</code>, <code>START</code>, <code>STOP</code> and <code>LOG</code> control it.</p>
+      <figure><img src="shots/47-prismnet-done.png" alt="PrismNet is installed. Prefs in SYS:Prefs/PrismNet, PrismMon and the manual in SYS:Tools" loading="lazy"><figcaption>Installed.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="stage" id="done">
+  <div class="stage-head"><span class="num">2</span><h2>Check the result</h2></div>
+  <div class="steps">
+    <div class="step">
+      <p>In a Shell, <code>PrismNet STATUS</code> shows the stack's memory and connections, and a name lookup proves DHCP and DNS work. Here <code>nslookup aminet.net</code> answered through the DNS server DHCP handed out (10.0.2.3 on WinUAE's slirp network).</p>
+      <figure><img src="shots/48-prismnet-online.png" alt="Shell: PrismNet STATUS output, then nslookup aminet.net answered by 10.0.2.3 with address 49.13.59.190" loading="lazy"><figcaption>Online.</figcaption></figure>
+    </div>
+    <div class="step">
+      <p>A cold reboot brings PrismNet up in the background with Workbench.</p>
+      <figure><img src="shots/49-final-boot.png" alt="Workbench 3.2.3 on the 800x600 16-bit PrismRTG screen after a cold boot" loading="lazy"><figcaption>The finished A1200.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Recorded on WinUAE with an A1200 / KS 3.2.3 configuration. The 1.0.18 driver pages were recorded with the 1.0.18 installer; the other pages are identical to 1.0.17. Differences from real hardware:</p>
+  <ul>
+    <li>The <i>Transfer</i> drive is a WinUAE host folder used to bring in <code>cnet.device</code>. On real hardware, pick the driver from a floppy, a CF card or a drawer.</li>
+    <li>WinUAE's slirp network answers DHCP and DNS at 10.0.2.x; on a real network these come from your router.</li>
+  </ul>
+</footer>
+</div>
+</body>
+</html>

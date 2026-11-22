@@ -31,7 +31,11 @@ does:
 5. **Servers** (optional): the FTP, telnet and web servers, any of them. See
    [Servers](10-servers.md).
 6. **Settings.** If you have no PrismNet settings yet, it asks for:
-   - your network driver (a file requester in `DEVS:Networks`) and its unit,
+   - your network driver (a file requester in `DEVS:Networks`) and its unit.
+     A card that brings its driver in its boot ROM (PicoZorro) has no file:
+     the installer then lists the drivers that are already loaded, asks the
+     one you choose what it is, and names it in the settings without copying
+     anything to `DEVS:Networks`,
    - DHCP or a fixed address (then the address, netmask, gateway and DNS
      server),
    - a name for the Amiga on the network,

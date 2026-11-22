@@ -13,7 +13,7 @@ for pair in "out/PrismNet:core port lwip/src" "out/small/PrismNet:core port lwip
             "out/bsdsocket.library:lib/bsdsocket.c lib/lib_start.S lib/support.S port/include/prismnet/pnmsg.h" \
             "out/usergroup.library:lib/usergroup.c lib/ug_start.S lib/support.S" \
             "out/PrismNetPrefs:tools/prismprefs.c tools/prefsshares_io.c tools/prefsshares_gui.c tools/prefsservices_io.c tools/prefsservices_gui.c tools/tabs.c" \
-            "out/PrismMon:tools/prismmon.c" "out/ping:tools/net" "out/NetCtl:tools/net/netctl.c" "out/nslookup:tools/net" \
+            "out/PrismMon:tools/prismmon.c" "out/S2Devs:tools/s2devs.c" "out/ping:tools/net" "out/NetCtl:tools/net/netctl.c" "out/nslookup:tools/net" \
             "out/prismnfs-handler:tools/nfs tools/netfs" "out/ShareUnmount:tools/netfs/shareunmount.c" \
             "out/prismsmb-handler:tools/smb/smb_start.S tools/netfs/core.c tools/netfs/names.c tools/netfs/net_amiga.c tools/netfs/nbname.c tools/smb/backend.c tools/smb/smb2.c tools/smb/crypto.c tools/smb/passreq.c tools/netfs/*.h tools/smb/*.h" \
             "out/prismprint.device:printer/prismprint.c printer/start.S" "out/netpar/parallel.device:printer/prismprint.c printer/start.S" "out/PrismPrint:printer/prismprint_cli.c" "out/inetd:tools/srv/inetd.c" "out/ftpd:tools/srv/ftpd.c" "out/telnetd:tools/srv/telnetd.c" "out/httpd:tools/srv/httpd.c"\
@@ -43,7 +43,7 @@ cp dist-src/README $D/
 grep -q "PrismNetUpdate $VER " out/PrismNetUpdate || { echo "dist.sh: out/PrismNetUpdate is not $VER" >&2; exit 1; }
 cp LICENSE                               $D/Docs/
 cp lwip/COPYING                          $D/Docs/lwIP-COPYING
-cp out/PrismNet out/ping out/traceroute out/nslookup out/NetCtl $D/C/
+cp out/PrismNet out/ping out/traceroute out/nslookup out/NetCtl out/S2Devs $D/C/
 cp out/bsdsocket.library out/usergroup.library $D/Libs/
 cp out/prismnfs-handler                  $D/L/            # optional NFS client
 cp out/prismsmb-handler                  $D/L/            # optional SMB client

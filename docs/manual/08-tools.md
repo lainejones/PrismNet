@@ -67,6 +67,24 @@ NetCtl uses Roadshow's configuration calls, so it should also work with
 Roadshow (not yet tried there). In a script, a value that is still an unset
 `${variable}` counts as not given.
 
+## S2Devs
+
+```
+S2Devs LIST [ALL]
+S2Devs CHECK DEVICE=driver [UNIT=n] [QUIET]
+```
+
+The installer's helper for network drivers that are already loaded, such as
+one a card brings in its boot ROM. `LIST` shows the loaded devices that may
+be network drivers: it only reads their names and opens none. It leaves out
+devices that are never network drivers (`trackdisk.device`,
+`scsi.device`, ...) and, without `ALL`, the ones with a file in
+`DEVS:Networks`. `CHECK` opens that one driver and unit, asks what it is
+and closes it again: `Ethernet, MTU 1500, 48-bit address`, or why PrismNet
+can't use it. It returns 0 for a driver PrismNet can use, 10 when the device
+opened but isn't one, and 20 when it didn't open. Both also leave their
+answers in `ENV:PrismNet-Install/`.
+
 ## SMBShares
 
 ```

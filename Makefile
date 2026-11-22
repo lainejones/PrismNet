@@ -39,7 +39,7 @@ PORT_OBJ = $(patsubst port/%.S,$(OBJ)/port/%.o,$(patsubst port/%.c,$(OBJ)/port/%
 CORE_SRC = core/core.c core/csock.c core/resolv.c core/config.c core/netstats.c
 CORE_OBJ = $(patsubst core/%.c,$(OBJ)/core/%.o,$(CORE_SRC))
 
-all: nettools servers nfs smb update printer $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag
+all: nettools servers nfs smb update printer $(OUT)/PrismNet $(OUT)/bsdsocket.library $(OUT)/usergroup.library $(OUT)/PrismMon $(OUT)/PrismNetPrefs $(OUT)/bsdtest $(OUT)/bsdstress $(OUT)/ugtest $(OUT)/ugdump $(OUT)/rsquery $(OUT)/rscfg $(OUT)/pnpreload $(OUT)/pntest $(OUT)/carddiag $(OUT)/S2Devs
 
 # The update check (C:PrismNetUpdate): the shared update tool, 68020+ like
 # AmiSSL itself. Needs the AmiSSL SDK (https://github.com/jens-maus/amissl,
@@ -225,6 +225,12 @@ $(OUT)/pcsample: tools/pcsample.c
 $(OUT)/PrismNet.sym: $(CORE_OBJ) $(PORT_OBJ) $(OBJ)/liblwip.a $(STDIO_OBJ)
 	@mkdir -p $(OUT)
 	$(CC) $(LDFLAGS) -Wl,-u,___stkinit -o $@ $^
+
+# S2Devs: the installer's list and probe of loaded SANA-II drivers
+# (docs/manual/08-tools.md)
+$(OUT)/S2Devs: $(OBJ)/tools/s2devs.o $(STDIO_OBJ)
+	@mkdir -p $(OUT)
+	$(CC) $(LDFLAGS) -s -o $@ $^
 
 $(OUT)/carddiag: $(OBJ)/tools/carddiag.o $(STDIO_OBJ)
 	@mkdir -p $(OUT)

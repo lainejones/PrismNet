@@ -117,6 +117,8 @@
     (if (exists "C:PrismNetUpdate" (noreq)) (delete "C:PrismNetUpdate"))
     (if (exists "C:NetCtl" (noreq))
         (if (= 0 (run "Search >NIL: C:NetCtl \"PrismNet\"" (safe))) (delete "C:NetCtl")))
+    (if (exists "C:S2Devs" (noreq))
+        (if (= 0 (run "Search >NIL: C:S2Devs \"PrismNet\"" (safe))) (delete "C:S2Devs")))
     (if (exists "SYS:Storage/OpenVPN" (noreq))
         (run "Delete >NIL: SYS:Storage/OpenVPN SYS:Storage/OpenVPN.info ALL QUIET"))
     ; network tools: delete only PrismNet's, then put back another stack's
@@ -409,8 +411,94 @@
     (set firstdev "")
     (foreach "DEVS:Networks" "#?.device"
         (if (= firstdev "") (set firstdev @each-name)))
+    ; drivers that are loaded but have no file there: a card's boot ROM brings
+    ; its own (PicoZorro), or another program loaded one. S2Devs LIST only reads
+    ; Exec's list of names and opens nothing; the one the user picks is then
+    ; tried with S2Devs CHECK (docs/manual/08-tools.md). Its answers
+    ; are in ENV:PrismNet-Install/.
+    (set nloaded 0)
+    (if (exists "C/S2Devs" (noreq))
+        (if (= 0 (run "C/S2Devs LIST >NIL:" (safe)))
+            (set nloaded (+ 0 (getenv "PrismNet-Install/count")))))
+    (set dev "")
+    (set uselo (if (= firstdev "") (> nloaded 0) 0))
+    (if (and (<> firstdev "") (> nloaded 0))
+        (set uselo (askchoice (prompt "Which network driver should PrismNet use?")
+                              (help "A driver file in DEVS:Networks, or a driver that is already "
+                                    "running: some cards bring theirs in their boot ROM, so it has "
+                                    "no file.")
+                              (choices (cat "The driver file " firstdev " in DEVS:Networks")
+                                       (cat "A loaded driver: " (getenv "PrismNet-Install/list")))
+                              (default 0))))
+    (while uselo
+      (
+        ; One askchoice per count: OS 3.1's Installer 43.3 shows an empty
+        ; choice as a blank button (3.1.4's 45.6 hides it). None is first, so
+        ; choice n is devn; the default is the first driver (what Novice takes).
+        (set pk_prompt (cat "These network drivers are already loaded, and DEVS:Networks "
+                            "has no file for them. A card can bring its driver in its boot "
+                            "ROM.\n\nWhich one is your network card's?"))
+        (set pk_help (cat "Only the one you choose is opened, to ask it what it is: a "
+                          "SANA-II network driver, and which network.\n\n"
+                          "Choose \"None of these\" to use a driver file instead."))
+        (set pk_none "None of these: use a driver file")
+        ; only the slots S2Devs filled: Installer 43.3's getenv stops the
+        ; script on a variable that is not there
+        (set d1 "") (set d2 "") (set d3 "") (set d4 "") (set d5 "") (set d6 "") (set d7 "") (set d8 "")
+        (if (>= nloaded 1) (set d1 (getenv "PrismNet-Install/dev1")))
+        (if (>= nloaded 2) (set d2 (getenv "PrismNet-Install/dev2")))
+        (if (>= nloaded 3) (set d3 (getenv "PrismNet-Install/dev3")))
+        (if (>= nloaded 4) (set d4 (getenv "PrismNet-Install/dev4")))
+        (if (>= nloaded 5) (set d5 (getenv "PrismNet-Install/dev5")))
+        (if (>= nloaded 6) (set d6 (getenv "PrismNet-Install/dev6")))
+        (if (>= nloaded 7) (set d7 (getenv "PrismNet-Install/dev7")))
+        (if (>= nloaded 8) (set d8 (getenv "PrismNet-Install/dev8")))
+        (set pick 0)
+        (if (= nloaded 1) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1) (default 1))))
+        (if (= nloaded 2) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2) (default 1))))
+        (if (= nloaded 3) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3) (default 1))))
+        (if (= nloaded 4) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3 d4) (default 1))))
+        (if (= nloaded 5) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3 d4 d5) (default 1))))
+        (if (= nloaded 6) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3 d4 d5 d6) (default 1))))
+        (if (= nloaded 7) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3 d4 d5 d6 d7) (default 1))))
+        (if (= nloaded 8) (set pick (askchoice (prompt pk_prompt) (help pk_help) (choices pk_none d1 d2 d3 d4 d5 d6 d7 d8) (default 1))))
+        (if (= pick 0)
+            (set uselo 0)
+          (
+            (set dev (getenv (cat "PrismNet-Install/dev" pick)))
+            (if (<> dev "")
+              (
+                (set unit (asknumber (prompt (cat "Which unit of " dev "?"))
+                                     (help "0 unless you have several cards on one driver.")
+                                     (range 0 15) (default 0)))
+                (working (cat "Asking " dev " what it is"))
+                (if (= 0 (run (cat "C/S2Devs CHECK QUIET DEVICE=\"" dev "\" UNIT=" unit) (safe)))
+                    (if (askbool (prompt (cat dev " unit " unit " is a network driver:\n"
+                                              (getenv "PrismNet-Install/info") "\n\n"
+                                              "PrismNet opens it by its name, the one that is "
+                                              "loaded. Nothing is copied to DEVS:Networks."))
+                                 (help "Choose another to go back to the list.")
+                                 (choices "Use it" "Choose another") (default 1))
+                        (set uselo 0)
+                        (set dev ""))
+                  (
+                    (set why (getenv "PrismNet-Install/why"))
+                    (set dev "")
+                    ; Novice takes the default: not the list again, or it would ask forever
+                    (set again (askchoice (prompt (cat "PrismNet can't use this driver:\n\n" why))
+                                          (help "Choose again to pick another driver or unit.")
+                                          (choices "Choose again" "Use a driver file instead" "Stop here")
+                                          (default (if (= @user-level 0) 1 0))))
+                    (if (= again 1) (set uselo 0))
+                    (if (= again 2)
+                        (exit "PrismNet is not set up yet: it needs your network card's SANA-II driver."
+                              (quiet)))
+                  ))
+              ))
+          ))
+      ))
     ; no driver there yet (AmigaOS comes without network drivers): offer to copy one in
-    (if (= firstdev "")
+    (if (and (= dev "") (= firstdev ""))
         (if (= 1 (askchoice (prompt "DEVS:Networks has no network driver yet.\n\n"
                                     "PrismNet reaches the network through your card's SANA-II "
                                     "driver. AmigaOS comes without network drivers; the driver "
@@ -423,27 +511,31 @@
             (exit "PrismNet is not set up yet: it needs your network card's SANA-II driver.\n\n"
                   "Copy the driver to DEVS:Networks and run the installer again."
                   (quiet))))
-    (set dev (askfile (prompt (if (= firstdev "")
-                                  "Choose your network card's SANA-II driver to copy to DEVS:Networks."
-                                  "Choose the SANA-II driver of your network card\n(normally in DEVS:Networks)."))
-                      (help "For example cnet.device for many PCMCIA cards, x-surf.device for "
-                            "the X-Surf, scsidayna.device for the DaynaPORT.")
-                      (default (if (= firstdev "") "SYS:" (tackon "DEVS:Networks" firstdev)))))
-    (if (patmatch "DEVS:Networks/#?" dev) (set dev (fileonly dev)))
-    (if (or (= dev "") (not (patmatch "#?.device" dev)))
-        (abort "No network driver was chosen.\n\n"
-               "Copy your card's SANA-II driver to DEVS:Networks and run the installer again."))
-    ; a driver picked outside DEVS:Networks is copied there, so PrismNet finds it by name
-    (if (<> dev (fileonly dev))
+    ; a driver file (none of the loaded ones was chosen)
+    (if (= dev "")
       (
-        (if (not (exists (tackon "DEVS:Networks" (fileonly dev)) (noreq)))
-            (copyfiles (prompt (cat "Copying " (fileonly dev) " to DEVS:Networks"))
-                       (help @copyfiles-help)
-                       (source dev) (dest "DEVS:Networks") (nogauge)))
-        (set dev (fileonly dev))))
-    (set unit (asknumber (prompt (cat "Which unit of " dev "?"))
-                         (help "0 unless you have several cards on one driver.")
-                         (range 0 15) (default 0)))
+        (set dev (askfile (prompt (if (= firstdev "")
+                                      "Choose your network card's SANA-II driver to copy to DEVS:Networks."
+                                      "Choose the SANA-II driver of your network card\n(normally in DEVS:Networks)."))
+                          (help "For example cnet.device for many PCMCIA cards, x-surf.device for "
+                                "the X-Surf, scsidayna.device for the DaynaPORT.")
+                          (default (if (= firstdev "") "SYS:" (tackon "DEVS:Networks" firstdev)))))
+        (if (patmatch "DEVS:Networks/#?" dev) (set dev (fileonly dev)))
+        (if (or (= dev "") (not (patmatch "#?.device" dev)))
+            (abort "No network driver was chosen.\n\n"
+                   "Copy your card's SANA-II driver to DEVS:Networks and run the installer again."))
+        ; a driver picked outside DEVS:Networks is copied there, so PrismNet finds it by name
+        (if (<> dev (fileonly dev))
+          (
+            (if (not (exists (tackon "DEVS:Networks" (fileonly dev)) (noreq)))
+                (copyfiles (prompt (cat "Copying " (fileonly dev) " to DEVS:Networks"))
+                           (help @copyfiles-help)
+                           (source dev) (dest "DEVS:Networks") (nogauge)))
+            (set dev (fileonly dev))))
+        (set unit (asknumber (prompt (cat "Which unit of " dev "?"))
+                             (help "0 unless you have several cards on one driver.")
+                             (range 0 15) (default 0)))
+      ))
     (set static (askchoice (prompt "How does this Amiga get its network address?")
                            (help "DHCP: from your router - the usual choice.\n"
                                  "Fixed address: you type the address, netmask, gateway and DNS server.")
@@ -515,6 +607,12 @@
 ; NetCtl: interfaces, routes and name servers from scripts (the OpenVPN hooks use it)
 (copyfiles (source "C") (dest "C:") (choices "NetCtl") (nogauge))
 (run "Protect >NIL: C:NetCtl +e")
+; S2Devs: lists loaded SANA-II drivers and checks one (what this installer asks)
+(if (exists "C/S2Devs" (noreq))
+  (
+    (copyfiles (source "C") (dest "C:") (choices "S2Devs") (nogauge))
+    (run "Protect >NIL: C:S2Devs +e")
+  ))
 ; the AmiOpenVPN scripts (manual, chapter VPN): the user copies them to OPENVPN:
 ; a drawer made here gets this Workbench's own drawer icon (ENV:Sys/def_drawer.info)
 (if (not (exists "SYS:Storage/OpenVPN" (noreq))) (makedir "SYS:Storage/OpenVPN" (infos)))
